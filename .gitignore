@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+state/
+scripts/
+engine/src/
+engine/build-*/
+engine/*.log
+bench/results/raw/*.err
+bench/results/mem/*.csv
+bench/results/mem/*.log
+bench/results/mtp/*.log
+.pytest_cache/
+bench/research_raw.json
+engine/engramhalo-src/

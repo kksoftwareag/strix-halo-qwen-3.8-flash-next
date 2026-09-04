@@ -1,0 +1,22 @@
+### 12:46:27 01-userhip-q4kxl-f16: /home/lyra/models/llama.cpp-mtp/build/bin/llama-bench -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/c8b5954a88c2775c546b92593eda40ea041d3176/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf -ngl 99 -t 16 -fa on -p 512 -n 128 -r 2 --tensor-read-lazy auto -ctk f16 -ctv f16
+exit=0 dauer=55s
+   (kein JSON: 'test' )
+### 12:47:22 02-rocwmma-q4kxl-f16: /home/lyra/models/qwen38-flash/engine/build-hip/bin/llama-bench -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/c8b5954a88c2775c546b92593eda40ea041d3176/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf -ngl 99 -t 16 -fa on -p 512 -n 128 -r 2 --tensor-read-lazy auto -ctk f16 -ctv f16
+exit=0 dauer=43s
+   (kein JSON: 'test' )
+### 12:48:05 03-rocwmma-q4kxl-q8: env LLAMA_ATTN_ROT_DISABLE=1 /home/lyra/models/qwen38-flash/engine/build-hip/bin/llama-bench -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/c8b5954a88c2775c546b92593eda40ea041d3176/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf -ngl 99 -t 16 -fa on -p 512 -n 128 -r 2 --tensor-read-lazy auto -ctk q8_0 -ctv q8_0
+exit=0 dauer=44s
+   (kein JSON: 'test' )
+### 12:48:49 04-rocwmma-q4kxl-f16-ub1024: /home/lyra/models/qwen38-flash/engine/build-hip/bin/llama-bench -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/c8b5954a88c2775c546b92593eda40ea041d3176/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf -ngl 99 -t 16 -fa on -p 512 -n 128 -r 2 --tensor-read-lazy auto -ctk f16 -ctv f16 -ub 1024 -b 2048
+exit=0 dauer=45s
+   (kein JSON: 'test' )
+### 12:49:34 05-rocwmma-q4kxl-f16-ub2048: /home/lyra/models/qwen38-flash/engine/build-hip/bin/llama-bench -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/c8b5954a88c2775c546b92593eda40ea041d3176/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf -ngl 99 -t 16 -fa on -p 512 -n 128 -r 2 --tensor-read-lazy auto -ctk f16 -ctv f16 -ub 2048 -b 2048
+exit=0 dauer=43s
+   (kein JSON: 'test' )
+### 12:50:17 06-rocwmma-q2kxl-f16: /home/lyra/models/qwen38-flash/engine/build-hip/bin/llama-bench -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-Q2_K_XL/Qwen3.8-Flash-Next-UD-Q2_K_XL-00001-of-00003.gguf -ngl 99 -t 16 -fa on -p 512 -n 128 -r 2 --tensor-read-lazy auto -ctk f16 -ctv f16
+exit=0 dauer=34s
+   (kein JSON: 'test' )
+### 12:50:51 07-userhip-q2kxl-f16: /home/lyra/models/llama.cpp-mtp/build/bin/llama-bench -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-Q2_K_XL/Qwen3.8-Flash-Next-UD-Q2_K_XL-00001-of-00003.gguf -ngl 99 -t 16 -fa on -p 512 -n 128 -r 2 --tensor-read-lazy auto -ctk f16 -ctv f16
+exit=0 dauer=34s
+   (kein JSON: 'test' )
+### fertig 12:51:25

@@ -1,0 +1,73 @@
+{
+ "tag": "engramhalo-Q4_K_XL-none-n3-p0.75-t1.0",
+ "engine": "engramhalo",
+ "quant": "Q4_K_XL",
+ "lm": "none",
+ "name": "n3-p0.75-t1.0",
+ "args": [
+  "--temp",
+  "1.0",
+  "-md",
+  "/home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf",
+  "-ngld",
+  "99",
+  "--spec-type",
+  "draft-mtp",
+  "--spec-draft-n-max",
+  "3",
+  "--spec-draft-p-min",
+  "0.75"
+ ],
+ "runs": [
+  {
+   "prompt": "code",
+   "wall": 12.512463092803955,
+   "cache_n": 0,
+   "prompt_n": 47,
+   "prompt_ms": 406.979,
+   "prompt_per_token_ms": 8.659127659574468,
+   "prompt_per_second": 115.48507416844603,
+   "predicted_n": 400,
+   "predicted_ms": 12053.536,
+   "predicted_per_token_ms": 30.209363408521302,
+   "predicted_per_second": 33.10231951852137,
+   "draft_n": 281,
+   "draft_n_accepted": 233
+  },
+  {
+   "prompt": "prosa",
+   "wall": 13.932040452957153,
+   "cache_n": 0,
+   "prompt_n": 51,
+   "prompt_ms": 421.585,
+   "prompt_per_token_ms": 8.266372549019607,
+   "prompt_per_second": 120.97204596937748,
+   "predicted_n": 400,
+   "predicted_ms": 13457.97,
+   "predicted_per_token_ms": 33.72924812030075,
+   "predicted_per_second": 29.64785922393942,
+   "draft_n": 280,
+   "draft_n_accepted": 212
+  },
+  {
+   "prompt": "reasoning",
+   "wall": 10.825652122497559,
+   "cache_n": 0,
+   "prompt_n": 71,
+   "prompt_ms": 516.728,
+   "prompt_per_token_ms": 7.277859154929577,
+   "prompt_per_second": 137.4030437677076,
+   "predicted_n": 400,
+   "predicted_ms": 10257.572,
+   "predicted_per_token_ms": 25.708200501253135,
+   "predicted_per_second": 38.89809401289116,
+   "draft_n": 302,
+   "draft_n_accepted": 271
+  }
+ ],
+ "error": "",
+ "load_s": 24.077022075653076,
+ "tg_mean": 33.88275758511731,
+ "tg_code": 33.10231951852137,
+ "accept": 0.8296639629200464
+}

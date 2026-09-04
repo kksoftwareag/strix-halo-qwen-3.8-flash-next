@@ -1,0 +1,68 @@
+{
+ "name": "q4-nomtp-t1.0",
+ "model": "UD-Q4_K_XL",
+ "args": [
+  "--temp",
+  "1.0"
+ ],
+ "runs": [
+  {
+   "wall": 21.919607877731323,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 47,
+    "prompt_ms": 389.465,
+    "prompt_per_token_ms": 8.286489361702127,
+    "prompt_per_second": 120.67836647709036,
+    "predicted_n": 400,
+    "predicted_ms": 21461.474,
+    "predicted_per_token_ms": 53.788155388471175,
+    "predicted_per_second": 18.591453690459474
+   },
+   "finish": "length",
+   "n_content": 81,
+   "n_reasoning": 1466,
+   "prompt": "code"
+  },
+  {
+   "wall": 20.052167654037476,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 51,
+    "prompt_ms": 408.058,
+    "prompt_per_token_ms": 8.00113725490196,
+    "prompt_per_second": 124.98223291786951,
+    "predicted_n": 400,
+    "predicted_ms": 19566.049,
+    "predicted_per_token_ms": 49.037716791979946,
+    "predicted_per_second": 20.392466562871228
+   },
+   "finish": "length",
+   "n_content": 739,
+   "n_reasoning": 860,
+   "prompt": "prosa"
+  },
+  {
+   "wall": 19.917478561401367,
+   "timings": {
+    "cache_n": 0,
+    "prompt_n": 71,
+    "prompt_ms": 529.824,
+    "prompt_per_token_ms": 7.462309859154929,
+    "prompt_per_second": 134.00676451047894,
+    "predicted_n": 400,
+    "predicted_ms": 19270.784,
+    "predicted_per_token_ms": 48.29770426065163,
+    "predicted_per_second": 20.70491786945461
+   },
+   "finish": "length",
+   "n_content": 0,
+   "n_reasoning": 955,
+   "prompt": "reasoning"
+  }
+ ],
+ "error": "",
+ "load_s": 30.160615921020508,
+ "tg_mean": 19.89627937426177,
+ "accept": null
+}

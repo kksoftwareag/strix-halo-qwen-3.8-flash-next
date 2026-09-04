@@ -1,0 +1,57 @@
+{
+ "tag": "engramhalo-Q4_K_XL-none-nomtp-t1.0",
+ "engine": "engramhalo",
+ "quant": "Q4_K_XL",
+ "lm": "none",
+ "name": "nomtp-t1.0",
+ "args": [
+  "--temp",
+  "1.0"
+ ],
+ "runs": [
+  {
+   "prompt": "code",
+   "wall": 19.642484188079834,
+   "cache_n": 0,
+   "prompt_n": 47,
+   "prompt_ms": 410.933,
+   "prompt_per_token_ms": 8.743255319148936,
+   "prompt_per_second": 114.3738760333193,
+   "predicted_n": 400,
+   "predicted_ms": 19185.437,
+   "predicted_per_token_ms": 48.08380200501254,
+   "predicted_per_second": 20.79702432631584
+  },
+  {
+   "prompt": "prosa",
+   "wall": 19.61774468421936,
+   "cache_n": 0,
+   "prompt_n": 51,
+   "prompt_ms": 394.768,
+   "prompt_per_token_ms": 7.740549019607843,
+   "prompt_per_second": 129.18980261824666,
+   "predicted_n": 400,
+   "predicted_ms": 19169.643,
+   "predicted_per_token_ms": 48.044218045112785,
+   "predicted_per_second": 20.814159136922893
+  },
+  {
+   "prompt": "reasoning",
+   "wall": 19.626806020736694,
+   "cache_n": 0,
+   "prompt_n": 71,
+   "prompt_ms": 485.426,
+   "prompt_per_token_ms": 6.836985915492957,
+   "prompt_per_second": 146.26328214805142,
+   "predicted_n": 400,
+   "predicted_ms": 19088.859,
+   "predicted_per_token_ms": 47.84175187969925,
+   "predicted_per_second": 20.90224460246681
+  }
+ ],
+ "error": "",
+ "load_s": 22.081413984298706,
+ "tg_mean": 20.83780935523518,
+ "tg_code": 20.79702432631584,
+ "accept": null
+}

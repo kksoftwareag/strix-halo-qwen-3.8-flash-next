@@ -1,0 +1,33 @@
+{
+ "name": "q4-nohost",
+ "args": [
+  "engine/build-hip/bin/llama",
+  "serve",
+  "-m",
+  "/home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/c8b5954a88c2775c546b92593eda40ea041d3176/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+  "-ngl",
+  "99",
+  "-c",
+  "32768",
+  "-fa",
+  "on",
+  "-ctk",
+  "q8_0",
+  "-ctv",
+  "q8_0",
+  "-t",
+  "16",
+  "--tensor-read-lazy",
+  "auto",
+  "--jinja",
+  "--chat-template-kwargs",
+  "{\"reasoning_effort\":\"low\"}",
+  "-np",
+  "1",
+  "-lv",
+  "4",
+  "--no-host"
+ ],
+ "guard_exit": 137,
+ "guard_summary": "[memguard] fertig nach 11s: MemAvailable Start 35.7 GiB, Minimum 9.4 GiB (Verbrauch 26.4 GiB), Peak GTT 76.4 GiB, Peak RSS 21.5 GiB, exit -9 KILLED"
+}

@@ -1,0 +1,41 @@
+### 17:06:26 engramhalo-Q4_K_XL-none-nomtp-t1.0
+   code       pp  114.4 | tg  20.80 t/s | n=400
+   prosa      pp  129.2 | tg  20.81 t/s | n=400
+   reasoning  pp  146.3 | tg  20.90 t/s | n=400
+   => tg Ø 20.84 t/s (code 20.80), Load 22s
+### 17:07:52 engramhalo-Q4_K_XL-none-n3-p0.75-t1.0
+   code       pp  115.5 | tg  33.10 t/s | n=400 | draft 233/281 = 83%
+   prosa      pp  121.0 | tg  29.65 t/s | n=400 | draft 212/280 = 76%
+   reasoning  pp  137.4 | tg  38.90 t/s | n=400 | draft 271/302 = 90%
+   => tg Ø 33.88 t/s (code 33.10), Akzeptanz 83%, Load 24s
+### 17:08:57 engramhalo-Q4_K_XL-none-n4-p0.75-ng-t1.0
+   code       pp  114.8 | tg  32.06 t/s | n=400 | draft 233/296 = 79%
+   prosa      pp  121.3 | tg  31.15 t/s | n=400 | draft 229/304 = 75%
+   reasoning  pp  136.4 | tg  41.01 t/s | n=400 | draft 288/336 = 86%
+   => tg Ø 34.74 t/s (code 32.06), Akzeptanz 80%, Load 24s
+### 17:10:02 engramhalo-Q4_K_XL-none-n2-p0.75-t1.0
+   code       pp   82.0 | tg  30.71 t/s | n=400 | draft 207/243 = 85%
+   prosa      pp  122.6 | tg  28.22 t/s | n=400 | draft 192/248 = 77%
+   reasoning  pp  138.4 | tg  33.77 t/s | n=400 | draft 232/252 = 92%
+   => tg Ø 30.90 t/s (code 30.71), Akzeptanz 85%, Load 24s
+### 17:11:11 engramhalo-Q4_K_XL-none-n4-p0.0-t1.0
+   code       pp  114.4 | tg  32.49 t/s | n=400 | draft 261/548 = 48%
+   prosa      pp  120.6 | tg  31.07 t/s | n=400 | draft 258/559 = 46%
+   reasoning  pp  138.1 | tg  44.50 t/s | n=400 | draft 300/395 = 76%
+   => tg Ø 36.02 t/s (code 32.49), Akzeptanz 55%, Load 24s
+### 17:12:15 engramhalo-Q4_K_XL-none-n3-p0.75-t0.6
+   code       pp  115.8 | tg  36.07 t/s | n=400 | draft 256/290 = 88%
+   prosa      pp  120.9 | tg  30.39 t/s | n=400 | draft 214/267 = 80%
+   reasoning  pp  137.2 | tg  39.47 t/s | n=400 | draft 274/304 = 90%
+   => tg Ø 35.31 t/s (code 36.07), Akzeptanz 86%, Load 24s
+### 17:13:19 engramhalo-Q4_K_XL-none-n3-p0.75-t0.0
+   code       pp  115.0 | tg  36.22 t/s | n=400 | draft 251/278 = 90%
+   prosa      pp  121.4 | tg  30.77 t/s | n=400 | draft 218/269 = 81%
+   reasoning  pp  137.4 | tg  40.31 t/s | n=400 | draft 277/308 = 90%
+   => tg Ø 35.77 t/s (code 36.22), Akzeptanz 87%, Load 24s
+### 17:14:23 engramhalo-Q4_K_XL-none-n6-p0.75-ng-t1.0
+   code       pp  113.5 | tg  34.90 t/s | n=400 | draft 264/344 = 77%
+   prosa      pp  119.6 | tg  30.87 t/s | n=400 | draft 235/325 = 72%
+   reasoning  pp  136.1 | tg  41.27 t/s | n=400 | draft 299/386 = 77%
+   => tg Ø 35.68 t/s (code 34.90), Akzeptanz 76%, Load 24s
+### fertig 17:15:27

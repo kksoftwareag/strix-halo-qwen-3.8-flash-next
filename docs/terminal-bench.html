@@ -15,6 +15,14 @@
 Docker-Container und muss echte Arbeit erledigen – Pakete bauen, Dienste konfigurieren, Fehler suchen. Gewertet wird
 nur, was der Verifier der Aufgabe akzeptiert.</p>
 
+<div class="note" id="conditions">
+<strong>Messbedingungen:</strong> <span id="cond-effort">Denkmodus <code>medium</code></span> ·
+ein Versuch je Aufgabe (pass@1) · ein Stream, keine parallelen Anfragen · spekulatives Decoding (MTP) aktiv ·
+60 Minuten Zeitlimit je Aufgabe · <span id="cond-ctx">163 840</span> Token Kontext ·
+Agent Terminus-2 über Harbor. Der Denkmodus wirkt stark auf Token-Zahl und Laufzeit und ist deshalb Teil
+der Kennung jedes Laufs.
+</div>
+
 <div id="summary" class="cards"></div>
 <div id="bars"></div>
 
@@ -79,16 +87,22 @@ Modell, Token, größter Kontext, Fehlerursache.</p>
     return;
   }
 
+  const efforts = [...new Set(runs.map(r => r.effort).filter(Boolean))];
+  if (efforts.length) $("cond-effort").innerHTML = "Denkmodus " + efforts.map(e => "<code>" + esc(e) + "</code>").join(" und ");
+  const ctxs = [...new Set(runs.map(r => r.n_ctx).filter(Boolean))];
+  if (ctxs.length) $("cond-ctx").textContent = ctxs.map(c => c.toLocaleString("de-DE")).join(" / ");
+
   /* Karten und Balken */
   $("summary").innerHTML = runs.map(r => {
     const f = (D.quant_facts || {})[r.quant] || {};
-    return '<div class="card"><h3>' + esc(r.quant) + '</h3><div class="big">' + r.passed_tasks + "/" + r.total_tasks +
+    return '<div class="card"><h3>' + esc(r.quant) + ' <span class="pill">' + esc(r.effort || "?") + '</span></h3>' +
+      '<div class="big">' + r.passed_tasks + "/" + r.total_tasks +
       '</div><div class="sub">' + Math.round(r.pass_rate * 100) + " % bestanden · " + hm(r.duration_s) + " Laufzeit" +
       (f.footprint_gib ? " · " + f.footprint_gib + " GiB Speicher" : "") + "</div></div>";
   }).join("");
 
   $("bars").innerHTML = runs.map(r =>
-    '<div class="bar"><span class="label">' + esc(r.quant) + '</span><span class="track"><span class="fill" style="width:' +
+    '<div class="bar"><span class="label">' + esc(r.label || r.quant) + '</span><span class="track"><span class="fill" style="width:' +
     (r.pass_rate * 100).toFixed(1) + '%"></span></span><span class="val">' + r.passed_tasks + "/" + r.total_tasks +
     "</span></div>").join("");
 
@@ -127,7 +141,8 @@ Modell, Token, größter Kontext, Fehlerursache.</p>
   function render() {
     const list = visible();
     let html = "<thead><tr><th class='task'>Aufgabe</th>" +
-      runs.map(r => "<th class='num'>" + esc(r.quant) + "</th>").join("") + "</tr></thead><tbody>";
+      runs.map(r => "<th class='num'>" + esc(r.quant) + "<span class='meta'>Denkmodus " +
+        esc(r.effort || "?") + "</span></th>").join("") + "</tr></thead><tbody>";
     for (const t of list) {
       html += "<tr><td class='task'><code>" + esc(t.id) + "</code><span class='meta'>" +
         "<span class='pill'>" + esc(t.difficulty) + "</span><span class='pill'>" + esc(t.category) + "</span>" +
@@ -138,7 +153,7 @@ Modell, Token, größter Kontext, Fehlerursache.</p>
         const out = x.outcome || (x.passed ? "bestanden" : "nicht bestanden");
         const cls = x.passed ? "pass" : (out === "nicht bestanden" ? "fail" : "err");
         const mark = x.passed ? "ja" : (out === "Zeitlimit" ? "Zeit" : (out === "Abbruch" ? "Abbruch" : "nein"));
-        html += "<td class='cell " + cls + "' data-task='" + esc(t.id) + "' data-quant='" + esc(r.quant) + "'>" +
+        html += "<td class='cell " + cls + "' data-task='" + esc(t.id) + "' data-run='" + esc(r.dir || r.quant) + "'>" +
           mark + " <span class='meta'>" + hms(x.duration_s) +
           (x.tok_per_s != null ? " · " + x.tok_per_s.toLocaleString("de-DE") + " t/s" : "") + "</span></td>";
       }
@@ -152,10 +167,10 @@ Modell, Token, größter Kontext, Fehlerursache.</p>
   $("matrix").addEventListener("click", ev => {
     const td = ev.target.closest("td.cell"); if (!td || !td.dataset.task) return;
     const t = tasks.find(x => x.id === td.dataset.task);
-    const r = runs.find(x => x.quant === td.dataset.quant);
+    const r = runs.find(x => (x.dir || x.quant) === td.dataset.run);
     const x = cellOf(r, t.id) || {};
     const tok = x.tokens || {};
-    $("detail-body").innerHTML = "<h3>" + esc(t.id) + " · " + esc(r.quant) + "</h3>" +
+    $("detail-body").innerHTML = "<h3>" + esc(t.id) + " · " + esc(r.label || r.quant) + "</h3>" +
       "<p>" + esc(t.description) + "</p>" +
       "<dl class='kv'>" +
       "<dt>Ergebnis</dt><dd>" + esc(x.outcome || (x.passed ? "bestanden" : "nicht bestanden")) + "</dd>" +
@@ -189,11 +204,12 @@ Modell, Token, größter Kontext, Fehlerursache.</p>
   const cmds = D.commands || {};
   $("setup").innerHTML = runs.map(r => {
     const c = cmds[r.quant] || {};
-    let h = "<h3>" + esc(r.quant) + "</h3>";
+    let h = "<h3>" + esc(r.label || r.quant) + "</h3>";
     h += "<dl class='kv'>" +
       "<dt>Engine</dt><dd>" + esc(r.engine) + " " + esc(r.engine_version) + "</dd>" +
       "<dt>Backend</dt><dd>" + esc(r.backend) + " " + esc(r.backend_version) + "</dd>" +
       "<dt>Kontext</dt><dd>" + num(r.n_ctx) + " Token, " + (c.slots || 1) + " Slot</dd>" +
+      "<dt>Denkmodus</dt><dd>" + esc(r.effort || "?") + "</dd>" +
       "<dt>Profil</dt><dd>" + esc(r.inference_profile) + "</dd>" +
       "<dt>Benchmark</dt><dd>Terminal-Bench " + esc(r.tb_version) + " · Harbor " + esc(r.harbor_version) +
         " · Agent Terminus-2</dd>" +

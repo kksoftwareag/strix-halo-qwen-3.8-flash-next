@@ -13,13 +13,18 @@ wird nicht mitversioniert, sondern geholt:
 bench/quality/fetch.sh          # klont den Benchmark und prüft docker, uv, Speicher, Platz
 ```
 
-## Alle drei Quants nacheinander
+## Alle Quants nacheinander
 
 ```bash
-bench/quality/run-quants.sh                       # UD-Q2_K_XL, UD-IQ3_XXS, UD-IQ4_XS
+bench/quality/run-quants.sh                       # UD-Q2_K_XL, UD-IQ1_M, UD-IQ3_XXS, UD-IQ4_XS
 bench/quality/run-quants.sh UD-IQ4_XS             # nur einer
-TB_AGENT_TIMEOUT=2700 bench/quality/run-quants.sh # anderes Zeitlimit je Aufgabe (Default 1800 s)
+TB_AGENT_TIMEOUT=1800 bench/quality/run-quants.sh # Zeitlimit je Aufgabe (Default 3600 s)
+TB_EFFORT=xhigh bench/quality/run-quants.sh       # Denkstufe (Default medium)
 ```
+
+Die Denkstufe steckt im Profilnamen (`mtp4-ngram-thinking-medium`) und damit in der Kennung jedes Laufs;
+Läufe mit unterschiedlicher Stufe landen in getrennten Ergebnisordnern und stehen auf der Website
+nebeneinander.
 
 Das Skript wartet zwischen den Quants, bis der Speicher wieder frei ist, schreibt je Quant ein Log nach
 `state/quality/tbmini-<quant>.log` und setzt den apt-Spiegel fest (siehe unten). Danach die Auswertung:

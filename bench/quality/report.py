@@ -62,7 +62,7 @@ def server_commands() -> dict[str, dict]:
     """Zu jedem Quant das exakte Server-Kommando und die Speicherbilanz aus dem Lauf-Log."""
     out: dict[str, dict] = {}
     for log in sorted(LOGS.glob("tbmini-*.log")):
-        quant = log.name[len("tbmini-"):-len(".log")]
+        key = log.name[len("tbmini-"):-len(".log")]
         text = log.read_text(errors="replace")
         entry: dict = {"log": str(log.relative_to(PROJECT))}
         m = re.search(r"^   Server-Log    (\S+)$", text, re.M)
@@ -83,7 +83,7 @@ def server_commands() -> dict[str, dict]:
         m = re.search(r"^   apt-Spiegel\s+(.*)$", text, re.M)
         if m:
             entry["apt_mirror"] = m.group(1).strip()
-        out[quant] = entry
+        out[key] = entry
     return out
 
 
@@ -191,9 +191,15 @@ def load_runs(results: Path) -> list[dict]:
             first = next(iter(sorted(summary.parent.glob("results-*.json"))), None)
             if first:
                 prof = json.loads(first.read_text()).get("evaluation_profile") or {}
+        profile = s.get("inference_profile") or ""
+        effort = ("aus" if "no-thinking" in profile else
+                  next((e for e in ("xhigh", "medium", "low") if f"thinking-{e}" in profile), "?"))
         runs.append({
             "quant": s.get("quant"),
-            "inference_profile": s.get("inference_profile"),
+            "inference_profile": profile,
+            "effort": effort,
+            "label": f"{s.get('quant')} · {effort}",
+            "log_key": f"{s.get('quant')}-{effort}" if effort != "medium" else str(s.get("quant")),
             "engine": s.get("engine"),
             "engine_version": s.get("engine_version"),
             "backend": s.get("backend"),
@@ -215,7 +221,9 @@ def load_runs(results: Path) -> list[dict]:
             "dir": str(summary.parent.relative_to(PROJECT)),
             "per_task": per,
         })
-    runs.sort(key=lambda r: (QUANT_ORDER.index(r["quant"]) if r["quant"] in QUANT_ORDER else 99, r["quant"] or ""))
+    effort_order = {"aus": 0, "low": 1, "medium": 2, "xhigh": 3}
+    runs.sort(key=lambda r: (effort_order.get(r["effort"], 9),
+                             QUANT_ORDER.index(r["quant"]) if r["quant"] in QUANT_ORDER else 99, r["quant"] or ""))
     return runs
 
 
@@ -269,7 +277,7 @@ def markdown(data: dict) -> str:
             f = QUANT_FACTS.get(r["quant"], {})
             out_tok = (r["tokens"] or {}).get("output") or 0
             tps = out_tok / r["duration_s"] if r["duration_s"] else 0
-            add(f"| {r['quant']} | {r['passed_tasks']}/{r['total_tasks']} | {r['pass_rate']:.0%} | "
+            add(f"| {r['label']} | {r['passed_tasks']}/{r['total_tasks']} | {r['pass_rate']:.0%} | "
                 f"{hm(r['duration_s'])} | {out_tok:,} | {tps:.1f} | {f.get('kld', '')} | {f.get('top1', '')} % |"
                 .replace(",", "."))
     else:
@@ -278,7 +286,7 @@ def markdown(data: dict) -> str:
 
     if full:
         add("## Aufgaben im Einzelnen\n")
-        head = "| Aufgabe | Kategorie | Schwierigkeit | " + " | ".join(r["quant"] for r in full) + " |"
+        head = "| Aufgabe | Kategorie | Schwierigkeit | " + " | ".join(r["label"] for r in full) + " |"
         add(head)
         add("| --- | --- | --- | " + " | ".join("---" for _ in full) + " |")
         for t in tasks:
@@ -312,11 +320,12 @@ def markdown(data: dict) -> str:
         add("| Quant | Anfragen | Prompt-Token | erzeugte Token | Prompt t/s | Decode t/s | MTP-Akzeptanz | mittlere Draft-Länge |")
         add("| --- | --- | --- | --- | --- | --- | --- | --- |")
         for r in full:
-            st = ((data.get("commands") or {}).get(r["quant"]) or {}).get("server") or {}
+            cmds0 = data.get("commands") or {}
+            st = ((cmds0.get(r["log_key"]) or cmds0.get(r["quant"]) or {}).get("server")) or {}
             def g(key):
                 v = st.get(key)
                 return f"{v:,}".replace(",", ".") if isinstance(v, int) else ("–" if v is None else str(v))
-            add(f"| {r['quant']} | {g('requests')} | {g('prompt_tokens')} | {g('generated_tokens')} | "
+            add(f"| {r['label']} | {g('requests')} | {g('prompt_tokens')} | {g('generated_tokens')} | "
                 f"{g('pp_tps')} | {g('tg_tps')} | {g('draft_accept')} | {g('draft_mean_len')} |")
         add("")
         add("Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Agenten, "
@@ -328,8 +337,8 @@ def markdown(data: dict) -> str:
         add("Ausgabe-Token geteilt durch die Zeit, die der Agent tatsächlich auf das Modell gewartet hat "
             "(Summe aller Antwortzeiten). Der Wert liegt unter der reinen Decode-Rate, weil jede Anfrage "
             "auch den Prompt verarbeitet; er sagt, wie schnell der Agent bei dieser Aufgabe vorankam.\n")
-        add("| Aufgabe | " + " | ".join(f"{r['quant']} t/s" for r in full) + " | " +
-            " | ".join(f"{r['quant']} Modellzeit" for r in full) + " |")
+        add("| Aufgabe | " + " | ".join(f"{r['label']} t/s" for r in full) + " | " +
+            " | ".join(f"{r['label']} Modellzeit" for r in full) + " |")
         add("| --- | " + " | ".join("---" for _ in full * 2) + " |")
         for t in tasks:
             rates, times = [], []
@@ -345,7 +354,7 @@ def markdown(data: dict) -> str:
             toks = sum((d.get("tokens") or {}).get("output") or 0 for d in r["per_task"].values())
             if vals:
                 komma = lambda x, n=1: f"{x:.{n}f}".replace(".", ",")
-                add(f"- {r['quant']}: {komma(min(vals))} bis {komma(max(vals))} t/s je Aufgabe, über alle "
+                add(f"- {r['label']}: {komma(min(vals))} bis {komma(max(vals))} t/s je Aufgabe, über alle "
                     f"Aufgaben {komma(toks / secs)} t/s; der Agent wartete {hm(secs)} auf das Modell, "
                     f"das sind {secs / r['duration_s'] * 100:.0f} % der Laufzeit.")
         add("")
@@ -371,10 +380,10 @@ def markdown(data: dict) -> str:
     add("")
     cmds = data.get("commands") or {}
     for r in full + part:
-        c = cmds.get(r["quant"]) or {}
+        c = cmds.get(r["log_key"]) or cmds.get(r["quant"]) or {}
         if not c.get("command"):
             continue
-        add(f"### {r['quant']}\n")
+        add(f"### {r['label']}\n")
         add("```bash")
         add(c["command"])
         add("```")
@@ -388,7 +397,7 @@ def markdown(data: dict) -> str:
     if part:
         add("## Weitere Läufe\n")
         for r in part:
-            add(f"- {r['quant']}: {r['passed_tasks']}/{r['total_tasks']} Aufgaben "
+            add(f"- {r['label']}: {r['passed_tasks']}/{r['total_tasks']} Aufgaben "
                 f"({hm(r['duration_s'])}), Profil `{r['inference_profile']}`")
         add("")
     add("Rohdaten: `state/quality/tbench/`, Transkripte und Verifier-Ausgaben unter "

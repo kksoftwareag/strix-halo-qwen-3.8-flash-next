@@ -6,11 +6,11 @@ Stand: 2026-09-04. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1 auf 
 
 | Quant | bestanden | Quote | Dauer | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| UD-Q2_K_XL | 16/20 | 80% | 7 h 36 min | 385.970 | 14.1 | 0.2246 | 82.7 % |
+| UD-Q2_K_XL · medium | 16/20 | 80% | 7 h 36 min | 385.970 | 14.1 | 0.2246 | 82.7 % |
 
 ## Aufgaben im Einzelnen
 
-| Aufgabe | Kategorie | Schwierigkeit | UD-Q2_K_XL |
+| Aufgabe | Kategorie | Schwierigkeit | UD-Q2_K_XL · medium |
 | --- | --- | --- | --- |
 | `pypi-server` | software-engineering | medium | **ja** (3:53) |
 | `nginx-request-logging` | system-administration | medium | **ja** (4:08) |
@@ -46,7 +46,7 @@ Zwei Dinge dazu, bevor man Quants anhand einzelner Aufgaben vergleicht:
 
 | Quant | Anfragen | Prompt-Token | erzeugte Token | Prompt t/s | Decode t/s | MTP-Akzeptanz | mittlere Draft-Länge |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| UD-Q2_K_XL | 399 | 404.631 | 385.970 | 243.4 | 24.4 | 0.67 | 3.48 |
+| UD-Q2_K_XL · medium | 399 | 404.631 | 385.970 | 243.4 | 24.4 | 0.67 | 3.48 |
 
 Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Agenten, nicht nur die Antworten, die in die Wertung eingehen). `Decode t/s` ist die reine Erzeugungsrate, gemittelt über alle Anfragen.
 
@@ -54,7 +54,7 @@ Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Age
 
 Ausgabe-Token geteilt durch die Zeit, die der Agent tatsächlich auf das Modell gewartet hat (Summe aller Antwortzeiten). Der Wert liegt unter der reinen Decode-Rate, weil jede Anfrage auch den Prompt verarbeitet; er sagt, wie schnell der Agent bei dieser Aufgabe vorankam.
 
-| Aufgabe | UD-Q2_K_XL t/s | UD-Q2_K_XL Modellzeit |
+| Aufgabe | UD-Q2_K_XL · medium t/s | UD-Q2_K_XL · medium Modellzeit |
 | --- | --- | --- |
 | `pypi-server` | 25,6 | 1:55 |
 | `nginx-request-logging` | 25,6 | 2:54 |
@@ -77,7 +77,7 @@ Ausgabe-Token geteilt durch die Zeit, die der Agent tatsächlich auf das Modell 
 | `overfull-hbox` | 24,3 | 16:46 |
 | `mteb-retrieve` | 23,9 | 4:54 |
 
-- UD-Q2_K_XL: 6,5 bis 27,7 t/s je Aufgabe, über alle Aufgaben 18,8 t/s; der Agent wartete 5 h 41 min auf das Modell, das sind 75 % der Laufzeit.
+- UD-Q2_K_XL · medium: 6,5 bis 27,7 t/s je Aufgabe, über alle Aufgaben 18,8 t/s; der Agent wartete 5 h 41 min auf das Modell, das sind 75 % der Laufzeit.
 
 ## Ausführung
 
@@ -87,7 +87,7 @@ Ausgabe-Token geteilt durch die Zeit, die der Agent tatsächlich auf das Modell 
 - Container je Aufgabe: 1 CPU, 2 GB RAM (nur `overfull-hbox`: 2 CPUs, 4 GB)
 - Engine: llama.cpp 0.3.0-dev (build 1, commit 60bce1a), Backend rocm 7.1.52802, Kontext 163840
 
-### UD-Q2_K_XL
+### UD-Q2_K_XL · medium
 
 ```bash
 ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-Q2_K_XL/Qwen3.8-Flash-Next-UD-Q2_K_XL-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{"reasoning_effort": "medium"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4
@@ -110,6 +110,6 @@ ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/b
 
 ## Weitere Läufe
 
-- UD-Q4_K_XL: 1/1 Aufgaben (1 min), Profil `mtp4-ngram-thinking-medium`
+- UD-Q4_K_XL · medium: 1/1 Aufgaben (1 min), Profil `mtp4-ngram-thinking-medium`
 
 Rohdaten: `state/quality/tbench/`, Transkripte und Verifier-Ausgaben unter `bench/quality/terminal-bench-mini/jobs/`. Interaktive Ansicht: [terminal-bench.html](terminal-bench.html).

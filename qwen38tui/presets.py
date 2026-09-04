@@ -90,6 +90,13 @@ EH_PRESETS: list[Preset] = [
         "UD-IQ4_XS mit 163840 Kontext (MTP laut Fork bis 164k validiert), KV q8_0 ≈ 2 GiB, MTP+ngram.",
         dict(quant="UD-IQ4_XS", ctx_size=163840, load_mode="none", thinking=True, reasoning_effort="medium", **_EH, **_QWEN_SAMPLING),
     ),
+    Preset(
+        "eh-agent", "EngramHalo – Coding-Agent / Terminal-Bench (UD-Q4_K_XL, 160k)",
+        "Für Agenten-Läufe (Terminal-Bench, SWE-Agenten): ein Slot, MTP+ngram, 163840 Kontext, kleiner Prompt-Cache "
+        "(2 GiB) – so bleiben rund 8 GiB für die Docker-Container der Aufgaben frei. Thinking medium.",
+        dict(quant="UD-Q4_K_XL", ctx_size=163840, load_mode="none", thinking=True, reasoning_effort="medium",
+             n_parallel=1, cache_ram_mib=2048, mem_guard_gib=5.0, **_EH, **_QWEN_SAMPLING),
+    ),
 ]
 
 PRESETS: list[Preset] = EH_PRESETS + STOCK_PRESETS

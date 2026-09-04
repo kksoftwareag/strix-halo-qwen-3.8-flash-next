@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terminal-Bench – Qwen3.8-Flash-Next auf Strix Halo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="terminal-bench.html" aria-current="page">Terminal-Bench</a><a href="anleitung.html">Anleitung</a><a href="recherche.html">Recherche &amp; Quellen</a><a class="gh" href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a></nav></div></header>
+<main><div class="wrap">
+
+<h1>Terminal-Bench-Mini-20</h1>
+<p class="lead">Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1: Der Agent bekommt eine Shell in einem
+Docker-Container und muss echte Arbeit erledigen – Pakete bauen, Dienste konfigurieren, Fehler suchen. Gewertet wird
+nur, was der Verifier der Aufgabe akzeptiert.</p>
+
+<div id="summary" class="cards"></div>
+<div id="bars"></div>
+
+<h2>Aufgaben im Vergleich</h2>
+<p>Eine Zelle zeigt, ob der Quant die Aufgabe gelöst hat, und wie lange der Agent dafür gebraucht hat.
+Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerursache.</p>
+
+<div class="controls">
+  <label>Schwierigkeit<select id="f-diff"><option value="">alle</option></select></label>
+  <label>Kategorie<select id="f-cat"><option value="">alle</option></select></label>
+  <label>Ergebnis<select id="f-out">
+    <option value="">alle</option>
+    <option value="pass">irgendwo bestanden</option>
+    <option value="fail">nirgends bestanden</option>
+    <option value="split">unterschiedlich</option>
+  </select></label>
+  <label>Sortierung<select id="f-sort">
+    <option value="subset">Reihenfolge im Benchmark</option>
+    <option value="name">Name</option>
+    <option value="pass">meiste Fehlschläge zuerst</option>
+    <option value="dur">längste Laufzeit zuerst</option>
+    <option value="diff">Schwierigkeit</option>
+  </select></label>
+  <button id="f-reset" type="button">zurücksetzen</button>
+</div>
+<div class="legend"><span class="l-pass">bestanden</span><span class="l-fail">nicht bestanden</span><span class="l-err">Abbruch oder Fehler im Ablauf</span></div>
+<div class="tablewrap"><table class="matrix" id="matrix"></table></div>
+<p id="count" class="empty"></p>
+
+<h2>Ausführung</h2>
+<div id="setup"></div>
+
+<dialog id="detail"><button class="close" type="button" aria-label="schließen">×</button><div id="detail-body"></div></dialog>
+
+</div></main>
+<footer><div class="wrap">Stand: <span id="stand">–</span> · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next">kksoftwareag/strix-halo-qwen-3.8-flash-next</a> · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>
+
+<script src="tbmini-data.js"></script>
+<script>
+(function () {
+  const D = window.TBMINI || { tasks: [], runs: [], commands: {}, quant_facts: {} };
+  const runs = (D.runs || []).filter(r => (r.total_tasks || 0) >= 20);
+  const tasks = D.tasks || [];
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const hms = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+    return h ? h + ":" + String(m).padStart(2, "0") + ":" + String(x).padStart(2, "0") : m + ":" + String(x).padStart(2, "0"); };
+  const num = n => (n == null ? "–" : n.toLocaleString("de-DE"));
+
+  if (D.generated_at) $("stand").textContent = new Date(D.generated_at).toLocaleDateString("de-DE",
+    { year: "numeric", month: "long", day: "numeric" });
+
+  if (!runs.length) {
+    $("summary").innerHTML = '<p class="empty">Noch keine abgeschlossenen Läufe. Die Seite füllt sich, sobald ' +
+      '<code>bench/quality/report.py</code> nach einem Durchlauf neue Daten schreibt.</p>';
+    $("matrix").innerHTML = "";
+    $("setup").innerHTML = '<p class="empty">–</p>';
+    return;
+  }
+
+  /* Karten und Balken */
+  $("summary").innerHTML = runs.map(r => {
+    const f = (D.quant_facts || {})[r.quant] || {};
+    return '<div class="card"><h3>' + esc(r.quant) + '</h3><div class="big">' + r.passed_tasks + "/" + r.total_tasks +
+      '</div><div class="sub">' + Math.round(r.pass_rate * 100) + " % bestanden · " + hms(r.duration_s) + " h Laufzeit" +
+      (f.footprint_gib ? " · " + f.footprint_gib + " GiB Speicher" : "") + "</div></div>";
+  }).join("");
+
+  const maxRate = Math.max(...runs.map(r => r.pass_rate), 0.0001);
+  $("bars").innerHTML = runs.map(r =>
+    '<div class="bar"><span class="label">' + esc(r.quant) + '</span><span class="track"><span class="fill" style="width:' +
+    (r.pass_rate / maxRate * 100).toFixed(1) + '%"></span></span><span class="val">' + r.passed_tasks + "/" + r.total_tasks +
+    "</span></div>").join("");
+
+  /* Filter befüllen */
+  const uniq = key => [...new Set(tasks.map(t => t[key]).filter(Boolean))].sort();
+  for (const [sel, key] of [["f-diff", "difficulty"], ["f-cat", "category"]])
+    for (const v of uniq(key)) { const o = document.createElement("option"); o.value = o.textContent = v; $(sel).appendChild(o); }
+
+  const DIFF = { easy: 0, medium: 1, hard: 2 };
+  const cellOf = (r, id) => (r.per_task || {})[id];
+
+  function visible() {
+    const d = $("f-diff").value, c = $("f-cat").value, o = $("f-out").value;
+    let list = tasks.filter(t => (!d || t.difficulty === d) && (!c || t.category === c));
+    if (o) list = list.filter(t => {
+      const st = runs.map(r => { const x = cellOf(r, t.id); return x ? !!x.passed : null; }).filter(v => v !== null);
+      if (!st.length) return false;
+      if (o === "pass") return st.some(Boolean);
+      if (o === "fail") return !st.some(Boolean);
+      return st.some(Boolean) && !st.every(Boolean);
+    });
+    const s = $("f-sort").value;
+    const dur = t => Math.max(...runs.map(r => (cellOf(r, t.id) || {}).duration_s || 0), 0);
+    const fails = t => runs.filter(r => { const x = cellOf(r, t.id); return x && !x.passed; }).length;
+    if (s === "name") list = [...list].sort((a, b) => a.id.localeCompare(b.id));
+    else if (s === "pass") list = [...list].sort((a, b) => fails(b) - fails(a) || a.id.localeCompare(b.id));
+    else if (s === "dur") list = [...list].sort((a, b) => dur(b) - dur(a));
+    else if (s === "diff") list = [...list].sort((a, b) => (DIFF[b.difficulty] ?? 0) - (DIFF[a.difficulty] ?? 0) || a.id.localeCompare(b.id));
+    return list;
+  }
+
+  function render() {
+    const list = visible();
+    let html = "<thead><tr><th class='task'>Aufgabe</th>" +
+      runs.map(r => "<th class='num'>" + esc(r.quant) + "</th>").join("") + "</tr></thead><tbody>";
+    for (const t of list) {
+      html += "<tr><td class='task'><code>" + esc(t.id) + "</code><span class='meta'>" +
+        "<span class='pill'>" + esc(t.difficulty) + "</span><span class='pill'>" + esc(t.category) + "</span>" +
+        (t.expert_min ? "Fachmann ca. " + t.expert_min + " min" : "") + "</span></td>";
+      for (const r of runs) {
+        const x = cellOf(r, t.id);
+        if (!x) { html += "<td class='cell none'>–</td>"; continue; }
+        const cls = x.exception ? "err" : (x.passed ? "pass" : "fail");
+        const mark = x.exception ? "Fehler" : (x.passed ? "ja" : "nein");
+        html += "<td class='cell " + cls + "' data-task='" + esc(t.id) + "' data-quant='" + esc(r.quant) + "'>" +
+          mark + " <span class='meta'>" + hms(x.duration_s) + "</span></td>";
+      }
+      html += "</tr>";
+    }
+    html += "</tbody>";
+    $("matrix").innerHTML = html;
+    $("count").textContent = list.length + " von " + tasks.length + " Aufgaben sichtbar";
+  }
+
+  $("matrix").addEventListener("click", ev => {
+    const td = ev.target.closest("td.cell"); if (!td || !td.dataset.task) return;
+    const t = tasks.find(x => x.id === td.dataset.task);
+    const r = runs.find(x => x.quant === td.dataset.quant);
+    const x = cellOf(r, t.id) || {};
+    const tok = x.tokens || {};
+    $("detail-body").innerHTML = "<h3>" + esc(t.id) + " · " + esc(r.quant) + "</h3>" +
+      "<p>" + esc(t.description) + "</p>" +
+      "<dl class='kv'>" +
+      "<dt>Ergebnis</dt><dd>" + (x.exception ? "Abbruch" : (x.passed ? "bestanden" : "nicht bestanden")) + "</dd>" +
+      "<dt>Dauer</dt><dd>" + hms(x.duration_s) + "</dd>" +
+      "<dt>Schritte des Agenten</dt><dd>" + num(x.steps) + "</dd>" +
+      "<dt>Token ein / davon Cache</dt><dd>" + num(tok.input) + " / " + num(tok.cached) + "</dd>" +
+      "<dt>Token aus</dt><dd>" + num(tok.output) + "</dd>" +
+      "<dt>größter Kontext</dt><dd>" + num(x.peak_context) + "</dd>" +
+      "<dt>Zeitlimit der Aufgabe</dt><dd>" + num(t.task_timeout_s) + " s</dd>" +
+      "<dt>Container</dt><dd>" + num(t.memory_mb) + " MB, Image <code>" + esc(t.image) + "</code></dd>" +
+      "</dl>" +
+      (x.exception ? "<pre><code>" + esc(String(x.exception).slice(0, 1200)) + "</code></pre>" : "");
+    $("detail").showModal();
+  });
+  $("detail").querySelector(".close").addEventListener("click", () => $("detail").close());
+
+  for (const id of ["f-diff", "f-cat", "f-out", "f-sort"]) $(id).addEventListener("change", render);
+  $("f-reset").addEventListener("click", () => {
+    for (const id of ["f-diff", "f-cat", "f-out"]) $(id).value = "";
+    $("f-sort").value = "subset"; render();
+  });
+
+  /* Ausführung: genaue Kommandos je Quant */
+  const cmds = D.commands || {};
+  $("setup").innerHTML = runs.map(r => {
+    const c = cmds[r.quant] || {};
+    let h = "<h3>" + esc(r.quant) + "</h3>";
+    h += "<dl class='kv'>" +
+      "<dt>Engine</dt><dd>" + esc(r.engine) + " " + esc(r.engine_version) + "</dd>" +
+      "<dt>Backend</dt><dd>" + esc(r.backend) + " " + esc(r.backend_version) + "</dd>" +
+      "<dt>Kontext</dt><dd>" + num(r.n_ctx) + " Token, " + (c.slots || 1) + " Slot</dd>" +
+      "<dt>Profil</dt><dd>" + esc(r.inference_profile) + "</dd>" +
+      "<dt>Benchmark</dt><dd>Terminal-Bench " + esc(r.tb_version) + " · Harbor " + esc(r.harbor_version) +
+        " · Agent Terminus-2</dd>" +
+      "<dt>Token gesamt</dt><dd>" + num((r.tokens || {}).input) + " ein, " + num((r.tokens || {}).output) + " aus</dd>" +
+      "</dl>";
+    if (c.command) h += "<pre><code>" + esc(c.command) + "</code></pre>";
+    if (c.memory && c.memory.length) {
+      h += "<div class='tablewrap'><table><thead><tr><th>Posten</th><th class='num'>Größe</th></tr></thead><tbody>" +
+        c.memory.map(m => "<tr><td>" + esc(m[0]) + "</td><td class='num'>" + esc(m[1]) + "</td></tr>").join("") +
+        "</tbody></table></div>";
+    }
+    return h;
+  }).join("");
+
+  render();
+})();
+</script>
+</body>
+</html>

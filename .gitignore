@@ -13,3 +13,4 @@ bench/results/mtp/*.log
 .pytest_cache/
 bench/research_raw.json
 engine/engramhalo-src/
+bench/quality/terminal-bench-mini/

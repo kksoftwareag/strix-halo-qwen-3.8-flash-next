@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""Docker-Zwischenschicht für die Agenten-Benchmarks.
+
+Hängt an jeden `docker compose`-Aufruf eine Overlay-Datei an, die dem Dienst `main`
+zusätzliche /etc/hosts-Einträge gibt. Damit lässt sich in Netzen, in denen
+archive.ubuntu.com quälend langsam ist, ein schneller Spiegel unterschieben, ohne
+den Benchmark oder die Aufgabenbilder zu verändern.
+
+Steuerung über Umgebungsvariablen:
+  QWEN38_EXTRA_HOSTS   "name:ip,name:ip"  – leer = nichts tun, nur durchreichen
+  QWEN38_REAL_DOCKER   Pfad zum echten docker (Default /usr/bin/docker)
+  QWEN38_SHIM_DIR      Ablage für die Overlay-Datei (Default: neben diesem Skript)
+"""
+from __future__ import annotations
+
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+COMPOSE_COMMANDS = {
+    "build", "config", "cp", "down", "exec", "images", "kill", "logs", "ps",
+    "pull", "restart", "rm", "run", "start", "stop", "top", "up",
+}
+
+
+def overlay(hosts: list[str]) -> str:
+    d = Path(os.environ.get("QWEN38_SHIM_DIR") or tempfile.gettempdir())
+    d.mkdir(parents=True, exist_ok=True)
+    p = d / "extra-hosts.json"
+    data = {"services": {"main": {"extra_hosts": hosts}}}
+    text = json.dumps(data)
+    if not p.exists() or p.read_text() != text:
+        p.write_text(text)
+    return str(p)
+
+
+def main() -> int:
+    real = os.environ.get("QWEN38_REAL_DOCKER") or "/usr/bin/docker"
+    args = sys.argv[1:]
+    hosts = [h.strip() for h in os.environ.get("QWEN38_EXTRA_HOSTS", "").split(",") if h.strip()]
+    if hosts and args and args[0] == "compose":
+        for i, a in enumerate(args):
+            if a in COMPOSE_COMMANDS:
+                args = args[:i] + ["-f", overlay(hosts)] + args[i:]
+                break
+    os.execv(real, [real, *args])
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

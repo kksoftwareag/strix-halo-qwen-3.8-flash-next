@@ -124,7 +124,7 @@ dzannotti-MTP-Head passt zu den Builds; der unsloth-Head braucht den unsloth-For
 | `qwen38tui/` | das Programm (Konfiguration, Speicherschätzung, Modell-Erkennung, GGUF-Reader, Server-Steuerung, Benchmarks, Oberfläche) |
 | `engine/` | `fetch.sh`, Build-Skripte, Patches; nach dem Bauen `build-engramhalo/` und `build-hip/` |
 | `bench/` | Mess-Skripte mit Speicher-Wächter und die Rohergebnisse dieser Maschine |
-| `docs/` | `RESEARCH.md` (Recherche mit Quellen), `HILFE.md` (Hilfe im Programm) und die Dokumentations-Website (HTML, wird über GitHub Pages aus diesem Ordner veröffentlicht) |
+| `docs/` | `RESEARCH.md` (Recherche mit Quellen), `QUALITAETS-BENCHMARKS.md` (welche Qualitäts-Benchmarks in 8 Stunden möglich sind), `HILFE.md` (Hilfe im Programm) und die Dokumentations-Website (HTML, wird über GitHub Pages aus diesem Ordner veröffentlicht) |
 | `tests/` | `uv run pytest -q` |
 | `state/` | eigene Profile, Logs, Messergebnisse (wird beim ersten Start angelegt) |
 

@@ -9,6 +9,8 @@ Decoding (MTP)? Wie viele Nutzer gleichzeitig?
 Alles ist auf einer solchen Maschine gemessen. Die Ergebnisse und die Begründungen stehen in
 `docs/RESEARCH.md`.
 
+![Konfigurations-Tab: links die Einstellungen, rechts Speicherbilanz, Warnungen und die erzeugte Kommandozeile](docs/screenshot-konfiguration.png)
+
 ## Was das Programm kann
 
 - **Konfigurieren**: Modell-Quant, Kontextlänge, KV-Cache, Batch-Größen, MTP-Draft-Head, Thinking-Modus,

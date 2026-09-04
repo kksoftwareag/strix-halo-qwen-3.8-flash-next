@@ -40,9 +40,9 @@ SECTIONS: list[tuple[str, list[tuple[str, str, str, Any, str]]]] = [
         ("quant", "Quant", "select", None, "auto = größter Quant, der ins Speicherbudget passt."),
         ("tensor_read_lazy", "PLE-Tabelle lazy lesen", "select", _opts(LAZY_MODES, {"auto": "auto (lazy, da > 4 GiB)", "on": "on (immer lazy)", "off": "off (26.8 GiB resident)"}),
          "Die 26.8-GiB-Per-Layer-Embedding-Tabelle wird per mmap zeilenweise von NVMe gelesen statt im RAM gehalten."),
-        ("no_host", "--no-host (kein gepinnter Host-Puffer)", "switch", None, "Pflicht im HIP-Build, damit die PLE-Tabelle lazy bleibt (sonst +27 GiB RAM → OOM)."),
-        ("ple_cpu_override", "PLE per -ot auf CPU-Puffer", "switch", None, "Alternative/Ergänzung zu --no-host: nur die PLE-Tabelle in den normalen CPU-Puffer."),
-        ("load_mode", "Lade-Modus", "select", _opts(LOAD_MODES), "Explizit 'mmap' setzen! Bei 'auto' nutzt ROCm kein mmap und kopiert die PLE-Tabelle (28 GiB) in den RAM."),
+        ("no_host", "--no-host (kein gepinnter Host-Puffer)", "switch", None, "Nur mit Lade-Modus mmap relevant; im Standard nicht nötig."),
+        ("ple_cpu_override", "PLE per -ot auf CPU-Puffer", "switch", None, "Experimentell: nur die PLE-Tabelle in den normalen CPU-Puffer zwingen."),
+        ("load_mode", "Lade-Modus", "select", _opts(LOAD_MODES), "EngramHalo: none (Tabelle bleibt trotzdem lazy). Stock-Fork: auto (Tabelle 28 GiB im RAM); mmap lädt dort mit ~18 MB/s."),
         ("n_gpu_layers", "GPU-Layer (-ngl)", "int", None, "99 = alles auf die iGPU (Unified Memory)."),
     ]),
     ("Kontext & KV-Cache", [

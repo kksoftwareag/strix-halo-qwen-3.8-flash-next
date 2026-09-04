@@ -43,3 +43,6 @@ footer{border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;paddi
 .bar .track{display:block;flex:1;height:.9rem;background:var(--code);border-radius:4px;overflow:hidden}
 .bar .fill{display:block;height:100%;min-width:2px;background:var(--accent)}
 .bar .val{width:5.5rem;text-align:right;font-variant-numeric:tabular-nums;font-size:.92rem}
+figure{margin:1.4rem 0}
+figure img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px}
+figcaption{color:var(--muted);font-size:.9rem;margin-top:.4rem;max-width:48rem}

@@ -143,4 +143,5 @@ dzannotti-MTP-Head passt zu den Builds; der unsloth-Head braucht den unsloth-For
 
 ## Lizenz
 
-MIT, siehe `LICENSE`. Die Modelle und Patches Dritter stehen unter ihren eigenen Lizenzen.
+Dieses Projekt steht unter der **European Union Public Licence v. 1.2 (EUPL-1.2)**, siehe `LICENSE`.
+Die Modelle, llama.cpp, EngramHalo.cpp und die Patches Dritter stehen unter ihren eigenen Lizenzen.

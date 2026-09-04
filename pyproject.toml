@@ -3,6 +3,8 @@ name = "qwen38-flash"
 version = "0.1.0"
 description = "Terminal-UI zum Konfigurieren, Starten und Benchmarken von Qwen3.8-Flash-Next (llama.cpp) auf AMD Strix Halo"
 readme = "README.md"
+license = "EUPL-1.2"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "textual>=3.0",

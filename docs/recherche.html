@@ -11,7 +11,7 @@
 <header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="anleitung.html">Anleitung</a><a href="recherche.html" aria-current="page">Recherche & Quellen</a></nav></div></header>
 <main><div class="wrap">
 <h1>Recherche & Quellen</h1>
-<p class="lead">Woher die Informationen stammen und was offen bleibt.</p>
+<p class="lead">Vorgehen der Recherche, Modellfakten, Alternativen zu llama.cpp, offene Punkte und Quellenverzeichnis.</p>
 
 <h2>Vorgehen</h2>
 <p>Die Recherche lief in mehreren Strängen: offizielle Modellkarte und Konfiguration, unsloth-Dokumentation der Quants,
@@ -34,7 +34,7 @@ lassen die Embedding-Tabelle in BF16 (126 bis 173 GB). SGLang lehnt gfx1151 ab. 
 ROCm. Ollama bietet nur MLX-Varianten. LM Studio und Lemonade nutzen upstream llama.cpp ohne MTP. Die echte Konkurrenz
 sind Strix-Halo-Forks von llama.cpp.</p>
 
-<h2>Was nicht geklärt ist</h2>
+<h2>Offene Punkte</h2>
 <ul>
 <li>Der EasiiX-Q8_0-MTP-Head (4 GB) soll höhere Akzeptanz haben; nicht getestet.</li>
 <li>Ein Rebase des MTP-Patches auf llama.cpp mit PR #28123 (Rekurrenz-Rollback) könnte MTP weiter beschleunigen.</li>

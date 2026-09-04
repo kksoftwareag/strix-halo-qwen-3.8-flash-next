@@ -11,17 +11,17 @@
 <header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html" aria-current="page">Speicher</a><a href="benchmarks.html">Messungen</a><a href="anleitung.html">Anleitung</a><a href="recherche.html">Recherche & Quellen</a></nav></div></header>
 <main><div class="wrap">
 <h1>Speicher</h1>
-<p class="lead">Warum 104 GB Modell in 128 GB nicht automatisch passen, und was dagegen hilft.</p>
+<p class="lead">Speichermodell auf Unified-Memory-Systemen, Größe der Quantisierungen, Verhalten der Embedding-Tabelle je Engine und Berechnung des Speicherbedarfs.</p>
 
-<h2>Wo der Speicher hingeht</h2>
+<h2>Speicheraufteilung auf Strix Halo</h2>
 <p>Ein Strix Halo hat einen gemeinsamen Speicher für CPU und GPU. Auf dem Testrechner sieht das Betriebssystem 109,7 GB;
 die GPU bekommt davon 16 GB fest (VRAM) und darf den Rest als GTT benutzen. Alles teilt sich denselben physischen RAM:
 Gewichte, KV-Cache, Compute-Puffer, die Embedding-Tabelle, der Page-Cache und das Betriebssystem.</p>
 
-<div class="note">GTT-Speicher erscheint nicht im RSS des Prozesses. Wer nur <code>top</code> anschaut, unterschätzt den Verbrauch
-um 50 bis 80 GB. Verlässlich ist <code>MemAvailable</code> aus <code>/proc/meminfo</code>.</div>
+<div class="note">GTT-Speicher erscheint nicht im RSS des Prozesses. Werkzeuge wie <code>top</code> zeigen den Verbrauch deshalb um
+50 bis 80 GB zu niedrig an. Verlässlich ist <code>MemAvailable</code> aus <code>/proc/meminfo</code>.</div>
 
-<h2>Die Quants</h2>
+<h2>Quantisierungen</h2>
 <div class="tablewrap"><table>
 <tr><th>Quant</th><th class="num">Datei</th><th class="num">davon Experten</th><th class="num">Gewichte in GPU</th><th class="num">KLD</th><th class="num">Top-1</th></tr>
 <tr><td>UD-Q2_K_XL</td><td class="num">73,4 GB</td><td class="num">42,9</td><td class="num">46,6</td><td class="num">0,225</td><td class="num">82,7 %</td></tr>
@@ -33,7 +33,7 @@ um 50 bis 80 GB. Verlässlich ist <code>MemAvailable</code> aus <code>/proc/memi
 Der Unterschied zwischen den Quants ist ausschließlich die Präzision der gerouteten Experten. (GB hier als GiB; unsloth
 gibt dezimale GB an.)</p>
 
-<h2>Was mit der Tabelle passiert</h2>
+<h2>Embedding-Tabelle je Engine und Lade-Modus</h2>
 <div class="tablewrap"><table>
 <tr><th>Engine und Lade-Modus</th><th>Tabelle</th><th>Ladezeit Q4_K_XL</th><th>Bedarf Q4_K_XL + MTP</th></tr>
 <tr><td>llama.cpp, <code>--load-mode auto</code></td><td>komplett im RAM (28 GB anonym)</td><td>28 s</td><td class="bad">über 107 GB → OOM</td></tr>
@@ -41,12 +41,12 @@ gibt dezimale GB an.)</p>
 <tr><td>EngramHalo, <code>-lm none</code></td><td>lazy, 2,7 GB resident</td><td class="ok">28 s</td><td class="ok">84,7 GB</td></tr>
 <tr><td>EngramHalo, <code>-lm mmap</code></td><td>lazy</td><td class="ok">39 s</td><td class="ok">83,4 GB</td></tr>
 </table></div>
-<p>Warum ist mmap beim Stock-Fork so langsam? Die Gewichte werden Seite für Seite per Page-Fault gelesen, ohne Readahead,
+<p>Ursache der langen mmap-Ladezeit beim Stock-Fork: Die Gewichte werden Seite für Seite per Page-Fault gelesen, ohne Readahead,
 und der Page-Cache konkurriert mit dem GTT um denselben RAM. Sobald das Modell nicht zweimal in den Speicher passt,
 werden Seiten verdrängt und erneut gelesen: 149 GB Lesevolumen für eine 104-GB-Datei. EngramHalo gibt Readahead-Hinweise
 und räumt den Page-Cache hinter dem Upload frei.</p>
 
-<h2>Was das Programm rechnet</h2>
+<h2>Speicherschätzung im Programm</h2>
 <ul>
 <li>Gewichte in der GPU (Datei minus Tabelle) plus 2,7 GB Tabelle bei EngramHalo, sonst plus 26,8 GB.</li>
 <li>KV-Cache der 12 Full-Attention-Layer: 2 KV-Heads × 256 Dimensionen → 24 KB pro Token bei f16, 12,75 KB bei q8_0;
@@ -58,9 +58,9 @@ plus Indexer-Cache (K 128 + V 256 Dimensionen). Gemessen bei 32k q8_0: 408 + 153
 </ul>
 <p>Beispiel Standard-Preset (EngramHalo, Q4_K_XL, 128k, MTP): geschätzt 90,0 GB, gemessen 89,7 GB.</p>
 
-<h2>Kontext kostet wenig</h2>
+<h2>Kontextlänge</h2>
 <p>Weil nur 12 der 48 Layer einen KV-Cache haben, sind 256k Kontext mit q8_0 nur 3,3 GB KV plus 0,8 GB Indexer.
-Der Kontext ist bei diesem Modell keine Speicherfrage, sondern eine Geschwindigkeitsfrage (Prompt-Processing).</p>
+Die Kontextlänge ist bei diesem Modell vor allem eine Frage der Prompt-Processing-Geschwindigkeit, nicht des Speichers.</p>
 
 </div></main>
 <footer><div class="wrap">Stand: 4. September 2026 · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/">qwen38-flash</a> (Repo-Link eintragen) · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>

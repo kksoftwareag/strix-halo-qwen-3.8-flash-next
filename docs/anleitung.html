@@ -11,7 +11,7 @@
 <header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="anleitung.html" aria-current="page">Anleitung</a><a href="recherche.html">Recherche & Quellen</a></nav></div></header>
 <main><div class="wrap">
 <h1>Anleitung</h1>
-<p class="lead">Von der leeren Maschine zum laufenden Server.</p>
+<p class="lead">Installation, Modell-Download, Build der Engines und Start des Servers.</p>
 
 <h2>Voraussetzungen</h2>
 <ul>
@@ -20,7 +20,7 @@
 <li>Python 3.12+, <a href="https://docs.astral.sh/uv/">uv</a>, die Hugging-Face-CLI <code>hf</code>, rund 200 GB freier NVMe-Platz.</li>
 </ul>
 
-<h2>Schritt für Schritt</h2>
+<h2>Installation</h2>
 <pre><code># 1. Programm
 git clone &lt;Repo-URL&gt; qwen38-flash &amp;&amp; cd qwen38-flash
 uv sync
@@ -59,7 +59,7 @@ engine/build.sh hip        # zweite Engine
 <tr><td>stock-*</td><td>llama.cpp + Patch</td><td>IQ4_XS / IQ3_XXS / Q2_K_XL</td><td>je nach Preset</td><td>an</td><td>Fallback ohne EngramHalo</td></tr>
 </table></div>
 
-<h2>Wenn etwas schiefgeht</h2>
+<h2>Fehlerbehebung</h2>
 <ul>
 <li><strong>Kernel-OOM</strong>: Speicherbilanz im Programm prüfen (Spielraum mindestens 8 GB), kleineren Quant oder Kontext wählen, andere LLM-Prozesse beenden.</li>
 <li><strong>Ladevorgang dauert Stunden</strong>: <code>--load-mode mmap</code> beim Stock-Fork. Lade-Modus auf auto stellen oder EngramHalo verwenden.</li>

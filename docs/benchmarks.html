@@ -11,7 +11,7 @@
 <header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html" aria-current="page">Messungen</a><a href="anleitung.html">Anleitung</a><a href="recherche.html">Recherche & Quellen</a></nav></div></header>
 <main><div class="wrap">
 <h1>Messungen</h1>
-<p class="lead">Alle Zahlen, die den Entscheidungen zugrunde liegen.</p>
+<p class="lead">Messwerte zu Durchsatz, Speicherbedarf, MTP-Parametern und Mehrnutzer-Betrieb.</p>
 
 <p>Alle Messungen auf einem Rechner: Ryzen AI MAX+ 395, Radeon 8060S (gfx1151), 128 GB LPDDR5X, Fedora 44, ROCm/HIP 7.1,
 Samsung 990 PRO NVMe. Governor „powersave“, tuned „balanced“ (nicht optimiert). Rauschen zwischen Läufen etwa 3 %.
@@ -28,7 +28,7 @@ Rohdaten liegen im Projekt unter <code>bench/results/</code>.</p>
 <p>KV-Typ und ubatch ändern bei 512 Tokens nichts Messbares. Der Decode ist bandbreitenlimitiert: pro Token werden rund
 5 GB gelesen (10 von 512 Experten plus die dichten Anteile).</p>
 
-<h2 id="footprint">Footprint und Decode mit MTP (32k Kontext, q8_0, dzannotti-Head)</h2>
+<h2 id="footprint">Speicherbedarf und Decode mit MTP (32k Kontext, q8_0, dzannotti-Head)</h2>
 <div class="tablewrap"><table>
 <tr><th>Engine</th><th>Quant</th><th>MTP</th><th class="num">Ladezeit</th><th class="num">Decode</th><th class="num">Akzeptanz</th><th class="num">Speicherbedarf</th></tr>
 <tr><td>Stock (auto)</td><td>Q2_K_XL</td><td>–</td><td class="num">20 s</td><td class="num">24,6</td><td class="num">–</td><td class="num">75,7 GB</td></tr>
@@ -57,7 +57,7 @@ Rohdaten liegen im Projekt unter <code>bench/results/</code>.</p>
 </table></div>
 <p>Alle Werte in Tokens pro Sekunde, Temperatur 1.0 sofern nicht anders angegeben. Reasoning-Ausgaben profitieren am stärksten.</p>
 
-<h2 id="multiuser">Mehrere Nutzer gleichzeitig (EngramHalo, 8 Slots, 20k Kontext je Slot, 256 Tokens je Anfrage)</h2>
+<h2 id="multiuser">Mehrnutzer-Durchsatz (EngramHalo, 8 Slots, 20k Kontext je Slot, 256 Tokens je Anfrage)</h2>
 <div class="bars"><div class="bar"><span class="label">1 Nutzer</span><span class="track"><span class="fill" style="width:40%"></span></span><span class="val">20.4 t/s</span></div><div class="bar"><span class="label">2 Nutzer</span><span class="track"><span class="fill" style="width:63%"></span></span><span class="val">32 t/s</span></div><div class="bar"><span class="label">4 Nutzer</span><span class="track"><span class="fill" style="width:84%"></span></span><span class="val">42.4 t/s</span></div><div class="bar"><span class="label">8 Nutzer</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">50.4 t/s</span></div></div>
 <div class="tablewrap"><table>
 <tr><th class="num">Nutzer</th><th class="num">Σ ohne MTP (IQ4_XS)</th><th class="num">je Nutzer</th><th class="num">TTFT</th><th class="num">Σ mit MTP (Q4_K_XL)</th><th class="num">je Nutzer</th><th class="num">Mix-ups</th></tr>
@@ -69,7 +69,7 @@ Rohdaten liegen im Projekt unter <code>bench/results/</code>.</p>
 <p>Continuous Batching bringt bei 8 Nutzern das 2,5-Fache des Einzeldurchsatzes. MTP lohnt nur bei einem Nutzer. Die
 Mix-up-Prüfung (jeder Nutzer bekommt ein Codewort) fand mit dem #25992-Patch keinen vertauschten Slot.</p>
 
-<h2 id="rotation">Kleinere Messungen</h2>
+<h2 id="rotation">Weitere Messungen</h2>
 <ul>
 <li>Hadamard-Rotation bei q8_0-KV an vs. aus (Stock, Q2_K_XL): 24,2 vs. 24,6 Tokens/s.</li>
 <li>Puffergrößen: Compute 297 MB (ubatch 512) bzw. 1188 MB (ubatch 2048); Kontext 32k q8_0 = 673 MB; MTP-Draft 2146 MB + 740 MB.</li>

@@ -11,15 +11,15 @@
 <header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html" aria-current="page">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="anleitung.html">Anleitung</a><a href="recherche.html">Recherche & Quellen</a></nav></div></header>
 <main><div class="wrap">
 <h1>Überblick</h1>
-<p class="lead">Wie Qwen3.8-Flash-Next auf einem AMD Strix Halo mit 128 GB bestmöglich läuft, und warum genau so.</p>
+<p class="lead">Dokumentation zum Betrieb von Qwen3.8-Flash-Next mit llama.cpp auf AMD Strix Halo (128 GB Unified Memory): Konfiguration, Speichermodell, Messungen und Quellen.</p>
 
 <div class="cards">
 <div class="card"><h3>Empfohlene Konfiguration</h3><div class="big">UD-Q4_K_XL + MTP</div><div class="sub">EngramHalo.cpp, 128k Kontext, 33–41 Tokens/s, 85 GB Speicher</div></div>
-<div class="card"><h3>Ohne den richtigen Fork</h3><div class="big bad">OOM</div><div class="sub">Der beste Quant mit MTP passt mit normalem llama.cpp nicht in 128 GB</div></div>
-<div class="card"><h3>Mehrere Nutzer</h3><div class="big">50 t/s</div><div class="sub">Gesamtdurchsatz bei 8 gleichzeitigen Anfragen (ohne MTP)</div></div>
+<div class="card"><h3>Speicherbedarf mit Standard-llama.cpp</h3><div class="big bad">über 107 GB</div><div class="sub">UD-Q4_K_XL + MTP passt nicht in 128 GB (Kernel-OOM), siehe Speicher</div></div>
+<div class="card"><h3>Mehrnutzer-Durchsatz</h3><div class="big">50 t/s</div><div class="sub">Gesamtdurchsatz bei 8 gleichzeitigen Anfragen, ohne MTP</div></div>
 </div>
 
-<h2>Worum es geht</h2>
+<h2>Einführung</h2>
 <p>Qwen3.8-Flash-Next ist ein großes Mixture-of-Experts-Modell (125 Milliarden Parameter, 6 Milliarden aktiv) mit einer
 Besonderheit: einer 51-Milliarden-Parameter-Tabelle für n-Gram-Embeddings. Auf einem Strix-Halo-Rechner mit 128 GB
 Unified Memory passt das Modell nur, wenn Engine, Quantisierung, Lade-Modus und Kontext zusammenpassen. Diese Seite
@@ -28,21 +28,21 @@ dokumentiert, welche Entscheidungen dabei getroffen wurden, warum, und was gemes
 <p>Das zugehörige Werkzeug ist ein Terminal-Programm (Python/Textual), das die Konfiguration übernimmt, den Speicherbedarf
 vorab berechnet, den Server startet und überwacht und Benchmarks ausführt. Siehe <a href="anleitung.html">Anleitung</a>.</p>
 
-<h2>Die fünf wichtigsten Ergebnisse</h2>
+<h2>Zusammenfassung</h2>
 <ol>
-<li><strong>Die n-Gram-Tabelle entscheidet über den Speicher.</strong> Sie ist in jedem Quant 26,8 GB groß. Normales llama.cpp
-lädt sie auf ROCm zusätzlich zu den GPU-Gewichten in den RAM. <a href="speicher.html">Details</a></li>
-<li><strong>EngramHalo.cpp löst das.</strong> Der Strix-Halo-Fork lässt die Tabelle auf der NVMe, lädt in unter 30 Sekunden und
-macht den besten Quant mit MTP nutzbar. <a href="entscheidungen.html#engine">Entscheidung</a></li>
-<li><strong>MTP verdoppelt fast die Geschwindigkeit</strong> bei einem Nutzer (21 → 33–41 Tokens/s), schadet aber ab zwei
-gleichzeitigen Nutzern. <a href="benchmarks.html#mtp">Messungen</a></li>
-<li><strong>Nur ein MTP-Head passt.</strong> Der dzannotti-Head hat die Tensornamen, die die Builds erwarten; der unsloth-Head braucht
-einen anderen Fork. <a href="entscheidungen.html#mtp-head">Entscheidung</a></li>
-<li><strong>ROCm statt Vulkan.</strong> Vulkan ist beim Decode oft schneller, bricht aber mit MTP bei diesem Modell ein.
+<li><strong>Speicher:</strong> Die n-Gram-Tabelle ist in jedem Quant 26,8 GB groß. Standard-llama.cpp lädt sie auf ROCm zusätzlich zu den
+GPU-Gewichten in den RAM. <a href="speicher.html">Speicher</a></li>
+<li><strong>Engine:</strong> EngramHalo.cpp (Strix-Halo-Fork) lässt die Tabelle auf der NVMe, lädt in unter 30 Sekunden und macht den
+besten Quant mit MTP nutzbar. <a href="entscheidungen.html#engine">Entscheidung</a></li>
+<li><strong>MTP:</strong> Spekulatives Decoding erhöht den Durchsatz bei einem Nutzer von 21 auf 33–41 Tokens/s; ab zwei gleichzeitigen
+Nutzern senkt es den Gesamtdurchsatz. <a href="benchmarks.html#mtp">Messungen</a></li>
+<li><strong>MTP-Head:</strong> Der dzannotti-Head hat die Tensornamen, die die Builds erwarten; der unsloth-Head setzt einen anderen Fork
+voraus. <a href="entscheidungen.html#mtp-head">Entscheidung</a></li>
+<li><strong>Backend:</strong> ROCm/HIP. Vulkan ist beim reinen Decode oft schneller, verliert mit MTP bei diesem Modell jedoch deutlich.
 <a href="entscheidungen.html#backend">Entscheidung</a></li>
 </ol>
 
-<h2>Decode-Geschwindigkeit, ein Nutzer</h2>
+<h2>Decode-Geschwindigkeit (ein Nutzer)</h2>
 <div class="bars"><div class="bar"><span class="label">Q4_K_XL ohne MTP</span><span class="track"><span class="fill" style="width:51%"></span></span><span class="val">20.8 t/s</span></div><div class="bar"><span class="label">Q4_K_XL mit MTP (Code)</span><span class="track"><span class="fill" style="width:88%"></span></span><span class="val">36.1 t/s</span></div><div class="bar"><span class="label">Q4_K_XL mit MTP (Reasoning)</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">41 t/s</span></div><div class="bar"><span class="label">IQ4_XS mit MTP</span><span class="track"><span class="fill" style="width:89%"></span></span><span class="val">36.5 t/s</span></div><div class="bar"><span class="label">IQ3_XXS mit MTP</span><span class="track"><span class="fill" style="width:84%"></span></span><span class="val">34.4 t/s</span></div></div>
 <p class="sub">EngramHalo.cpp, 32k Kontext, KV-Cache q8_0, dzannotti-Head. Alle Zahlen: <a href="benchmarks.html">Messungen</a>.</p>
 

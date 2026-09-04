@@ -7,7 +7,8 @@ header{border-bottom:1px solid var(--line);background:var(--card)}
 .wrap{max-width:62rem;margin:0 auto;padding:0 1.25rem}
 header .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1.6rem;padding:.9rem 1.25rem}
 header .brand{font-weight:700;text-decoration:none;color:var(--fg);font-size:1.05rem}
-nav a{color:var(--muted);text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent}
+nav{display:flex;flex-wrap:wrap;gap:.3rem 1.3rem}
+nav a{color:var(--muted);text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent;white-space:nowrap}
 nav a:hover,nav a[aria-current]{color:var(--accent);border-color:var(--accent)}
 main{padding:2rem 0 4rem}
 h1{font-size:2rem;line-height:1.2;margin:.2rem 0 1rem}

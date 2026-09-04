@@ -1,5 +1,9 @@
 # qwen38-flash
 
+> **Hinweis:** Der Großteil dieses Repositorys (Programm, Build- und Benchmark-Skripte, Recherche, Dokumentation und
+> Website) wurde von Claude Fable 5.1 (Anthropic) erstellt, gesteuert und geprüft durch den Autor. Die Messwerte stammen
+> von echten Läufen auf der beschriebenen Hardware.
+
 Ein Terminal-Programm, mit dem du **Qwen3.8-Flash-Next** auf einem **AMD Strix Halo** Rechner
 (Ryzen AI MAX+ 395 / Radeon 8060S, 128 GB Unified Memory) mit **llama.cpp** einrichtest, startest,
 überwachst und misst. Es nimmt dir die Entscheidungen ab, die bei diesem Modell schwierig sind:

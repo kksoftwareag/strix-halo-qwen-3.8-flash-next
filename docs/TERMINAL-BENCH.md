@@ -48,7 +48,36 @@ Zwei Dinge dazu, bevor man Quants anhand einzelner Aufgaben vergleicht:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | UD-Q2_K_XL | 399 | 404.631 | 385.970 | 243.4 | 24.4 | 0.67 | 3.48 |
 
-Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Agenten, nicht nur die Antworten, die in die Wertung eingehen).
+Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Agenten, nicht nur die Antworten, die in die Wertung eingehen). `Decode t/s` ist die reine Erzeugungsrate, gemittelt über alle Anfragen.
+
+### Tempo je Aufgabe
+
+Ausgabe-Token geteilt durch die Zeit, die der Agent tatsächlich auf das Modell gewartet hat (Summe aller Antwortzeiten). Der Wert liegt unter der reinen Decode-Rate, weil jede Anfrage auch den Prompt verarbeitet; er sagt, wie schnell der Agent bei dieser Aufgabe vorankam.
+
+| Aufgabe | UD-Q2_K_XL t/s | UD-Q2_K_XL Modellzeit |
+| --- | --- | --- |
+| `pypi-server` | 25,6 | 1:55 |
+| `nginx-request-logging` | 25,6 | 2:54 |
+| `git-leak-recovery` | 23,6 | 2:06 |
+| `fix-git` | 22,6 | 2:48 |
+| `cobol-modernization` | 24,2 | 8:46 |
+| `regex-log` | 15,0 | 21:52 |
+| `headless-terminal` | 25,2 | 14:13 |
+| `mailman` | 19,7 | 30:33 |
+| `fix-ocaml-gc` | 21,2 | 27:10 |
+| `break-filter-js-from-html` | 6,5 | 55:22 |
+| `sqlite-with-gcov` | 22,2 | 4:22 |
+| `sparql-university` | 27,7 | 11:33 |
+| `llm-inference-batching-scheduler` | 21,1 | 54:09 |
+| `configure-git-webserver` | 23,7 | 5:17 |
+| `build-cython-ext` | 20,4 | 15:26 |
+| `extract-elf` | 22,7 | 25:53 |
+| `build-pov-ray` | 17,4 | 33:08 |
+| `openssl-selfsigned-cert` | 27,5 | 2:34 |
+| `overfull-hbox` | 24,3 | 16:46 |
+| `mteb-retrieve` | 23,9 | 4:54 |
+
+- UD-Q2_K_XL: 6,5 bis 27,7 t/s je Aufgabe, über alle Aufgaben 18,8 t/s; der Agent wartete 5 h 41 min auf das Modell, das sind 75 % der Laufzeit.
 
 ## Ausführung
 

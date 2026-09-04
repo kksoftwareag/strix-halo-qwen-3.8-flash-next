@@ -1,5 +1,5 @@
 window.TBMINI = {
- "generated_at": "2026-09-04T21:01:45+00:00",
+ "generated_at": "2026-09-04T21:36:04+00:00",
  "tasks": [
   {
    "id": "pypi-server",
@@ -247,6 +247,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 12,
      "requests": 12,
+     "model_s": 3322,
+     "tok_per_s": 6.5,
      "req_max_s": 1839,
      "req_mean_s": 277,
      "attempts": 1
@@ -268,6 +270,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 65,
      "requests": 65,
+     "model_s": 926,
+     "tok_per_s": 20.4,
      "req_max_s": 61,
      "req_mean_s": 14,
      "attempts": 1
@@ -294,6 +298,8 @@ window.TBMINI = {
      "exception_message": "Agent execution timed out after 3600.0 seconds",
      "episodes": 65,
      "requests": 64,
+     "model_s": 1988,
+     "tok_per_s": 17.4,
      "req_max_s": 144,
      "req_mean_s": 31,
      "attempts": 1
@@ -315,6 +321,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 13,
      "requests": 13,
+     "model_s": 526,
+     "tok_per_s": 24.2,
      "req_max_s": 142,
      "req_mean_s": 40,
      "attempts": 1
@@ -336,6 +344,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 9,
      "requests": 9,
+     "model_s": 317,
+     "tok_per_s": 23.7,
      "req_max_s": 121,
      "req_mean_s": 35,
      "attempts": 1
@@ -357,6 +367,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 14,
      "requests": 14,
+     "model_s": 1553,
+     "tok_per_s": 22.7,
      "req_max_s": 353,
      "req_mean_s": 111,
      "attempts": 1
@@ -378,6 +390,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 10,
      "requests": 10,
+     "model_s": 168,
+     "tok_per_s": 22.6,
      "req_max_s": 30,
      "req_mean_s": 17,
      "attempts": 1
@@ -399,6 +413,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 36,
      "requests": 36,
+     "model_s": 1630,
+     "tok_per_s": 21.2,
      "req_max_s": 324,
      "req_mean_s": 45,
      "attempts": 1
@@ -420,6 +436,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 7,
      "requests": 7,
+     "model_s": 126,
+     "tok_per_s": 23.6,
      "req_max_s": 27,
      "req_mean_s": 18,
      "attempts": 1
@@ -441,6 +459,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 16,
      "requests": 16,
+     "model_s": 853,
+     "tok_per_s": 25.2,
      "req_max_s": 167,
      "req_mean_s": 53,
      "attempts": 1
@@ -467,6 +487,8 @@ window.TBMINI = {
      "exception_message": "Agent execution timed out after 3600.0 seconds",
      "episodes": 25,
      "requests": 24,
+     "model_s": 3249,
+     "tok_per_s": 21.1,
      "req_max_s": 468,
      "req_mean_s": 135,
      "attempts": 1
@@ -488,6 +510,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 47,
      "requests": 47,
+     "model_s": 1833,
+     "tok_per_s": 19.7,
      "req_max_s": 203,
      "req_mean_s": 39,
      "attempts": 1
@@ -509,6 +533,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 13,
      "requests": 13,
+     "model_s": 294,
+     "tok_per_s": 23.9,
      "req_max_s": 51,
      "req_mean_s": 23,
      "attempts": 1
@@ -530,6 +556,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 10,
      "requests": 10,
+     "model_s": 174,
+     "tok_per_s": 25.6,
      "req_max_s": 24,
      "req_mean_s": 17,
      "attempts": 1
@@ -551,6 +579,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 6,
      "requests": 6,
+     "model_s": 154,
+     "tok_per_s": 27.5,
      "req_max_s": 36,
      "req_mean_s": 26,
      "attempts": 1
@@ -572,6 +602,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 14,
      "requests": 14,
+     "model_s": 1006,
+     "tok_per_s": 24.3,
      "req_max_s": 403,
      "req_mean_s": 72,
      "attempts": 1
@@ -593,6 +625,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 7,
      "requests": 7,
+     "model_s": 115,
+     "tok_per_s": 25.6,
      "req_max_s": 34,
      "req_mean_s": 16,
      "attempts": 1
@@ -614,6 +648,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 4,
      "requests": 4,
+     "model_s": 1312,
+     "tok_per_s": 15.0,
      "req_max_s": 1146,
      "req_mean_s": 328,
      "attempts": 1
@@ -635,6 +671,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 11,
      "requests": 11,
+     "model_s": 693,
+     "tok_per_s": 27.7,
      "req_max_s": 172,
      "req_mean_s": 63,
      "attempts": 1
@@ -656,6 +694,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 17,
      "requests": 17,
+     "model_s": 262,
+     "tok_per_s": 22.2,
      "req_max_s": 32,
      "req_mean_s": 15,
      "attempts": 1
@@ -706,6 +746,8 @@ window.TBMINI = {
      "exception_message": null,
      "episodes": 7,
      "requests": 7,
+     "model_s": 74,
+     "tok_per_s": 26.0,
      "req_max_s": 13,
      "req_mean_s": 11,
      "attempts": 1
@@ -719,13 +761,13 @@ window.TBMINI = {
    "server_log": "state/logs/tbench-server-20260904-225745.log",
    "command": "ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/38bb39ee97821de2c9009abb7e93950eec396e66/UD-IQ1_M/Qwen3.8-Flash-Next-UD-IQ1_M-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{\"reasoning_effort\": \"medium\"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4",
    "server": {
-    "requests": 1,
-    "prompt_tokens": 837,
-    "generated_tokens": 244,
-    "pp_tps": 246.3,
-    "tg_tps": 43.4,
-    "draft_accept": 0.815,
-    "draft_mean_len": 3.79,
+    "requests": 27,
+    "prompt_tokens": 31021,
+    "generated_tokens": 30634,
+    "pp_tps": 234.0,
+    "tg_tps": 28.2,
+    "draft_accept": 0.672,
+    "draft_mean_len": 3.6,
     "load_s": 16
    },
    "memory": [

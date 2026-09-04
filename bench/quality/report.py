@@ -106,9 +106,14 @@ def trial_details(rel_trial: str | None) -> dict:
     exc = d.get("exception_info") or {}
     out = {"episodes": meta.get("n_episodes")}
     if times:
+        model_s = sum(times) / 1000
         out["requests"] = len(times)
         out["req_max_s"] = round(max(times) / 1000)
         out["req_mean_s"] = round(sum(times) / len(times) / 1000)
+        out["model_s"] = round(model_s)
+        n_out = (d.get("agent_result") or {}).get("n_output_tokens") or 0
+        if model_s > 0 and n_out:
+            out["tok_per_s"] = round(n_out / model_s, 1)
     if exc:
         out["exception_type"] = exc.get("exception_type")
         out["exception_message"] = exc.get("exception_message")
@@ -175,6 +180,8 @@ def load_runs(results: Path) -> list[dict]:
                 "exception_message": det.get("exception_message"),
                 "episodes": det.get("episodes"),
                 "requests": det.get("requests"),
+                "model_s": det.get("model_s"),
+                "tok_per_s": det.get("tok_per_s"),
                 "req_max_s": det.get("req_max_s"),
                 "req_mean_s": det.get("req_mean_s"),
                 "attempts": len(r.get("attempts") or []),
@@ -313,7 +320,34 @@ def markdown(data: dict) -> str:
                 f"{g('pp_tps')} | {g('tg_tps')} | {g('draft_accept')} | {g('draft_mean_len')} |")
         add("")
         add("Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Agenten, "
-            "nicht nur die Antworten, die in die Wertung eingehen).")
+            "nicht nur die Antworten, die in die Wertung eingehen). `Decode t/s` ist die reine "
+            "Erzeugungsrate, gemittelt über alle Anfragen.")
+        add("")
+
+        add("### Tempo je Aufgabe\n")
+        add("Ausgabe-Token geteilt durch die Zeit, die der Agent tatsächlich auf das Modell gewartet hat "
+            "(Summe aller Antwortzeiten). Der Wert liegt unter der reinen Decode-Rate, weil jede Anfrage "
+            "auch den Prompt verarbeitet; er sagt, wie schnell der Agent bei dieser Aufgabe vorankam.\n")
+        add("| Aufgabe | " + " | ".join(f"{r['quant']} t/s" for r in full) + " | " +
+            " | ".join(f"{r['quant']} Modellzeit" for r in full) + " |")
+        add("| --- | " + " | ".join("---" for _ in full * 2) + " |")
+        for t in tasks:
+            rates, times = [], []
+            for r in full:
+                d = r["per_task"].get(t["id"]) or {}
+                rates.append(f"{d['tok_per_s']:.1f}".replace(".", ",") if d.get("tok_per_s") else "–")
+                times.append(hms(d["model_s"]) if d.get("model_s") else "–")
+            add(f"| `{t['id']}` | " + " | ".join(rates) + " | " + " | ".join(times) + " |")
+        add("")
+        for r in full:
+            vals = [d["tok_per_s"] for d in r["per_task"].values() if d.get("tok_per_s")]
+            secs = sum(d["model_s"] for d in r["per_task"].values() if d.get("model_s"))
+            toks = sum((d.get("tokens") or {}).get("output") or 0 for d in r["per_task"].values())
+            if vals:
+                komma = lambda x, n=1: f"{x:.{n}f}".replace(".", ",")
+                add(f"- {r['quant']}: {komma(min(vals))} bis {komma(max(vals))} t/s je Aufgabe, über alle "
+                    f"Aufgaben {komma(toks / secs)} t/s; der Agent wartete {hm(secs)} auf das Modell, "
+                    f"das sind {secs / r['duration_s'] * 100:.0f} % der Laufzeit.")
         add("")
 
     add("## Ausführung\n")

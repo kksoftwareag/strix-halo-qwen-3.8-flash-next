@@ -19,8 +19,9 @@ nur, was der Verifier der Aufgabe akzeptiert.</p>
 <div id="bars"></div>
 
 <h2>Aufgaben im Vergleich</h2>
-<p>Eine Zelle zeigt, ob der Quant die Aufgabe gelöst hat, und wie lange der Agent dafür gebraucht hat.
-Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerursache.</p>
+<p>Eine Zelle zeigt, ob der Quant die Aufgabe gelöst hat, wie lange der Agent dafür gebraucht hat und wie
+schnell das Modell dabei Token erzeugt hat. Ein Klick öffnet die Einzelheiten: Episoden, Anfragen, Zeit im
+Modell, Token, größter Kontext, Fehlerursache.</p>
 
 <div class="controls">
   <label>Schwierigkeit<select id="f-diff"><option value="">alle</option></select></label>
@@ -36,6 +37,7 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
     <option value="name">Name</option>
     <option value="pass">meiste Fehlschläge zuerst</option>
     <option value="dur">längste Laufzeit zuerst</option>
+    <option value="tps">langsamstes Tempo zuerst</option>
     <option value="diff">Schwierigkeit</option>
   </select></label>
   <button id="f-reset" type="button">zurücksetzen</button>
@@ -114,6 +116,10 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
     if (s === "name") list = [...list].sort((a, b) => a.id.localeCompare(b.id));
     else if (s === "pass") list = [...list].sort((a, b) => fails(b) - fails(a) || a.id.localeCompare(b.id));
     else if (s === "dur") list = [...list].sort((a, b) => dur(b) - dur(a));
+    else if (s === "tps") {
+      const rate = t => Math.min(...runs.map(r => (cellOf(r, t.id) || {}).tok_per_s ?? Infinity));
+      list = [...list].sort((a, b) => rate(a) - rate(b));
+    }
     else if (s === "diff") list = [...list].sort((a, b) => (DIFF[b.difficulty] ?? 0) - (DIFF[a.difficulty] ?? 0) || a.id.localeCompare(b.id));
     return list;
   }
@@ -133,7 +139,8 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
         const cls = x.passed ? "pass" : (out === "nicht bestanden" ? "fail" : "err");
         const mark = x.passed ? "ja" : (out === "Zeitlimit" ? "Zeit" : (out === "Abbruch" ? "Abbruch" : "nein"));
         html += "<td class='cell " + cls + "' data-task='" + esc(t.id) + "' data-quant='" + esc(r.quant) + "'>" +
-          mark + " <span class='meta'>" + hms(x.duration_s) + "</span></td>";
+          mark + " <span class='meta'>" + hms(x.duration_s) +
+          (x.tok_per_s != null ? " · " + x.tok_per_s.toLocaleString("de-DE") + " t/s" : "") + "</span></td>";
       }
       html += "</tr>";
     }
@@ -157,6 +164,9 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
       "<dt>Episoden</dt><dd>" + num(x.episodes) + "</dd>" +
       "<dt>Modellanfragen</dt><dd>" + num(x.requests) + (x.req_mean_s != null ?
         " (im Mittel " + x.req_mean_s + " s, längste " + x.req_max_s + " s)" : "") + "</dd>" +
+      "<dt>Zeit im Modell</dt><dd>" + (x.model_s != null ? hms(x.model_s) +
+        (x.duration_s ? " von " + hms(x.duration_s) + " (" + Math.round(x.model_s / x.duration_s * 100) + " %)" : "") : "–") + "</dd>" +
+      "<dt>Tempo</dt><dd>" + (x.tok_per_s != null ? x.tok_per_s.toLocaleString("de-DE") + " Token/s" : "–") + "</dd>" +
       "<dt>Token ein / davon Cache</dt><dd>" + num(tok.input) + " / " + num(tok.cached) + "</dd>" +
       "<dt>Token aus</dt><dd>" + num(tok.output) + "</dd>" +
       "<dt>größter Kontext</dt><dd>" + num(x.peak_context) + "</dd>" +

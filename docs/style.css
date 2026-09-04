@@ -10,6 +10,8 @@ header .brand{font-weight:700;text-decoration:none;color:var(--fg);font-size:1.0
 nav{display:flex;flex-wrap:wrap;gap:.3rem 1.3rem}
 nav a{color:var(--muted);text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent;white-space:nowrap}
 nav a:hover,nav a[aria-current]{color:var(--accent);border-color:var(--accent)}
+nav a.gh{display:inline-flex;align-items:center;gap:.4rem}
+nav a.gh svg{width:1.05em;height:1.05em;fill:currentColor;flex:none}
 main{padding:2rem 0 4rem}
 h1{font-size:2rem;line-height:1.2;margin:.2rem 0 1rem}
 h2{font-size:1.35rem;margin:2.2rem 0 .6rem;border-bottom:1px solid var(--line);padding-bottom:.25rem}

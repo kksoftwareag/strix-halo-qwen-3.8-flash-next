@@ -39,6 +39,6 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;padding:1.2rem 0}
 .bar{display:flex;align-items:center;gap:.6rem;margin:.25rem 0}
 .bar .label{width:11rem;color:var(--muted);font-size:.92rem}
-.bar .track{flex:1;height:.9rem;background:var(--code);border-radius:4px;overflow:hidden}
-.bar .fill{height:100%;background:var(--accent)}
+.bar .track{display:block;flex:1;height:.9rem;background:var(--code);border-radius:4px;overflow:hidden}
+.bar .fill{display:block;height:100%;min-width:2px;background:var(--accent)}
 .bar .val{width:5.5rem;text-align:right;font-variant-numeric:tabular-nums;font-size:.92rem}

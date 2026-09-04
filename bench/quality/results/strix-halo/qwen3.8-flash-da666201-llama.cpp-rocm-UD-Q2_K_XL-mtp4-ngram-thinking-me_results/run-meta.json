@@ -1,0 +1,144 @@
+{
+  "schema_version": 3,
+  "created_at": "2026-09-04T13:21:19.661920+00:00",
+  "benchmark": "Terminal-Bench-Local",
+  "harness": "Harbor",
+  "terminal_bench_version": "2.1",
+  "tier": "full",
+  "requested_tasks": [
+    "pypi-server",
+    "nginx-request-logging",
+    "git-leak-recovery",
+    "fix-git",
+    "cobol-modernization",
+    "regex-log",
+    "headless-terminal",
+    "mailman",
+    "fix-ocaml-gc",
+    "break-filter-js-from-html",
+    "sqlite-with-gcov",
+    "sparql-university",
+    "llm-inference-batching-scheduler",
+    "configure-git-webserver",
+    "build-cython-ext",
+    "extract-elf",
+    "build-pov-ray",
+    "openssl-selfsigned-cert",
+    "overfull-hbox",
+    "mteb-retrieve"
+  ],
+  "executed_tasks": [
+    "pypi-server",
+    "nginx-request-logging",
+    "git-leak-recovery",
+    "fix-git",
+    "cobol-modernization",
+    "regex-log",
+    "headless-terminal",
+    "mailman",
+    "fix-ocaml-gc",
+    "break-filter-js-from-html",
+    "sqlite-with-gcov",
+    "sparql-university",
+    "llm-inference-batching-scheduler",
+    "configure-git-webserver",
+    "build-cython-ext",
+    "extract-elf",
+    "build-pov-ray",
+    "openssl-selfsigned-cert",
+    "overfull-hbox",
+    "mteb-retrieve"
+  ],
+  "task_list_hash": "86abc9a9ba3fc01dcb9f39d6f1bc7878a76b7c681c51ff3ead3d89aa3a405bfc",
+  "platform": {
+    "id": "strix-halo",
+    "name": "AMD Ryzen AI MAX+ 395 (Strix Halo)"
+  },
+  "model": {
+    "name": "Qwen3.8-Flash-Next",
+    "id": "qwen3.8-flash",
+    "endpoint_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "created": 1788528079,
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 78858104320,
+        "ftype": "Q2_K - Medium"
+      }
+    }
+  },
+  "engine": "llama.cpp",
+  "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+  "backend": "rocm",
+  "backend_version": "7.1.52802",
+  "quant": "UD-Q2_K_XL",
+  "inference_profile": "mtp4-ngram-thinking-medium",
+  "tag": null,
+  "result_tag": "llama.cpp-rocm-UD-Q2_K_XL-mtp4-ngram-thinking-medium-terminus-2",
+  "endpoint": "http://10.50.4.9:8080/v1",
+  "container_runtime": {
+    "type": "docker",
+    "description": "Docker version 29.7.2, build a7dcaa6"
+  },
+  "job_name": "tbmini-UD-Q2_K_XL",
+  "attempt_group": "tbmini-UD-Q2_K_XL",
+  "attempt_round": 1,
+  "attempt_policy": "stop_on_pass",
+  "max_attempts": 1,
+  "evaluation_profile": {
+    "benchmark": "Terminal-Bench-Local",
+    "terminal_bench_version": "2.1",
+    "terminal_bench_revision": "5c8eadf1f393183288fa08b8f73ca9a469cc5e00",
+    "harbor_version": "0.20.0",
+    "model_id": "qwen3.8-flash",
+    "model_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 78858104320,
+        "ftype": "Q2_K - Medium"
+      }
+    },
+    "endpoint": "http://10.50.4.9:8080/v1",
+    "engine": "llama.cpp",
+    "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+    "backend": "rocm",
+    "backend_version": "7.1.52802",
+    "quant": "UD-Q2_K_XL",
+    "inference_profile": "mtp4-ngram-thinking-medium",
+    "tag": null,
+    "agent": {
+      "name": "terminus-2",
+      "version": "2.0.0",
+      "context_length": 163840,
+      "context_summarization": true,
+      "summarization_free_tokens": 8000
+    },
+    "agent_timeout_seconds": 3600
+  },
+  "profile_hash": "5d87f51eb100adc3a00317a71ff58748549078f0aa79a40157251a08f1ef61c4",
+  "exported_at": "2026-09-04T20:57:22.796581+00:00",
+  "harbor_job": "jobs/tbmini-UD-Q2_K_XL"
+}

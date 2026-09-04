@@ -2,15 +2,15 @@
 # Terminal-Bench-Mini-20 nacheinander für mehrere Quants laufen lassen.
 # Ein Stream (np 1), MTP an, ein Versuch je Aufgabe (pass@1).
 #
-#   bench/quality/run-quants.sh                          # Q2_K_XL, IQ3_XXS, IQ4_XS
+#   bench/quality/run-quants.sh                          # Q2_K_XL, IQ1_M, IQ3_XXS, IQ4_XS
 #   bench/quality/run-quants.sh UD-IQ4_XS                # nur einer
-#   TB_AGENT_TIMEOUT=2700 bench/quality/run-quants.sh    # anderes Zeitlimit je Aufgabe
+#   TB_AGENT_TIMEOUT=1800 bench/quality/run-quants.sh    # anderes Zeitlimit je Aufgabe (Default 3600)
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 
 QUANTS=("$@")
-[ ${#QUANTS[@]} -eq 0 ] && QUANTS=(UD-Q2_K_XL UD-IQ3_XXS UD-IQ4_XS)
-TIMEOUT="${TB_AGENT_TIMEOUT:-1800}"
+[ ${#QUANTS[@]} -eq 0 ] && QUANTS=(UD-Q2_K_XL UD-IQ1_M UD-IQ3_XXS UD-IQ4_XS)
+TIMEOUT="${TB_AGENT_TIMEOUT:-3600}"
 FREI_GIB="${TB_FREE_GIB:-95}"
 # Der Spiegel wird fest gesetzt: archive.ubuntu.com ist aus diesem Netz zeitweise
 # unbrauchbar langsam, und ein Fehlschlag beim apt-Aufruf lässt jede Aufgabe scheitern.

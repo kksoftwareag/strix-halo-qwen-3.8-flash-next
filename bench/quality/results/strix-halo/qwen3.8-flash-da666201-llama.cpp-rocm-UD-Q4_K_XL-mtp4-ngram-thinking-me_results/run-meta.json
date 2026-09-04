@@ -1,0 +1,106 @@
+{
+  "schema_version": 3,
+  "created_at": "2026-09-04T10:38:31.966102+00:00",
+  "benchmark": "Terminal-Bench-Local",
+  "harness": "Harbor",
+  "terminal_bench_version": "2.1",
+  "tier": "smoke",
+  "requested_tasks": [
+    "git-leak-recovery"
+  ],
+  "executed_tasks": [
+    "git-leak-recovery"
+  ],
+  "task_list_hash": "5e44cad8efa002ccce5be343e750958092d968e4cb276af9653ebe52ab284e1c",
+  "platform": {
+    "id": "strix-halo",
+    "name": "AMD Ryzen AI MAX+ 395 (Strix Halo)"
+  },
+  "model": {
+    "name": "Qwen3.8-Flash-Next",
+    "id": "qwen3.8-flash",
+    "endpoint_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "created": 1788518311,
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 111323630080,
+        "ftype": "Q4_K - Medium"
+      }
+    }
+  },
+  "engine": "llama.cpp",
+  "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+  "backend": "rocm",
+  "backend_version": "7.1.52802",
+  "quant": "UD-Q4_K_XL",
+  "inference_profile": "mtp4-ngram-thinking-medium",
+  "tag": null,
+  "result_tag": "llama.cpp-rocm-UD-Q4_K_XL-mtp4-ngram-thinking-medium-terminus-2",
+  "endpoint": "http://10.50.4.9:8080/v1",
+  "container_runtime": {
+    "type": "docker",
+    "description": "Docker version 29.7.2, build a7dcaa6"
+  },
+  "job_name": "smoke2-q4kxl",
+  "attempt_group": "smoke2-q4kxl",
+  "attempt_round": 1,
+  "attempt_policy": "stop_on_pass",
+  "max_attempts": 1,
+  "evaluation_profile": {
+    "benchmark": "Terminal-Bench-Local",
+    "terminal_bench_version": "2.1",
+    "terminal_bench_revision": "5c8eadf1f393183288fa08b8f73ca9a469cc5e00",
+    "harbor_version": "0.20.0",
+    "model_id": "qwen3.8-flash",
+    "model_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 111323630080,
+        "ftype": "Q4_K - Medium"
+      }
+    },
+    "endpoint": "http://10.50.4.9:8080/v1",
+    "engine": "llama.cpp",
+    "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+    "backend": "rocm",
+    "backend_version": "7.1.52802",
+    "quant": "UD-Q4_K_XL",
+    "inference_profile": "mtp4-ngram-thinking-medium",
+    "tag": null,
+    "agent": {
+      "name": "terminus-2",
+      "version": "2.0.0",
+      "context_length": 163840,
+      "context_summarization": true,
+      "summarization_free_tokens": 8000
+    },
+    "agent_timeout_seconds": 3600
+  },
+  "profile_hash": "417c06a5a2d6d4d8281cfe8691793b282962cf9608e1d71dfc6172a2ca74fc78",
+  "exported_at": "2026-09-04T10:40:29.439690+00:00",
+  "harbor_job": "jobs/smoke2-q4kxl"
+}

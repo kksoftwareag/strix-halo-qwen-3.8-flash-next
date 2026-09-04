@@ -1,0 +1,52 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-09-04T20:57:22.816805+00:00",
+  "platform": {
+    "id": "strix-halo",
+    "name": "AMD Ryzen AI MAX+ 395 (Strix Halo)"
+  },
+  "model": {
+    "name": "Qwen3.8-Flash-Next",
+    "id": "qwen3.8-flash",
+    "endpoint_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "created": 1788518311,
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 111323630080,
+        "ftype": "Q4_K - Medium"
+      }
+    }
+  },
+  "engine": "llama.cpp",
+  "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+  "backend": "rocm",
+  "backend_version": "7.1.52802",
+  "quant": "UD-Q4_K_XL",
+  "inference_profile": "mtp4-ngram-thinking-medium",
+  "tag": null,
+  "result_tag": "llama.cpp-rocm-UD-Q4_K_XL-mtp4-ngram-thinking-medium-terminus-2",
+  "total_tasks": 1,
+  "passed_tasks": 1,
+  "pass_rate": 1.0,
+  "total_duration_ms": 114285,
+  "tokens": {
+    "input": 15691,
+    "cached": 12125,
+    "output": 1923
+  },
+  "results": [
+    "results-git-leak-recovery.json"
+  ]
+}

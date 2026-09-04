@@ -40,7 +40,7 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
   </select></label>
   <button id="f-reset" type="button">zurücksetzen</button>
 </div>
-<div class="legend"><span class="l-pass">bestanden</span><span class="l-fail">nicht bestanden</span><span class="l-err">Abbruch oder Fehler im Ablauf</span></div>
+<div class="legend"><span class="l-pass">bestanden</span><span class="l-fail">nicht bestanden</span><span class="l-err">Zeitlimit erreicht oder Abbruch</span></div>
 <div class="tablewrap"><table class="matrix" id="matrix"></table></div>
 <p id="count" class="empty"></p>
 
@@ -63,6 +63,8 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
   const hms = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
     return h ? h + ":" + String(m).padStart(2, "0") + ":" + String(x).padStart(2, "0") : m + ":" + String(x).padStart(2, "0"); };
   const num = n => (n == null ? "–" : n.toLocaleString("de-DE"));
+  const hm = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.round(s % 3600 / 60);
+    return h ? h + " h " + m + " min" : m + " min"; };
 
   if (D.generated_at) $("stand").textContent = new Date(D.generated_at).toLocaleDateString("de-DE",
     { year: "numeric", month: "long", day: "numeric" });
@@ -79,14 +81,13 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
   $("summary").innerHTML = runs.map(r => {
     const f = (D.quant_facts || {})[r.quant] || {};
     return '<div class="card"><h3>' + esc(r.quant) + '</h3><div class="big">' + r.passed_tasks + "/" + r.total_tasks +
-      '</div><div class="sub">' + Math.round(r.pass_rate * 100) + " % bestanden · " + hms(r.duration_s) + " h Laufzeit" +
+      '</div><div class="sub">' + Math.round(r.pass_rate * 100) + " % bestanden · " + hm(r.duration_s) + " Laufzeit" +
       (f.footprint_gib ? " · " + f.footprint_gib + " GiB Speicher" : "") + "</div></div>";
   }).join("");
 
-  const maxRate = Math.max(...runs.map(r => r.pass_rate), 0.0001);
   $("bars").innerHTML = runs.map(r =>
     '<div class="bar"><span class="label">' + esc(r.quant) + '</span><span class="track"><span class="fill" style="width:' +
-    (r.pass_rate / maxRate * 100).toFixed(1) + '%"></span></span><span class="val">' + r.passed_tasks + "/" + r.total_tasks +
+    (r.pass_rate * 100).toFixed(1) + '%"></span></span><span class="val">' + r.passed_tasks + "/" + r.total_tasks +
     "</span></div>").join("");
 
   /* Filter befüllen */
@@ -128,8 +129,9 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
       for (const r of runs) {
         const x = cellOf(r, t.id);
         if (!x) { html += "<td class='cell none'>–</td>"; continue; }
-        const cls = x.exception ? "err" : (x.passed ? "pass" : "fail");
-        const mark = x.exception ? "Fehler" : (x.passed ? "ja" : "nein");
+        const out = x.outcome || (x.passed ? "bestanden" : "nicht bestanden");
+        const cls = x.passed ? "pass" : (out === "nicht bestanden" ? "fail" : "err");
+        const mark = x.passed ? "ja" : (out === "Zeitlimit" ? "Zeit" : (out === "Abbruch" ? "Abbruch" : "nein"));
         html += "<td class='cell " + cls + "' data-task='" + esc(t.id) + "' data-quant='" + esc(r.quant) + "'>" +
           mark + " <span class='meta'>" + hms(x.duration_s) + "</span></td>";
       }
@@ -149,16 +151,20 @@ Ein Klick öffnet die Einzelheiten: Schritte, Token, größter Kontext, Fehlerur
     $("detail-body").innerHTML = "<h3>" + esc(t.id) + " · " + esc(r.quant) + "</h3>" +
       "<p>" + esc(t.description) + "</p>" +
       "<dl class='kv'>" +
-      "<dt>Ergebnis</dt><dd>" + (x.exception ? "Abbruch" : (x.passed ? "bestanden" : "nicht bestanden")) + "</dd>" +
+      "<dt>Ergebnis</dt><dd>" + esc(x.outcome || (x.passed ? "bestanden" : "nicht bestanden")) + "</dd>" +
       "<dt>Dauer</dt><dd>" + hms(x.duration_s) + "</dd>" +
       "<dt>Schritte des Agenten</dt><dd>" + num(x.steps) + "</dd>" +
+      "<dt>Episoden</dt><dd>" + num(x.episodes) + "</dd>" +
+      "<dt>Modellanfragen</dt><dd>" + num(x.requests) + (x.req_mean_s != null ?
+        " (im Mittel " + x.req_mean_s + " s, längste " + x.req_max_s + " s)" : "") + "</dd>" +
       "<dt>Token ein / davon Cache</dt><dd>" + num(tok.input) + " / " + num(tok.cached) + "</dd>" +
       "<dt>Token aus</dt><dd>" + num(tok.output) + "</dd>" +
       "<dt>größter Kontext</dt><dd>" + num(x.peak_context) + "</dd>" +
       "<dt>Zeitlimit der Aufgabe</dt><dd>" + num(t.task_timeout_s) + " s</dd>" +
       "<dt>Container</dt><dd>" + num(t.memory_mb) + " MB, Image <code>" + esc(t.image) + "</code></dd>" +
       "</dl>" +
-      (x.exception ? "<pre><code>" + esc(String(x.exception).slice(0, 1200)) + "</code></pre>" : "");
+      (x.exception_message ? "<pre><code>" + esc(String(x.exception_message).slice(0, 800)) + "</code></pre>" :
+        (x.exception ? "<pre><code>" + esc(String(x.exception).slice(0, 800)) + "</code></pre>" : ""));
     $("detail").showModal();
   });
   $("detail").querySelector(".close").addEventListener("click", () => $("detail").close());

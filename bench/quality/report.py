@@ -73,6 +73,7 @@ def server_commands() -> dict[str, dict]:
                 first = p.open(errors="replace").readline().strip()
                 if first.startswith("# "):
                     entry["command"] = first[2:]
+                entry["server"] = server_stats(p)
         mem = re.findall(r"^   ([A-ZÄÖÜa-zä-ü][^\n]*?)\s{2,}([\d.,]+ GiB)$", text, re.M)
         if mem:
             entry["memory"] = [[k.strip(), v] for k, v in mem]
@@ -86,6 +87,69 @@ def server_commands() -> dict[str, dict]:
     return out
 
 
+JOBS = HERE / "terminal-bench-mini"
+
+
+def trial_details(rel_trial: str | None) -> dict:
+    """Zusatzangaben aus dem Harbor-Trial: Episoden und Dauer der längsten Modellanfrage."""
+    if not rel_trial:
+        return {}
+    f = JOBS / rel_trial / "result.json"
+    if not f.is_file():
+        return {}
+    try:
+        d = json.loads(f.read_text())
+    except (OSError, json.JSONDecodeError):
+        return {}
+    meta = ((d.get("agent_result") or {}).get("metadata") or {})
+    times = meta.get("api_request_times_msec") or []
+    exc = d.get("exception_info") or {}
+    out = {"episodes": meta.get("n_episodes")}
+    if times:
+        out["requests"] = len(times)
+        out["req_max_s"] = round(max(times) / 1000)
+        out["req_mean_s"] = round(sum(times) / len(times) / 1000)
+    if exc:
+        out["exception_type"] = exc.get("exception_type")
+        out["exception_message"] = exc.get("exception_message")
+    return out
+
+
+RE_PROMPT = re.compile(r"prompt eval time =\s*([\d.]+) ms /\s*(\d+) tokens")
+RE_EVAL = re.compile(r"\|\s+eval time =\s*([\d.]+) ms /\s*(\d+) tokens")
+RE_DRAFT = re.compile(r"draft acceptance = ([\d.]+) \(\s*(\d+) accepted /\s*(\d+) generated\), mean len =\s*([\d.]+)")
+
+
+def server_stats(path: Path) -> dict:
+    """Durchsatz und MTP-Akzeptanz aus dem Server-Log zusammenzählen."""
+    if not path.is_file():
+        return {}
+    text = path.read_text(errors="replace")
+    pp_ms = pp_tok = tg_ms = tg_tok = 0.0
+    for ms, tok in RE_PROMPT.findall(text):
+        pp_ms += float(ms); pp_tok += int(tok)
+    for ms, tok in RE_EVAL.findall(text):
+        tg_ms += float(ms); tg_tok += int(tok)
+    acc = gen = 0
+    lens = []
+    for _, a, g, ln in RE_DRAFT.findall(text):
+        acc += int(a); gen += int(g); lens.append(float(ln))
+    out = {
+        "requests": len(RE_EVAL.findall(text)),
+        "prompt_tokens": int(pp_tok),
+        "generated_tokens": int(tg_tok),
+        "pp_tps": round(pp_tok / (pp_ms / 1000), 1) if pp_ms else None,
+        "tg_tps": round(tg_tok / (tg_ms / 1000), 1) if tg_ms else None,
+    }
+    if gen:
+        out["draft_accept"] = round(acc / gen, 3)
+        out["draft_mean_len"] = round(sum(lens) / len(lens), 2)
+    m2 = re.search(r"^(\d+)\.(\d+)\.(\d+)\.(\d+) I srv .*model loaded", text, re.M)
+    if m2:
+        out["load_s"] = int(m2[1]) * 60 + int(m2[2])
+    return out
+
+
 def load_runs(results: Path) -> list[dict]:
     runs = []
     for summary in sorted(results.glob("*/*_results/summary.json")):
@@ -94,6 +158,8 @@ def load_runs(results: Path) -> list[dict]:
         for rf in sorted(summary.parent.glob("results-*.json")):
             r = json.loads(rf.read_text())
             att = (r.get("attempts") or [{}])[0]
+            det = trial_details(((att.get("harbor_paths") or {}).get("trial")))
+            exc_type = det.get("exception_type") or (att.get("exception") or None)
             per[r["task"]] = {
                 "passed": bool(r.get("passed")),
                 "reward": r.get("reward"),
@@ -102,9 +168,22 @@ def load_runs(results: Path) -> list[dict]:
                 "tokens": r.get("tokens") or {},
                 "peak_context": (att.get("tokens") or {}).get("peak_context"),
                 "exception": att.get("exception"),
+                "outcome": ("bestanden" if r.get("passed") else
+                            "Zeitlimit" if exc_type == "AgentTimeoutError" else
+                            "Abbruch" if exc_type else "nicht bestanden"),
+                "exception_type": det.get("exception_type"),
+                "exception_message": det.get("exception_message"),
+                "episodes": det.get("episodes"),
+                "requests": det.get("requests"),
+                "req_max_s": det.get("req_max_s"),
+                "req_mean_s": det.get("req_mean_s"),
                 "attempts": len(r.get("attempts") or []),
             }
         prof = s.get("evaluation_profile") or {}
+        if not prof:
+            first = next(iter(sorted(summary.parent.glob("results-*.json"))), None)
+            if first:
+                prof = json.loads(first.read_text()).get("evaluation_profile") or {}
         runs.append({
             "quant": s.get("quant"),
             "inference_profile": s.get("inference_profile"),
@@ -119,6 +198,7 @@ def load_runs(results: Path) -> list[dict]:
             "tb_version": prof.get("terminal_bench_version"),
             "tb_revision": prof.get("terminal_bench_revision"),
             "harbor_version": prof.get("harbor_version"),
+            "agent_timeout_s": prof.get("agent_timeout_seconds"),
             "generated_at": s.get("generated_at"),
             "total_tasks": s.get("total_tasks"),
             "passed_tasks": s.get("passed_tasks"),
@@ -130,6 +210,29 @@ def load_runs(results: Path) -> list[dict]:
         })
     runs.sort(key=lambda r: (QUANT_ORDER.index(r["quant"]) if r["quant"] in QUANT_ORDER else 99, r["quant"] or ""))
     return runs
+
+
+REPO_RESULTS = HERE / "results"
+
+
+def copy_results(results: Path) -> int:
+    """Ergebnisse (ohne die großen Transkripte) ins Repo spiegeln, damit sie versioniert sind."""
+    n = 0
+    for summary in sorted(results.glob("*/*_results/summary.json")):
+        src = summary.parent
+        dst = REPO_RESULTS / src.parent.name / src.name
+        dst.mkdir(parents=True, exist_ok=True)
+        for f in sorted(src.iterdir()):
+            if f.is_file() and not f.name.startswith("transcript-"):
+                (dst / f.name).write_bytes(f.read_bytes())
+                n += 1
+    return n
+
+
+def hm(seconds: float) -> str:
+    seconds = int(seconds or 0)
+    h, m = divmod(seconds // 60, 60)
+    return f"{h} h {m} min" if h else f"{m} min"
 
 
 def hms(seconds: float) -> str:
@@ -147,20 +250,20 @@ def markdown(data: dict) -> str:
     add = L.append
     add("# Terminal-Bench-Mini-20: Ergebnisse\n")
     add(f"Stand: {data['generated_at'][:10]}. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench "
-        f"{full[0]['tb_version'] if full else '2.1'} auf dieser Maschine, ein Quant nach dem anderen. "
+        f"{(full[0].get('tb_version') if full else None) or '2.1'} auf dieser Maschine, ein Quant nach dem anderen. "
         "Aufbau und Bedienung: [`bench/quality/README.md`](../bench/quality/README.md), Einordnung in "
         "[`QUALITAETS-BENCHMARKS.md`](QUALITAETS-BENCHMARKS.md).\n")
 
     add("## Ergebnis\n")
     if full:
-        add("| Quant | bestanden | Quote | Dauer | Ausgabe-Token | Token/s im Mittel | KLD | Top-1 |")
+        add("| Quant | bestanden | Quote | Dauer | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |")
         add("| --- | --- | --- | --- | --- | --- | --- | --- |")
         for r in full:
             f = QUANT_FACTS.get(r["quant"], {})
             out_tok = (r["tokens"] or {}).get("output") or 0
             tps = out_tok / r["duration_s"] if r["duration_s"] else 0
             add(f"| {r['quant']} | {r['passed_tasks']}/{r['total_tasks']} | {r['pass_rate']:.0%} | "
-                f"{hms(r['duration_s'])} h | {out_tok:,} | {tps:.1f} | {f.get('kld', '')} | {f.get('top1', '')} % |"
+                f"{hm(r['duration_s'])} | {out_tok:,} | {tps:.1f} | {f.get('kld', '')} | {f.get('top1', '')} % |"
                 .replace(",", "."))
     else:
         add("_Noch keine vollständigen Läufe._")
@@ -179,21 +282,53 @@ def markdown(data: dict) -> str:
                     cells.append("–")
                 elif d["passed"]:
                     cells.append(f"**ja** ({hms(d['duration_s'])})")
-                elif d.get("exception"):
-                    cells.append("Fehler")
                 else:
-                    cells.append(f"nein ({hms(d['duration_s'])})")
+                    cells.append(f"{d.get('outcome', 'nein')} ({hms(d['duration_s'])})")
             add(f"| `{t['id']}` | {t['category']} | {t['difficulty']} | " + " | ".join(cells) + " |")
         add("")
 
+    if full:
+        add("## Einordnung\n")
+        add("Das Projekt, aus dem der Benchmark stammt, veröffentlicht Läufe anderer Modelle auf vergleichbarer "
+            "Hardware (Strix Halo, 128 GB): 11 bis 18 von 20 Aufgaben – allerdings mit **zwei** Versuchen je Aufgabe "
+            "und einem Zeitlimit von drei Stunden. Die Zahlen hier sind mit einem Versuch gemessen und deshalb eher "
+            "konservativ.\n")
+        add("Zwei Dinge dazu, bevor man Quants anhand einzelner Aufgaben vergleicht:\n")
+        add("- Bei 20 Aufgaben liegt das 95-%-Intervall um ein Ergebnis bei rund ±11 Prozentpunkten. Ein Unterschied "
+            "von ein bis zwei Aufgaben zwischen zwei Quants ist Rauschen.")
+        add("- Gemessen wird mit `temp 1.0`, also nicht deterministisch. In einem verworfenen Vorlauf mit 30-Minuten-"
+            "Limit war `configure-git-webserver` bestanden, im gewerteten Lauf nicht – bei einem Agenten, der nach "
+            "sieben Minuten fertig war, lag das nicht am Zeitlimit.")
+        add("")
+
+        add("## Durchsatz und Draft-Akzeptanz\n")
+        add("| Quant | Anfragen | Prompt-Token | erzeugte Token | Prompt t/s | Decode t/s | MTP-Akzeptanz | mittlere Draft-Länge |")
+        add("| --- | --- | --- | --- | --- | --- | --- | --- |")
+        for r in full:
+            st = ((data.get("commands") or {}).get(r["quant"]) or {}).get("server") or {}
+            def g(key):
+                v = st.get(key)
+                return f"{v:,}".replace(",", ".") if isinstance(v, int) else ("–" if v is None else str(v))
+            add(f"| {r['quant']} | {g('requests')} | {g('prompt_tokens')} | {g('generated_tokens')} | "
+                f"{g('pp_tps')} | {g('tg_tps')} | {g('draft_accept')} | {g('draft_mean_len')} |")
+        add("")
+        add("Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Agenten, "
+            "nicht nur die Antworten, die in die Wertung eingehen).")
+        add("")
+
     add("## Ausführung\n")
-    add(f"- Benchmark: {full[0]['benchmark'] if full else 'Terminal-Bench-Local'}, Terminal-Bench "
-        f"{full[0]['tb_version'] if full else '2.1'} (Revision `{full[0]['tb_revision'][:12] if full else ''}`), "
-        f"Harbor {full[0]['harbor_version'] if full else '0.20.0'}, Agent Terminus-2")
-    add("- Ein Versuch je Aufgabe (pass@1), ein Stream (`-np 1`), MTP als Draft-Head aktiv")
-    add("- Zeitlimit 1800 s je Aufgabe statt der 3 Stunden des Benchmarks; das liegt bei 18 der 20 Aufgaben "
-        "über dem Limit, das die Aufgabe selbst vorgibt (Ausnahmen: `build-pov-ray` mit 12000 s und "
-        "`fix-ocaml-gc` mit 3600 s)")
+    ref = full[0] if full else {}
+    rev = (ref.get("tb_revision") or "")[:12]
+    add(f"- Benchmark: {ref.get('benchmark') or 'Terminal-Bench-Local'}, Terminal-Bench "
+        f"{ref.get('tb_version') or '2.1'}{f' (Revision `{rev}`)' if rev else ''}, "
+        f"Harbor {ref.get('harbor_version') or '0.20.0'}, Agent Terminus-2")
+    add("- Ein Versuch je Aufgabe (pass@1), ein Stream (`-np 1`), MTP als Draft-Head aktiv, "
+        "`reasoning_effort: medium`")
+    tmo = next((r.get("agent_timeout_s") for r in full if r.get("agent_timeout_s")), None)
+    if tmo:
+        über = sum(1 for t in tasks if (t.get("task_timeout_s") or 0) <= tmo)
+        add(f"- Zeitlimit {tmo} s je Aufgabe statt der 3 Stunden, die der Benchmark voreinstellt; bei "
+            f"{über} der {len(tasks)} Aufgaben liegt das über dem Limit, das die Aufgabe selbst vorgibt")
     add("- Container je Aufgabe: 1 CPU, 2 GB RAM (nur `overfull-hbox`: 2 CPUs, 4 GB)")
     if full:
         r = full[0]
@@ -220,7 +355,7 @@ def markdown(data: dict) -> str:
         add("## Weitere Läufe\n")
         for r in part:
             add(f"- {r['quant']}: {r['passed_tasks']}/{r['total_tasks']} Aufgaben "
-                f"({hms(r['duration_s'])}), Profil `{r['inference_profile']}`")
+                f"({hm(r['duration_s'])}), Profil `{r['inference_profile']}`")
         add("")
     add("Rohdaten: `state/quality/tbench/`, Transkripte und Verifier-Ausgaben unter "
         "`bench/quality/terminal-bench-mini/jobs/`. Interaktive Ansicht: "
@@ -233,6 +368,7 @@ def main() -> int:
     ap.add_argument("--results", default=str(RESULTS))
     ap.add_argument("--out-json", default=str(PROJECT / "docs" / "tbmini-data.js"))
     ap.add_argument("--out-md", default=str(PROJECT / "docs" / "TERMINAL-BENCH.md"))
+    ap.add_argument("--no-copy", action="store_true", help="Ergebnisse nicht ins Repo spiegeln")
     a = ap.parse_args()
 
     data = {
@@ -242,6 +378,9 @@ def main() -> int:
         "commands": server_commands(),
         "quant_facts": QUANT_FACTS,
     }
+    if not a.no_copy:
+        n = copy_results(Path(a.results))
+        print(f"{n} Ergebnisdateien nach {REPO_RESULTS.relative_to(PROJECT)} gespiegelt")
     Path(a.out_json).write_text("window.TBMINI = " + json.dumps(data, ensure_ascii=False, indent=1) + ";\n")
     Path(a.out_md).write_text(markdown(data))
     print(f"{len(data['runs'])} Läufe, {len(data['tasks'])} Aufgaben -> {a.out_json}, {a.out_md}")

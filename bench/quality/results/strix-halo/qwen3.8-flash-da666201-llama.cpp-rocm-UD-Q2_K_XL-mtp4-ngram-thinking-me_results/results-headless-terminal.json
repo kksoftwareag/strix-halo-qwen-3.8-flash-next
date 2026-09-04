@@ -1,0 +1,131 @@
+{
+  "schema_version": 3,
+  "task": "headless-terminal",
+  "completed": true,
+  "passed": true,
+  "reward": 1.0,
+  "rewards": {
+    "reward": 1.0
+  },
+  "duration_ms": 1062013,
+  "tokens": {
+    "input": 170307,
+    "cached": 150607,
+    "output": 21487
+  },
+  "agent_steps": 16,
+  "attempts": [
+    {
+      "attempt": 1,
+      "trial_name": "headless-terminal__s49j99W",
+      "passed": true,
+      "reward": 1.0,
+      "rewards": {
+        "reward": 1.0
+      },
+      "duration_ms": 1062013,
+      "tokens": {
+        "input": 170307,
+        "cached": 150607,
+        "output": 21487,
+        "peak_context": 19640
+      },
+      "agent_steps": 16,
+      "exception": null,
+      "transcript": "transcript-headless-terminal.json",
+      "harbor_paths": {
+        "trial": "jobs/tbmini-UD-Q2_K_XL/headless-terminal__s49j99W",
+        "native_trajectory": "jobs/tbmini-UD-Q2_K_XL/headless-terminal__s49j99W/agent/trajectory.json",
+        "model_patch": null,
+        "verifier_ctrf": "jobs/tbmini-UD-Q2_K_XL/headless-terminal__s49j99W/verifier/ctrf.json",
+        "verifier_output": "jobs/tbmini-UD-Q2_K_XL/headless-terminal__s49j99W/verifier/test-stdout.txt"
+      }
+    }
+  ],
+  "succeeded_at_attempt": 1,
+  "transcript": "transcript-headless-terminal.json",
+  "model": {
+    "name": "Qwen3.8-Flash-Next",
+    "id": "qwen3.8-flash",
+    "endpoint_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "created": 1788528079,
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 78858104320,
+        "ftype": "Q2_K - Medium"
+      }
+    }
+  },
+  "platform": {
+    "id": "strix-halo",
+    "name": "AMD Ryzen AI MAX+ 395 (Strix Halo)"
+  },
+  "engine": "llama.cpp",
+  "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+  "backend": "rocm",
+  "backend_version": "7.1.52802",
+  "quant": "UD-Q2_K_XL",
+  "inference_profile": "mtp4-ngram-thinking-medium",
+  "tag": null,
+  "result_tag": "llama.cpp-rocm-UD-Q2_K_XL-mtp4-ngram-thinking-medium-terminus-2",
+  "evaluation_profile": {
+    "benchmark": "Terminal-Bench-Local",
+    "terminal_bench_version": "2.1",
+    "terminal_bench_revision": "5c8eadf1f393183288fa08b8f73ca9a469cc5e00",
+    "harbor_version": "0.20.0",
+    "model_id": "qwen3.8-flash",
+    "model_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 78858104320,
+        "ftype": "Q2_K - Medium"
+      }
+    },
+    "endpoint": "http://10.50.4.9:8080/v1",
+    "engine": "llama.cpp",
+    "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+    "backend": "rocm",
+    "backend_version": "7.1.52802",
+    "quant": "UD-Q2_K_XL",
+    "inference_profile": "mtp4-ngram-thinking-medium",
+    "tag": null,
+    "agent": {
+      "name": "terminus-2",
+      "version": "2.0.0",
+      "context_length": 163840,
+      "context_summarization": true,
+      "summarization_free_tokens": 8000
+    },
+    "agent_timeout_seconds": 3600
+  },
+  "profile_hash": "5d87f51eb100adc3a00317a71ff58748549078f0aa79a40157251a08f1ef61c4",
+  "harbor_job": "jobs/tbmini-UD-Q2_K_XL",
+  "harbor_jobs": [
+    "jobs/tbmini-UD-Q2_K_XL"
+  ],
+  "exported_at": "2026-09-04T20:57:22.806261+00:00"
+}

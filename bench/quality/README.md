@@ -63,6 +63,24 @@ Wichtige Schalter:
 
 Alles nach `--` geht unverändert an `terminal_bench.py`.
 
+## Container-Images
+
+Die 20 Aufgaben bringen je ein eigenes Docker-Image mit (zusammen einige GB). Beim ersten Lauf lädt Harbor
+sie einzeln nach; ein Image kann mehrere Minuten brauchen, und der Lauf wartet dabei. Schneller ist es, sie
+vorher parallel zu holen:
+
+```bash
+python3 -c '
+import tomllib, pathlib
+for d in sorted(pathlib.Path("bench/quality/terminal-bench-mini/tasks").iterdir()):
+    f = d / "task.toml"
+    if f.is_file():
+        print(tomllib.loads(f.read_text())["environment"]["docker_image"])
+' | xargs -P 3 -I{} docker pull -q {}
+```
+
+Ab dem zweiten Quant liegen die Images im Cache; nur der erste Durchlauf zahlt die Ladezeit.
+
 ## Speicher
 
 Der Agent läuft im Container, das Modell im selben RAM. Die Bilanz steht am Anfang jeder Ausgabe:
@@ -95,6 +113,8 @@ Benchmark und die Aufgabenbilder bleiben unverändert.
 * Roh-Jobs von Harbor (Transkripte, Verifier-Ausgaben): `bench/quality/terminal-bench-mini/jobs/`
 * Server-Log und Speicherverlauf: `state/logs/tbench-server-*.log`, `state/logs/tbench-mem-*.csv`
 * Aufbereitet: `docs/TERMINAL-BENCH.md` und die interaktive Seite `docs/terminal-bench.html`
+* Versioniert im Repo: `bench/quality/results/` (Zusammenfassung und Ergebnis je Aufgabe; die großen
+  Transkripte bleiben unter `state/`)
 
 Einen unterbrochenen Lauf fortsetzen oder Fehlschläge wiederholen (Server muss laufen,
 z. B. über das TUI, dann `--use-running`):

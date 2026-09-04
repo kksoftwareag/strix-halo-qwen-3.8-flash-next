@@ -1,0 +1,71 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-09-04T20:57:22.815082+00:00",
+  "platform": {
+    "id": "strix-halo",
+    "name": "AMD Ryzen AI MAX+ 395 (Strix Halo)"
+  },
+  "model": {
+    "name": "Qwen3.8-Flash-Next",
+    "id": "qwen3.8-flash",
+    "endpoint_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "created": 1788528079,
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 78858104320,
+        "ftype": "Q2_K - Medium"
+      }
+    }
+  },
+  "engine": "llama.cpp",
+  "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+  "backend": "rocm",
+  "backend_version": "7.1.52802",
+  "quant": "UD-Q2_K_XL",
+  "inference_profile": "mtp4-ngram-thinking-medium",
+  "tag": null,
+  "result_tag": "llama.cpp-rocm-UD-Q2_K_XL-mtp4-ngram-thinking-medium-terminus-2",
+  "total_tasks": 20,
+  "passed_tasks": 16,
+  "pass_rate": 0.8,
+  "total_duration_ms": 27360049,
+  "tokens": {
+    "input": 7666917,
+    "cached": 7262286,
+    "output": 385970
+  },
+  "results": [
+    "results-break-filter-js-from-html.json",
+    "results-build-cython-ext.json",
+    "results-build-pov-ray.json",
+    "results-cobol-modernization.json",
+    "results-configure-git-webserver.json",
+    "results-extract-elf.json",
+    "results-fix-git.json",
+    "results-fix-ocaml-gc.json",
+    "results-git-leak-recovery.json",
+    "results-headless-terminal.json",
+    "results-llm-inference-batching-scheduler.json",
+    "results-mailman.json",
+    "results-mteb-retrieve.json",
+    "results-nginx-request-logging.json",
+    "results-openssl-selfsigned-cert.json",
+    "results-overfull-hbox.json",
+    "results-pypi-server.json",
+    "results-regex-log.json",
+    "results-sparql-university.json",
+    "results-sqlite-with-gcov.json"
+  ]
+}

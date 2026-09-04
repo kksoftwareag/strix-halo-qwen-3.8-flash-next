@@ -109,12 +109,18 @@ def run_filtered(argv: list[str], cwd: str, raw: bool = False, every: float = 60
     Spinner-Frames landen höchstens alle `every` Sekunden im Log statt zehnmal pro Sekunde."""
     if raw:
         return subprocess.call(argv, cwd=cwd, env=env)
+
     proc = subprocess.Popen(argv, cwd=cwd, env=env, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, bufsize=0)
+                            stderr=subprocess.STDOUT, bufsize=0, start_new_session=True)
     out, last, buf = sys.stdout.buffer, 0.0, b""
     assert proc.stdout
     while True:
-        chunk = proc.stdout.read(4096)
+        try:
+            chunk = proc.stdout.read(4096)
+        except KeyboardInterrupt:
+            log("   breche den Benchmark ab …")
+            stop_tree(proc.pid, grace=20.0)
+            raise
         if not chunk:
             break
         buf += chunk
@@ -239,7 +245,12 @@ def profile_label(cfg) -> str:
     return "-".join(parts)
 
 
+def _term(signum, frame):  # pragma: no cover - Signalpfad
+    raise KeyboardInterrupt
+
+
 def main() -> int:
+    signal.signal(signal.SIGTERM, _term)
     ap = argparse.ArgumentParser(description="Terminal-Bench-Mini-20 gegen den lokalen Server")
     g = ap.add_argument_group("Server")
     g.add_argument("--preset", default="eh-agent", help="Preset für den Server (Default: eh-agent)")
@@ -444,6 +455,8 @@ def main() -> int:
         return rc
     except KeyboardInterrupt:
         log("== abgebrochen")
+        for q in descendants(os.getpid()):
+            kill_group(q, signal.SIGKILL)
         return 130
     finally:
         if proc and proc.poll() is None:

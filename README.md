@@ -118,9 +118,16 @@ dzannotti-MTP-Head passt zu den Builds; der unsloth-Head braucht den unsloth-For
 | `qwen38tui/` | das Programm (Konfiguration, Speicherschätzung, Modell-Erkennung, GGUF-Reader, Server-Steuerung, Benchmarks, Oberfläche) |
 | `engine/` | `fetch.sh`, Build-Skripte, Patches; nach dem Bauen `build-engramhalo/` und `build-hip/` |
 | `bench/` | Mess-Skripte mit Speicher-Wächter und die Rohergebnisse dieser Maschine |
-| `docs/` | `RESEARCH.md` (Recherche mit Quellen), `HILFE.md` (Hilfe im Programm) |
+| `docs/` | `RESEARCH.md` (Recherche mit Quellen), `HILFE.md` (Hilfe im Programm) und die Dokumentations-Website (HTML, wird über GitHub Pages aus diesem Ordner veröffentlicht) |
 | `tests/` | `uv run pytest -q` |
 | `state/` | eigene Profile, Logs, Messergebnisse (wird beim ersten Start angelegt) |
+
+## Dokumentations-Website
+
+Der Ordner `docs/` enthält eine statische Website mit allen Entscheidungen, Messungen und Quellen
+(`index.html`, `entscheidungen.html`, `speicher.html`, `benchmarks.html`, `anleitung.html`, `recherche.html`).
+Veröffentlichen: in den Repository-Einstellungen unter „Pages“ den Branch `main` mit dem Ordner `/docs` wählen.
+Es ist kein Build-Schritt nötig; `.nojekyll` sorgt dafür, dass GitHub die Dateien unverändert ausliefert.
 
 ## Bekannte Grenzen
 

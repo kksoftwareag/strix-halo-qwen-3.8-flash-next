@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entscheidungen · Qwen3.8-Flash-Next auf Strix Halo</title>
+<meta name="description" content="Dokumentation der Entscheidungen, Messungen und Quellen zum Betrieb von Qwen3.8-Flash-Next mit llama.cpp auf AMD Strix Halo.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html" aria-current="page">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="anleitung.html">Anleitung</a><a href="recherche.html">Recherche & Quellen</a></nav></div></header>
+<main><div class="wrap">
+<h1>Entscheidungen</h1>
+<p class="lead">Jede Entscheidung mit Begründung, Beleg und verworfenen Alternativen.</p>
+<div class="decision" id="backend"><h3>Backend: ROCm/HIP statt Vulkan</h3><dl>
+<dt>Entscheidung</dt><dd><strong>ROCm/HIP (gfx1151), beide Engines als HIP-Build.</strong></dd>
+<dt>Begründung</dt><dd>Community-Messungen zeigen Vulkan beim reinen Decode oft 10–25 % vorn, ROCm beim Prompt-Processing 20 % vorn. Mit MTP bricht Vulkan bei dieser Architektur jedoch ein (21 → 5 Tokens/s), weil der Rekurrenz-Zustand pro Spekulationsrunde im Host-Speicher gesichert wird. Auf dem Rechner fehlen außerdem die Vulkan-Entwicklungspakete.</dd>
+<dt>Beleg</dt><dd>llama.cpp PR #27836 (Vulkan-Regression mit MTP), soothill.io Vulkan-vs-ROCm-Vergleich; eigener Vulkan-Build scheiterte an fehlenden Headern.</dd>
+<dt>Verworfen</dt><dd>Vulkan-Build der gepatchten Quellen (vorbereitet in engine/build.sh, nicht gemessen).</dd>
+</dl></div><div class="decision" id="engine"><h3>Engine: EngramHalo.cpp als Standard, llama.cpp + MTP-Patch als zweite Engine</h3><dl>
+<dt>Entscheidung</dt><dd><strong>EngramHalo.cpp (Branch strix-halo-qwen4exp) wird bevorzugt; der Stock-Fork bleibt als Fallback.</strong></dd>
+<dt>Begründung</dt><dd>EngramHalo hält die 26,8-GB-Embedding-Tabelle in jedem Lade-Modus lazy (gemessen 2,7 GB im RAM statt 28 GB), lädt in 16–28 Sekunden, hat einen HIP-Top-k-Kernel gegen den CPU-Fallback ab 1k Kontext und ein sparses QSA-Gather ab 16k Kontext. Damit passt UD-Q4_K_XL mit MTP; mit dem Stock-Fork passt er nicht.</dd>
+<dt>Beleg</dt><dd>Eigene Footprint-Messungen (bench/results/mem): Q4_K_XL + MTP 84,7 GB auf EngramHalo, Kernel-OOM auf dem Stock-Fork. Fork-Dokumentation: docs/strix-halo/README.md.</dd>
+<dt>Verworfen</dt><dd>Stock-Fork mit --load-mode mmap: Tabelle lazy, aber Gewichte-Upload mit 18 MB/s (Q4_K_XL: 140 Minuten).</dd>
+</dl></div><div class="decision" id="quant"><h3>Quant: UD-Q4_K_XL, mit IQ4_XS und IQ3_XXS als kleinere Stufen</h3><dl>
+<dt>Entscheidung</dt><dd><strong>Standard-Preset UD-Q4_K_XL (KLD 0,047, Top-1 92 %). IQ4_XS für weniger Speicher, IQ3_XXS für maximale Geschwindigkeit bei kleinem Kontext.</strong></dd>
+<dt>Begründung</dt><dd>Die Quants unterscheiden sich nur in der Präzision der gerouteten Experten; Attention, DeltaNet und die Embedding-Tabelle sind überall gleich. Q4_K_XL ist mit 35 Tokens/s praktisch so schnell wie IQ4_XS (36,5) und Q2_K_XL (35), also gibt es keinen Grund, Qualität zu opfern, sobald er passt.</dd>
+<dt>Beleg</dt><dd>unsloth-KLD-Tabelle; eigene Messungen mit allen vier Quants.</dd>
+<dt>Verworfen</dt><dd>Q2_K_XL als Standard: 17 % schneller ohne MTP, aber mit MTP gleich schnell und deutlich schlechter (KLD 0,225).</dd>
+</dl></div><div class="decision" id="mtp-head"><h3>MTP-Head: dzannotti, nicht unsloth</h3><dl>
+<dt>Entscheidung</dt><dd><strong>Nur der dzannotti-Head (Q4_K_M, 2,4 GB) wird verwendet; das Programm erkennt Kompatibilität an den Tensornamen.</strong></dd>
+<dt>Begründung</dt><dd>Die lokalen Builds folgen dem Graph aus llama.cpp PR #27739 und erwarten die Tensoren <code>output_hc_*</code>. Der unsloth-Head benennt sie <code>blk.48.nextn.hc_head_*</code> (PR #28243) und lädt nur mit dem unsloth-Fork.</dd>
+<dt>Beleg</dt><dd>GGUF-Header beider Heads gelesen; Loader-Code in src/models/qwen4exp.cpp beider Forks.</dd>
+<dt>Verworfen</dt><dd>unsloth-Head mit dem unsloth-Fork b10715-mix: nicht getestet.</dd>
+</dl></div><div class="decision" id="mtp"><h3>MTP: an für einen Nutzer, aus für mehrere</h3><dl>
+<dt>Entscheidung</dt><dd><strong>Presets für Einzelnutzer nutzen <code>--spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75</code>; der Mehrnutzer-Test schaltet MTP ab.</strong></dd>
+<dt>Begründung</dt><dd>Ein Nutzer: 20,8 → 33–41 Tokens/s. Acht Nutzer: mit MTP 35 Tokens/s gesamt, ohne 50. Zwischen n_max 3 bis 6 und p_min 0 bis 0,75 liegen nur etwa 5 % (Messrauschen 3 %). Temperatur 1.0 kostet gegenüber greedy nur ~5 % Akzeptanz.</dd>
+<dt>Beleg</dt><dd>MTP-Feintuning und Mehrnutzer-Sweep in bench/results.</dd>
+<dt>Verworfen</dt><dd>n_max 16 / p_min 0.8 (Empfehlung für RTX 5090): auf bandbreitenlimitierter Hardware nicht übertragbar.</dd>
+</dl></div><div class="decision" id="kv"><h3>KV-Cache: q8_0 mit aktiver Hadamard-Rotation</h3><dl>
+<dt>Entscheidung</dt><dd><strong><code>-ctk q8_0 -ctv q8_0</code>, <code>LLAMA_ATTN_ROT_DISABLE</code> bleibt ungesetzt.</strong></dd>
+<dt>Begründung</dt><dd>q8_0 halbiert den KV-Speicher bei praktisch gleicher Qualität (KLD 0,0018) und gleicher Geschwindigkeit. Die Umgebungsvariable stammt aus einer Vorabversion der Modellunterstützung; der aktuelle Code rotiert Q/K/V selbst. Ohne die Variable lädt das Modell, und die Rotation kostet nur 2 %.</dd>
+<dt>Beleg</dt><dd>Load-Test mit Rotation (attn_rot_k = 1): 24,2 statt 24,6 Tokens/s. llama.cpp PR #21038.</dd>
+<dt>Verworfen</dt><dd>f16-KV: bei Tiefe langsamer; q4_0-KV: zerstört die Qualität (KLD 5,5).</dd>
+</dl></div><div class="decision" id="loadmode"><h3>Lade-Modus: auto bzw. none, nicht mmap (beim Stock-Fork)</h3><dl>
+<dt>Entscheidung</dt><dd><strong>Stock-Fork: <code>--load-mode auto</code>. EngramHalo: <code>-lm none</code>; die Tabelle bleibt trotzdem lazy.</strong></dd>
+<dt>Begründung</dt><dd>ROCm meldet „kein mmap“; bei auto kopiert llama.cpp die Tabelle in den RAM. Erzwungenes mmap macht die Tabelle lazy, lädt die Gewichte aber seitenweise ohne Readahead: 18 MB/s, 140 Minuten für Q4_K_XL. EngramHalo hat Readahead und Drop-Behind und lädt auch mit mmap in 39 Sekunden.</dd>
+<dt>Beleg</dt><dd>Eigene Messungen q4-mmap (Stock, 140 min) und eh-q4kxl-mmap-mtp (39 s).</dd>
+
+</dl></div><div class="decision" id="thinking"><h3>Thinking und Sampling nach Qwen-Vorgabe</h3><dl>
+<dt>Entscheidung</dt><dd><strong>reasoning_effort „medium“ als Alltag, „xhigh“ (Template-Default) nur bei Bedarf; Thinking-Sampling temp 1.0 / top_p 0.95 / top_k 20, Non-Thinking temp 0.7 / top_p 0.8 / presence 1.5.</strong></dd>
+<dt>Begründung</dt><dd>Das Chat-Template akzeptiert genau xhigh, medium, low und wirft bei allem anderen eine Exception. Die Sampling-Werte stehen in der Modellkarte und im GGUF.</dd>
+<dt>Beleg</dt><dd>Chat-Template aus dem GGUF gelesen; Qwen-Modellkarte; unsloth-Dokumentation.</dd>
+
+</dl></div><div class="decision" id="multislot"><h3>Mehrnutzer: Patch gegen vermischte Antworten</h3><dl>
+<dt>Entscheidung</dt><dd><strong>Der Workaround zu llama.cpp #25992 (keine gepinnten Host-Puffer auf integrierten GPUs) ist in beide Builds eingebaut.</strong></dd>
+<dt>Begründung</dt><dd>Auf gfx1151 wurden ohne den Patch Antworten zwischen Slots vertauscht. Der Mehrnutzer-Benchmark prüft das mit einem Codewort pro Nutzer: in 30 parallelen Anfragen kein einziger Mix-up.</dd>
+<dt>Beleg</dt><dd>EngramHalo Dockerfile.rocm-7.14 und Patch-Datei; eigener Mehrnutzer-Sweep.</dd>
+
+</dl></div><div class="decision" id="guard"><h3>Speicher-Wächter statt Hoffnung</h3><dl>
+<dt>Entscheidung</dt><dd><strong>Vor dem Start rechnet das Programm den Bedarf gegen MemAvailable; im Betrieb stoppt ein Wächter den Server, bevor der Kernel-OOM-Killer zuschlägt.</strong></dd>
+<dt>Begründung</dt><dd>GPU-Speicher (GTT) taucht nicht im RSS des Prozesses auf; nur MemAvailable zeigt die Nähe zum OOM. Zwei Kernel-OOM-Kills während der Arbeit haben die ganze Sitzung mitgerissen.</dd>
+<dt>Beleg</dt><dd>Kernel-Log 2026-09-03 12:56 und 13:03; Footprint-Messreihen mit memguard.</dd>
+
+</dl></div>
+</div></main>
+<footer><div class="wrap">Stand: 4. September 2026 · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/">qwen38-flash</a> (Repo-Link eintragen) · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>
+</body>
+</html>

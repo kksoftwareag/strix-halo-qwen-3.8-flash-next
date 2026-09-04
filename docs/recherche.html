@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recherche & Quellen · Qwen3.8-Flash-Next auf Strix Halo</title>
+<meta name="description" content="Dokumentation der Entscheidungen, Messungen und Quellen zum Betrieb von Qwen3.8-Flash-Next mit llama.cpp auf AMD Strix Halo.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="anleitung.html">Anleitung</a><a href="recherche.html" aria-current="page">Recherche & Quellen</a></nav></div></header>
+<main><div class="wrap">
+<h1>Recherche & Quellen</h1>
+<p class="lead">Woher die Informationen stammen und was offen bleibt.</p>
+
+<h2>Vorgehen</h2>
+<p>Die Recherche lief in mehreren Strängen: offizielle Modellkarte und Konfiguration, unsloth-Dokumentation der Quants,
+llama.cpp-Pull-Requests und Issues zur Modellunterstützung und zu MTP, Community-Berichte zu Strix Halo (Foren, Blogs,
+Fork-Dokumentationen), und Alternativen zu llama.cpp. Jede Aussage wurde, wo möglich, gegen den Quellcode der lokalen
+Builds und gegen eigene Messungen geprüft. Die Kurzfassung steht in der Projektdatei <a href="RESEARCH.md"><code>docs/RESEARCH.md</code></a>.</p>
+
+<h2>Modell</h2>
+<ul>
+<li>125 Milliarden Parameter, 6 Milliarden aktiv, plus 51-Milliarden-n-Gram-Embedding und 4-Milliarden-MTP-Head. 48 Layer:
+zwölfmal drei Gated-DeltaNet-Layer plus ein Sparse-Attention-Layer. 512 Experten, 10 aktiv plus 1 gemeinsamer.</li>
+<li>Kontext 262144 nativ, bis 1 Million mit YaRN.</li>
+<li>Thinking standardmäßig an; <code>reasoning_effort</code> xhigh (Default), medium, low; <code>enable_thinking</code> zum Abschalten.</li>
+<li>Sampling: Thinking temp 1.0 / top_p 0.95 / top_k 20; Non-Thinking temp 0.7 / top_p 0.8 / presence 1.5.</li>
+</ul>
+
+<h2>Alternativen zu llama.cpp (Stand September 2026)</h2>
+<p>Keine läuft mit diesem Modell auf einem einzelnen Strix Halo: vLLM ist nur auf MI355X validiert und alle vLLM-Checkpoints
+lassen die Embedding-Tabelle in BF16 (126 bis 173 GB). SGLang lehnt gfx1151 ab. ik_llama.cpp unterstützt das Modell, aber nicht
+ROCm. Ollama bietet nur MLX-Varianten. LM Studio und Lemonade nutzen upstream llama.cpp ohne MTP. Die echte Konkurrenz
+sind Strix-Halo-Forks von llama.cpp.</p>
+
+<h2>Was nicht geklärt ist</h2>
+<ul>
+<li>Der EasiiX-Q8_0-MTP-Head (4 GB) soll höhere Akzeptanz haben; nicht getestet.</li>
+<li>Ein Rebase des MTP-Patches auf llama.cpp mit PR #28123 (Rekurrenz-Rollback) könnte MTP weiter beschleunigen.</li>
+<li>Vulkan mit den gepatchten Quellen ist nicht gemessen.</li>
+<li>Governor „performance“ und tuned „accelerator-performance“ wurden nicht gemessen; alle Zahlen entstanden mit powersave/balanced.</li>
+</ul>
+
+<h2>Quellen</h2>
+<ol>
+<li><a href="https://huggingface.co/Qwen/Qwen3.8-Flash-Next">Qwen3.8-Flash-Next Modellkarte</a></li>
+<li><a href="https://huggingface.co/Qwen/Qwen3.8-Flash-Next/raw/main/config.json">config.json des Modells</a></li>
+<li><a href="https://unsloth.ai/docs/models/qwen3.8-next">unsloth: Quants, KLD-Tabelle, MTP</a></li>
+<li><a href="https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF">unsloth GGUF-Repository</a> und <a href="https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/blob/main/MTP/README.md">MTP-README</a></li>
+<li><a href="https://huggingface.co/dzannotti/Qwen3.8-Flash-Next-MTP-GGUF">dzannotti MTP-Head und Patch</a></li>
+<li><a href="https://github.com/Aristo94/EngramHalo.cpp">EngramHalo.cpp</a> (Branch strix-halo-qwen4exp, docs/strix-halo)</li>
+<li><a href="https://github.com/abliter8-ai/qwen-3.8-next-flash-amd-strix-halo">Unabhängige Reproduktion auf 128 GB Strix Halo</a></li>
+<li><a href="https://github.com/ggml-org/llama.cpp/pull/27742">llama.cpp PR #27742 (qwen4exp)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/27836">#27836 (MTP, Draft)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/28123">#28123 (Rollback)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/28243">#28243 (unsloth MTP)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/21038">#21038 (KV-Rotation)</a>, <a href="https://github.com/ggml-org/llama.cpp/issues/25992">#25992 (Mehrslot-Fehler)</a>, <a href="https://github.com/ggml-org/llama.cpp/issues/22629">#22629 (cache-ram)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/28136">#28136 (lazy-mode on-direct)</a></li>
+<li><a href="https://github.com/ggml-org/llama.cpp/discussions/23470">KV-Cache-Quantisierung: KLD-Vergleich</a></li>
+<li><a href="https://www.soothill.io/blog/2026/08/03/llamacpp-vulkan-vs-rocm-strix-halo/">Vulkan vs. ROCm auf Strix Halo</a></li>
+<li><a href="https://github.com/lemonade-sdk/lemonade/issues/2624">rocWMMA-FA auf Strix Halo</a></li>
+<li><a href="https://rocmdocs.amd.com/en/develop/how-to/system-optimization/strixhalo.html">AMD: Strix-Halo-Systemoptimierung</a></li>
+<li><a href="https://github.com/kyuz0/amd-strix-halo-toolboxes">kyuz0 Strix-Halo-Toolboxes</a></li>
+<li><a href="https://recipes.vllm.ai/Qwen/Qwen3.8-Flash-Next">vLLM-Rezept (nur MI355X)</a></li>
+<li><a href="https://github.com/ggml-org/llama.cpp/discussions/25198">MTP-Tuning auf High-End-GPUs</a></li>
+</ol>
+
+</div></main>
+<footer><div class="wrap">Stand: 4. September 2026 · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/">qwen38-flash</a> (Repo-Link eintragen) · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>
+</body>
+</html>

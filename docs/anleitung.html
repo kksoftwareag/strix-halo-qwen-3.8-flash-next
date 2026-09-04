@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anleitung · Qwen3.8-Flash-Next auf Strix Halo</title>
+<meta name="description" content="Dokumentation der Entscheidungen, Messungen und Quellen zum Betrieb von Qwen3.8-Flash-Next mit llama.cpp auf AMD Strix Halo.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="anleitung.html" aria-current="page">Anleitung</a><a href="recherche.html">Recherche & Quellen</a></nav></div></header>
+<main><div class="wrap">
+<h1>Anleitung</h1>
+<p class="lead">Von der leeren Maschine zum laufenden Server.</p>
+
+<h2>Voraussetzungen</h2>
+<ul>
+<li>AMD Strix Halo (gfx1151) mit 128 GB, Linux mit ROCm/HIP 7.x, <code>cmake</code>, <code>ninja</code>, <code>git</code>.</li>
+<li>Kernel-Parameter <code>amd_iommu=off amdgpu.gttsize=126976 ttm.pages_limit=32505856</code>, damit die GPU fast den ganzen RAM nutzen darf.</li>
+<li>Python 3.12+, <a href="https://docs.astral.sh/uv/">uv</a>, die Hugging-Face-CLI <code>hf</code>, rund 200 GB freier NVMe-Platz.</li>
+</ul>
+
+<h2>Schritt für Schritt</h2>
+<pre><code># 1. Programm
+git clone &lt;Repo-URL&gt; qwen38-flash &amp;&amp; cd qwen38-flash
+uv sync
+
+# 2. Modell und MTP-Head
+hf download unsloth/Qwen3.8-Flash-Next-GGUF --include 'UD-Q4_K_XL/*'
+hf download dzannotti/Qwen3.8-Flash-Next-MTP-GGUF Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf
+
+# 3. Engines
+engine/fetch.sh            # llama.cpp + EngramHalo.cpp holen und patchen
+engine/build-engramhalo.sh # empfohlene Engine
+engine/build.sh hip        # zweite Engine
+
+# 4. Starten
+./run.sh                   # Terminal-Programm, Preset "EngramHalo – Max. Qualität", F5
+</code></pre>
+
+<h2>Empfohlene Kommandozeile (ohne Programm)</h2>
+<pre><code>ROCBLAS_USE_HIPBLASLT=1 engine/build-engramhalo/bin/llama serve \
+  -m .../UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf \
+  -ngl 99 -c 131072 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 -lm none \
+  -md .../Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 \
+  --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 \
+  --jinja --chat-template-kwargs '{"reasoning_effort":"medium"}' \
+  --temp 1 --top-p 0.95 --top-k 20 --min-p 0 \
+  --host 0.0.0.0 --port 8080 --metrics</code></pre>
+<p>Für mehrere Nutzer: <code>-np 8</code> setzen (der Kontext gilt dann für alle Slots zusammen) und die drei MTP-Zeilen weglassen.</p>
+
+<h2>Presets im Programm</h2>
+<div class="tablewrap"><table>
+<tr><th>Preset</th><th>Engine</th><th>Quant</th><th>Kontext</th><th>MTP</th><th>Zweck</th></tr>
+<tr><td>eh-qualitaet (Standard)</td><td>EngramHalo</td><td>UD-Q4_K_XL</td><td>131072</td><td>an</td><td>beste Qualität, ein Nutzer</td></tr>
+<tr><td>eh-no-thinking</td><td>EngramHalo</td><td>UD-Q4_K_XL</td><td>131072</td><td>an</td><td>Chat und Tools ohne Thinking</td></tr>
+<tr><td>eh-schnell</td><td>EngramHalo</td><td>UD-IQ3_XXS</td><td>32768</td><td>an</td><td>kleinster Footprint</td></tr>
+<tr><td>eh-longctx</td><td>EngramHalo</td><td>UD-IQ4_XS</td><td>163840</td><td>an</td><td>lange Dokumente</td></tr>
+<tr><td>stock-*</td><td>llama.cpp + Patch</td><td>IQ4_XS / IQ3_XXS / Q2_K_XL</td><td>je nach Preset</td><td>an</td><td>Fallback ohne EngramHalo</td></tr>
+</table></div>
+
+<h2>Wenn etwas schiefgeht</h2>
+<ul>
+<li><strong>Kernel-OOM</strong>: Speicherbilanz im Programm prüfen (Spielraum mindestens 8 GB), kleineren Quant oder Kontext wählen, andere LLM-Prozesse beenden.</li>
+<li><strong>Ladevorgang dauert Stunden</strong>: <code>--load-mode mmap</code> beim Stock-Fork. Lade-Modus auf auto stellen oder EngramHalo verwenden.</li>
+<li><strong>MTP-Head lädt nicht</strong>: unsloth-Head gewählt. dzannotti-Head verwenden.</li>
+<li><strong>Unexpected reasoning effort</strong>: nur xhigh, medium, low sind erlaubt.</li>
+</ul>
+
+</div></main>
+<footer><div class="wrap">Stand: 4. September 2026 · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/">qwen38-flash</a> (Repo-Link eintragen) · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>
+</body>
+</html>

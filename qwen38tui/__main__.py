@@ -17,9 +17,10 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--profile", default="")
     p_run.add_argument("--preset", default="")
     p_par = sub.add_parser("bench-parallel", help="Mehrnutzer-Benchmark: N gleichzeitige Anfragen gegen einen Server mit -np N (ohne TUI)")
-    p_par.add_argument("--users", type=int, default=8, help="max. gleichzeitige Nutzer (1–8)")
-    p_par.add_argument("--levels", default="", help="Stufen, z.B. 1,2,4,8 (Default: 1,2,4,8 bis --users)")
-    p_par.add_argument("--max-tokens", type=int, default=256)
+    p_par.add_argument("--users", type=int, default=8, help="max. gleichzeitige Nutzer (1–16)")
+    p_par.add_argument("--levels", default="", help="Stufen, z.B. 1,2,4,8,16 (Default: 1,2,4,8,16 bis --users)")
+    p_par.add_argument("--max-tokens", type=int, default=256, help="erzeugte Tokens je Anfrage")
+    p_par.add_argument("--ctx-tokens", type=int, default=0, help="Länge des Prompts je Nutzer (Tokens, eigener Fülltext je Nutzer)")
     p_par.add_argument("--keep-mtp", action="store_true", help="spekulatives Decoding auch bei mehreren Slots lassen")
     p_par.add_argument("--profile", default="")
     p_par.add_argument("--preset", default="")
@@ -76,15 +77,19 @@ def main(argv: list[str] | None = None) -> int:
 
         from .bench import run_parallel_bench
 
-        n = max(1, min(8, a.users))
-        levels = tuple(int(x) for x in a.levels.split(",") if x.strip()) if a.levels else tuple(x for x in (1, 2, 4, 8) if x <= n) or (n,)
-        print(f"# Mehrnutzer-Benchmark: Stufen {levels}, max_tokens {a.max_tokens}, MTP {'an' if a.keep_mtp else 'aus'}", file=sys.stderr)
+        n = max(1, min(16, a.users))
+        levels = tuple(int(x) for x in a.levels.split(",") if x.strip()) if a.levels else tuple(x for x in (1, 2, 4, 8, 16) if x <= n) or (n,)
+        print(f"# Mehrnutzer-Benchmark: Stufen {levels}, max_tokens {a.max_tokens}, "
+              f"Prompt {a.ctx_tokens or 'kurz'}, MTP {'an' if a.keep_mtp else 'aus'}", file=sys.stderr)
         results = asyncio.run(run_parallel_bench(cfg, inv, hw, lambda l: print(l, file=sys.stderr), levels=levels,
-                                                 max_tokens=a.max_tokens, keep_mtp=a.keep_mtp))
-        print(f"{'Nutzer':>6} {'Σ t/s':>8} {'je Nutzer':>10} {'min':>6} {'TTFT p50':>9} {'p95':>6} {'Mix-up':>6}  Fehler")
+                                                 max_tokens=a.max_tokens, keep_mtp=a.keep_mtp,
+                                                 ctx_tokens=a.ctx_tokens,
+                                                 min_ctx_per_slot=max(8192, int((a.ctx_tokens + a.max_tokens) * 1.15))))
+        print(f"{'Nutzer':>6} {'Σ t/s':>8} {'je Nutzer':>10} {'min':>6} {'TTFT p50':>9} {'p95':>6} {'Draft':>6} {'Mix-up':>6}  Fehler")
         for r in results:
             ag = r.details.get("aggregate", {})
-            print(f"{r.users:>6} {r.agg_tps:8.1f} {r.tg_tps:10.1f} {ag.get('user_tg_min', 0):6.1f} {r.ttft_p50:9.1f} {r.ttft_p95:6.1f} {r.crosstalk:>6}  {r.error}")
+            print(f"{r.users:>6} {r.agg_tps:8.1f} {r.tg_tps:10.1f} {ag.get('user_tg_min', 0):6.1f} {r.ttft_p50:9.1f} "
+                  f"{r.ttft_p95:6.1f} {ag.get('draft_accept', 0):6.2f} {r.crosstalk:>6}  {r.error}")
         return 0 if all(not r.error and not r.crosstalk for r in results) else 1
     if a.cmd == "show":
         r = cmd.resolved

@@ -265,14 +265,46 @@ USER_TASKS = [
 ]
 
 
-def make_user_prompts(n: int, seed: int = 0) -> list[tuple[str, str]]:
-    """n Prompts mit eindeutigem Codewort (für die Mix-up-Prüfung): [(codewort, prompt), ...]."""
+CHARS_PER_TOKEN = 3.4      # grober Umrechnungsfaktor für den Fülltext (deutsch/englisch + Code)
+
+
+def _filler(rnd: random.Random, chars: int, user: int) -> str:
+    """Ein Pseudo-Repository als Kontext: je Nutzer anders, damit sich der Prompt-Cache nicht teilt."""
+    parts = [f"# Projektauszug für Nutzer {user} (Revision {rnd.randint(10**6, 10**7)})\n"]
+    size = len(parts[0])
+    i = 0
+    while size < chars:
+        i += 1
+        name = f"{rnd.choice(['load', 'merge', 'parse', 'render', 'sync', 'verify', 'flush', 'rotate'])}_{rnd.choice(['index', 'chunk', 'record', 'batch', 'entry', 'frame'])}_{i}"
+        block = (f"\ndef {name}(items, *, strict={rnd.choice(['True', 'False'])}, limit={rnd.randint(8, 4096)}):\n"
+                 f'    """{rnd.choice(["Verarbeitet", "Prüft", "Wandelt", "Sammelt"])} {rnd.randint(2, 99)} Einträge '
+                 f'aus dem Segment {rnd.randint(1000, 9999)}.\n\n    Historie: geändert in r{rnd.randint(100, 999)}, '
+                 f'siehe Ticket #{rnd.randint(1000, 9999)}.\n    """\n'
+                 f"    total = 0\n    for pos, item in enumerate(items[:limit]):\n"
+                 f"        if strict and item is None:\n            raise ValueError(f\"leerer Eintrag an {{pos}}\")\n"
+                 f"        total += len(str(item)) * {rnd.randint(2, 17)}\n    return total\n")
+        parts.append(block)
+        size += len(block)
+    return "".join(parts)
+
+
+def make_user_prompts(n: int, seed: int = 0, ctx_tokens: int = 0) -> list[tuple[str, str]]:
+    """n Prompts mit eindeutigem Codewort (für die Mix-up-Prüfung): [(codewort, prompt), ...].
+
+    Mit ctx_tokens > 0 bekommt jeder Nutzer einen eigenen Fülltext dieser ungefähren Länge davor –
+    damit lässt sich der Betrieb mit langen Kontexten messen, wie ihn Agenten erzeugen."""
     rnd = random.Random(seed)
     out = []
     for i in range(n):
         code = f"KW{i + 1}{rnd.randint(1000, 9999)}"
         task = USER_TASKS[i % len(USER_TASKS)]
-        out.append((code, f"Du bist Nutzer {i + 1}. Dein Codewort ist {code}. Beginne deine Antwort mit dem Codewort. Aufgabe: {task}"))
+        head = ""
+        if ctx_tokens > 0:
+            doc = _filler(random.Random(seed * 1000 + i), int(ctx_tokens * CHARS_PER_TOKEN), i + 1)
+            head = (f"Hier ist ein Auszug aus einem Projekt. Lies ihn, du brauchst ihn für die Aufgabe danach.\n\n"
+                    f"```python\n{doc}\n```\n\n")
+        out.append((code, f"{head}Du bist Nutzer {i + 1}. Dein Codewort ist {code}. Beginne deine Antwort mit dem "
+                          f"Codewort. Aufgabe: {task}"))
     return out
 
 
@@ -296,14 +328,20 @@ def aggregate_level(per_user: list[dict[str, Any]], wall: float) -> dict[str, fl
         k = max(0, min(len(vals) - 1, round(q * (len(vals) - 1))))
         return vals[k]
 
+    draft_n = sum(int(u.get("draft_n") or 0) for u in per_user)
+    draft_acc = sum(int(u.get("draft_n_accepted") or 0) for u in per_user)
+    prompt_n = sum(int(u.get("prompt_n") or 0) for u in per_user)
     return {"agg_tps": gen / wall if wall > 0 else 0.0, "gen_tokens": gen, "user_tg_mean": statistics.mean(tg) if tg else 0.0,
             "user_tg_min": min(tg) if tg else 0.0, "ttft_p50": pct(ttft, 0.5), "ttft_p95": pct(ttft, 0.95),
-            "pp_mean": statistics.mean(pp) if pp else 0.0, "wall": wall}
+            "pp_mean": statistics.mean(pp) if pp else 0.0, "wall": wall, "prompt_tokens": prompt_n,
+            "draft_n": draft_n, "draft_accepted": draft_acc,
+            "draft_accept": (draft_acc / draft_n) if draft_n else 0.0}
 
 
 async def run_parallel_bench(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, on_line: Callable[[str], None],
                              levels: tuple[int, ...] = (1, 2, 4, 8), max_tokens: int = 256, keep_mtp: bool = False,
-                             min_ctx_per_slot: int = 8192, should_abort: Callable[[], bool] | None = None) -> list[BenchResult]:
+                             min_ctx_per_slot: int = 8192, ctx_tokens: int = 0,
+                             should_abort: Callable[[], bool] | None = None) -> list[BenchResult]:
     """Ein Server mit -np max(levels); dann je Stufe N gleichzeitige Chat-Anfragen (asyncio.gather).
     Misst Gesamtdurchsatz, Durchsatz je Nutzer, Zeit bis zum ersten Token und prüft per Codewort auf Slot-Mix-ups."""
     n_par = max(levels)
@@ -342,9 +380,10 @@ async def run_parallel_bench(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo
         for n in levels:
             if should_abort and should_abort():
                 break
-            prompts = make_user_prompts(n, seed=n)
+            prompts = make_user_prompts(n, seed=n, ctx_tokens=ctx_tokens)
             codes = [c for c, _ in prompts]
-            on_line(f"[bench] {n} Nutzer gleichzeitig, je max {max_tokens} Tokens …")
+            on_line(f"[bench] {n} Nutzer gleichzeitig, je max {max_tokens} Tokens"
+                    + (f", Prompt ca. {ctx_tokens} Tokens" if ctx_tokens else "") + " …")
             t_level = time.time()
 
             async def one(i: int, code: str, prompt: str) -> dict[str, Any]:
@@ -370,6 +409,7 @@ async def run_parallel_bench(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo
                 res.error = f"{len(errors)} Anfragen fehlgeschlagen: {errors[0]['error'][:80]}"
             on_line(f"[bench] {n} Nutzer: Σ {agg['agg_tps']:.1f} t/s · je Nutzer Ø {agg['user_tg_mean']:.1f} (min {agg['user_tg_min']:.1f}) t/s · "
                     f"TTFT p50 {agg['ttft_p50']:.1f}s / p95 {agg['ttft_p95']:.1f}s · {agg['gen_tokens']} Tokens in {wall:.0f}s"
+                    + (f" · Draft-Akzeptanz {agg['draft_accept']:.2f} ({agg['draft_accepted']}/{agg['draft_n']})" if agg["draft_n"] else "")
                     + (f" · ⚠ {mixups} Mix-ups" if mixups else " · keine Mix-ups") + (f" · {res.error}" if res.error else ""))
             _append(res)
             results.append(res)

@@ -27,3 +27,12 @@ def test_aggregate_level_percentiles():
     assert agg["ttft_p50"] in (1.0, 2.0) and agg["ttft_p95"] == 4.0
     assert agg["pp_mean"] == 50.0
     assert aggregate_level([], 5.0)["agg_tps"] == 0.0
+
+
+def test_long_prompts_are_unique_and_sized():
+    from qwen38tui.bench import make_user_prompts
+
+    ps = make_user_prompts(4, seed=1, ctx_tokens=8000)
+    assert len({p for _, p in ps}) == 4              # je Nutzer eigener Text, kein geteilter Prompt-Cache
+    for code, p in ps:
+        assert code in p and 20000 < len(p) < 40000  # ~8000 Tokens bei ~3.4 Zeichen je Token

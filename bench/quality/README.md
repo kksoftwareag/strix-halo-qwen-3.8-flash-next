@@ -118,8 +118,12 @@ Benchmark und die Aufgabenbilder bleiben unverändert.
 * Roh-Jobs von Harbor (Transkripte, Verifier-Ausgaben): `bench/quality/terminal-bench-mini/jobs/`
 * Server-Log und Speicherverlauf: `state/logs/tbench-server-*.log`, `state/logs/tbench-mem-*.csv`
 * Aufbereitet: `docs/TERMINAL-BENCH.md` und die interaktive Seite `docs/terminal-bench.html`
-* Versioniert im Repo: `bench/quality/results/` (Zusammenfassung und Ergebnis je Aufgabe; die großen
-  Transkripte bleiben unter `state/`)
+* Versioniert im Repo: `bench/quality/results/` (Zusammenfassung und Ergebnis je Aufgabe) und
+  `docs/transcripts/<quant>-<denkstufe>/<aufgabe>.json` (vollständige Agenten-Transkripte im ATIF-Format,
+  rund 2,5 MB je Lauf)
+
+Die Website lädt ein Transkript erst beim Klick nach. Beim Öffnen der Seite über `file://` blockiert der
+Browser das Nachladen; für eine lokale Vorschau `python3 -m http.server` im Ordner `docs/` starten.
 
 Einen unterbrochenen Lauf fortsetzen oder Fehlschläge wiederholen (Server muss laufen,
 z. B. über das TUI, dann `--use-running`):

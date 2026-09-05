@@ -86,7 +86,7 @@ Identität des Laufs an den Runner und stoppt den Server danach. Der Server läu
 
 ### Ergebnisse auf dieser Maschine
 
-Die eigenen Läufe stehen in [`TERMINAL-BENCH.md`](TERMINAL-BENCH.md), interaktiv in [terminal-bench.html](terminal-bench.html).
+Die eigenen Läufe stehen in [`TERMINAL-BENCH.md`](TERMINAL-BENCH.md), interaktiv in [terminal-bench.html](terminal-bench.html) – dort lässt sich zu jeder Aufgabe das vollständige Transkript des Agenten öffnen, mit Gedankengang, Kommandos und Terminal-Ausgabe je Schritt.
 
 ### Zeitbedarf
 

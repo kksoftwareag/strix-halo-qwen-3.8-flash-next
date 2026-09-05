@@ -161,10 +161,14 @@ def load_runs(results: Path) -> list[dict]:
     for summary in sorted(results.glob("*/*_results/summary.json")):
         s = json.loads(summary.read_text())
         per = {}
+        prof0 = s.get("inference_profile") or ""
+        effort = ("aus" if "no-thinking" in prof0 else
+                  next((e for e in ("xhigh", "medium", "low") if f"thinking-{e}" in prof0), "?"))
         for rf in sorted(summary.parent.glob("results-*.json")):
             r = json.loads(rf.read_text())
             att = (r.get("attempts") or [{}])[0]
             det = trial_details(((att.get("harbor_paths") or {}).get("trial")))
+            tfile = summary.parent / f"transcript-{r['task']}.json"
             exc_type = det.get("exception_type") or (att.get("exception") or None)
             per[r["task"]] = {
                 "passed": bool(r.get("passed")),
@@ -186,15 +190,15 @@ def load_runs(results: Path) -> list[dict]:
                 "req_max_s": det.get("req_max_s"),
                 "req_mean_s": det.get("req_mean_s"),
                 "attempts": len(r.get("attempts") or []),
+                "transcript": (f"transcripts/{run_slug(s.get('quant'), effort)}/{r['task']}.json"
+                               if tfile.is_file() else None),
             }
         prof = s.get("evaluation_profile") or {}
         if not prof:
             first = next(iter(sorted(summary.parent.glob("results-*.json"))), None)
             if first:
                 prof = json.loads(first.read_text()).get("evaluation_profile") or {}
-        profile = s.get("inference_profile") or ""
-        effort = ("aus" if "no-thinking" in profile else
-                  next((e for e in ("xhigh", "medium", "low") if f"thinking-{e}" in profile), "?"))
+        profile = prof0
         runs.append({
             "quant": s.get("quant"),
             "inference_profile": profile,
@@ -229,20 +233,38 @@ def load_runs(results: Path) -> list[dict]:
 
 
 REPO_RESULTS = HERE / "results"
+DOCS_TRANSCRIPTS = PROJECT / "docs" / "transcripts"
 
 
-def copy_results(results: Path) -> int:
-    """Ergebnisse (ohne die großen Transkripte) ins Repo spiegeln, damit sie versioniert sind."""
-    n = 0
+def run_slug(quant: str | None, effort: str) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]+", "-", f"{quant or 'unbekannt'}-{effort}")
+
+
+def copy_results(results: Path) -> tuple[int, int]:
+    """Ergebnisse ins Repo spiegeln: Kennzahlen nach bench/quality/results, Transkripte nach docs/."""
+    n = t = 0
     for summary in sorted(results.glob("*/*_results/summary.json")):
         src = summary.parent
         dst = REPO_RESULTS / src.parent.name / src.name
         dst.mkdir(parents=True, exist_ok=True)
+        meta = json.loads(summary.read_text())
+        prof = meta.get("inference_profile") or ""
+        effort = ("aus" if "no-thinking" in prof else
+                  next((e for e in ("xhigh", "medium", "low") if f"thinking-{e}" in prof), "?"))
+        tdst = DOCS_TRANSCRIPTS / run_slug(meta.get("quant"), effort)
         for f in sorted(src.iterdir()):
-            if f.is_file() and not f.name.startswith("transcript-"):
+            if not f.is_file():
+                continue
+            if f.name.startswith("transcript-"):
+                tdst.mkdir(parents=True, exist_ok=True)
+                target = tdst / f.name[len("transcript-"):]
+                if not target.exists() or target.stat().st_size != f.stat().st_size:
+                    target.write_bytes(f.read_bytes())
+                t += 1
+            else:
                 (dst / f.name).write_bytes(f.read_bytes())
                 n += 1
-    return n
+    return n, t
 
 
 def hm(seconds: float) -> str:
@@ -423,8 +445,9 @@ def main() -> int:
         "quant_facts": QUANT_FACTS,
     }
     if not a.no_copy:
-        n = copy_results(Path(a.results))
-        print(f"{n} Ergebnisdateien nach {REPO_RESULTS.relative_to(PROJECT)} gespiegelt")
+        n, t = copy_results(Path(a.results))
+        print(f"{n} Ergebnisdateien nach {REPO_RESULTS.relative_to(PROJECT)}, "
+              f"{t} Transkripte nach {DOCS_TRANSCRIPTS.relative_to(PROJECT)} gespiegelt")
     Path(a.out_json).write_text("window.TBMINI = " + json.dumps(data, ensure_ascii=False, indent=1) + ";\n")
     Path(a.out_md).write_text(markdown(data))
     print(f"{len(data['runs'])} Läufe, {len(data['tasks'])} Aufgaben -> {a.out_json}, {a.out_md}")

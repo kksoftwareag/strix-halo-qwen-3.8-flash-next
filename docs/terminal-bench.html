@@ -29,7 +29,8 @@ der Kennung jedes Laufs.
 <h2>Aufgaben im Vergleich</h2>
 <p>Eine Zelle zeigt, ob der Quant die Aufgabe gelöst hat, wie lange der Agent dafür gebraucht hat und wie
 schnell das Modell dabei Token erzeugt hat. Ein Klick öffnet die Einzelheiten: Episoden, Anfragen, Zeit im
-Modell, Token, größter Kontext, Fehlerursache.</p>
+Modell, Token, größter Kontext, Fehlerursache – und das vollständige Transkript des Agenten mit
+Gedankengang, Kommandos und Terminal-Ausgabe.</p>
 
 <div class="controls">
   <label>Schwierigkeit<select id="f-diff"><option value="">alle</option></select></label>
@@ -189,10 +190,71 @@ Modell, Token, größter Kontext, Fehlerursache.</p>
       "<dt>Container</dt><dd>" + num(t.memory_mb) + " MB, Image <code>" + esc(t.image) + "</code></dd>" +
       "</dl>" +
       (x.exception_message ? "<pre><code>" + esc(String(x.exception_message).slice(0, 800)) + "</code></pre>" :
-        (x.exception ? "<pre><code>" + esc(String(x.exception).slice(0, 800)) + "</code></pre>" : ""));
+        (x.exception ? "<pre><code>" + esc(String(x.exception).slice(0, 800)) + "</code></pre>" : "")) +
+      (x.transcript ? '<div class="tbar"><button type="button" id="show-transcript" data-src="' +
+        esc(x.transcript) + '">Transkript anzeigen</button><span class="sub">' +
+        (x.steps != null ? x.steps + " Schritte" : "") + '</span></div>' : "");
+    wireTranscriptButton($("detail-body").innerHTML, t.id + " · " + (r.label || r.quant));
     $("detail").showModal();
   });
-  $("detail").querySelector(".close").addEventListener("click", () => $("detail").close());
+  $("detail").querySelector(".close").addEventListener("click", () => { $("detail").close(); $("detail").classList.remove("wide"); });
+
+  function renderTranscript(data, title, backHtml) {
+    const steps = (data && data.steps) || [];
+    const fm = (data && data.final_metrics) || {};
+    let h = "<h3>" + esc(title) + "</h3>" +
+      '<div class="tbar"><button type="button" id="back-detail">zurück</button>' +
+      '<span class="sub">' + steps.length + " Schritte · " + esc(String((data.agent || {}).name || "")) +
+      (fm.total_completion_tokens ? " · " + num(fm.total_completion_tokens) + " erzeugte Token" : "") +
+      "</span></div><div class='tsteps'>";
+    for (const st of steps) {
+      const t = st.timestamp ? new Date(st.timestamp).toLocaleTimeString("de-DE") : "";
+      const m = st.metrics || {};
+      h += '<div class="tstep"><div class="head"><b>Schritt ' + esc(st.step_id) + "</b><span>" +
+        esc(st.source || "") + "</span><span>" + esc(t) + "</span>" +
+        (m.completion_tokens ? "<span>" + num(m.completion_tokens) + " Token" : "") +
+        (m.cached_tokens ? " · " + num(m.cached_tokens) + " aus dem Cache</span>" : m.completion_tokens ? "</span>" : "") +
+        "</div>";
+      if (st.reasoning_content)
+        h += "<details><summary>Gedankengang (" + st.reasoning_content.length.toLocaleString("de-DE") +
+          " Zeichen)</summary><div class='think'>" + esc(st.reasoning_content) + "</div></details>";
+      if (st.message) h += '<p class="msg">' + esc(st.message) + "</p>";
+      const calls = st.tool_calls || [];
+      if (calls.length)
+        h += "<pre><code>" + esc(calls.map(c => ((c.arguments || {}).keystrokes || "")).join("")) + "</code></pre>";
+      const res = ((st.observation || {}).results) || [];
+      for (const r of res) if (r.content) h += "<pre><code>" + esc(r.content) + "</code></pre>";
+      h += "</div>";
+    }
+    h += "</div>";
+    $("detail-body").innerHTML = h;
+    $("detail").classList.add("wide");
+    $("back-detail").addEventListener("click", () => {
+      $("detail").classList.remove("wide");
+      $("detail-body").innerHTML = backHtml;
+      wireTranscriptButton(backHtml, title);
+    });
+  }
+
+  function wireTranscriptButton(backHtml, title) {
+    const btn = $("show-transcript");
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
+      btn.disabled = true; btn.textContent = "lädt …";
+      try {
+        const res = await fetch(btn.dataset.src, { cache: "no-cache" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        renderTranscript(await res.json(), title, backHtml);
+      } catch (e) {
+        btn.disabled = false; btn.textContent = "Transkript anzeigen";
+        const p = document.createElement("p");
+        p.className = "empty";
+        p.textContent = "Transkript nicht ladbar (" + e.message + "). Beim Öffnen über file:// blockiert der " +
+          "Browser das Nachladen – die Seite über einen Webserver aufrufen, etwa python3 -m http.server.";
+        btn.parentElement.after(p);
+      }
+    });
+  }
 
   for (const id of ["f-diff", "f-cat", "f-out", "f-sort"]) $(id).addEventListener("change", render);
   $("f-reset").addEventListener("click", () => {

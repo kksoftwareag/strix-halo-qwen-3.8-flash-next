@@ -1,5 +1,5 @@
 window.TBMINI = {
- "generated_at": "2026-09-05T05:17:20+00:00",
+ "generated_at": "2026-09-05T07:09:18+00:00",
  "tasks": [
   {
    "id": "pypi-server",
@@ -254,7 +254,8 @@ window.TBMINI = {
      "tok_per_s": 6.5,
      "req_max_s": 1839,
      "req_mean_s": 277,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/break-filter-js-from-html.json"
     },
     "build-cython-ext": {
      "passed": true,
@@ -277,7 +278,8 @@ window.TBMINI = {
      "tok_per_s": 20.4,
      "req_max_s": 61,
      "req_mean_s": 14,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/build-cython-ext.json"
     },
     "build-pov-ray": {
      "passed": true,
@@ -305,7 +307,8 @@ window.TBMINI = {
      "tok_per_s": 17.4,
      "req_max_s": 144,
      "req_mean_s": 31,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/build-pov-ray.json"
     },
     "cobol-modernization": {
      "passed": true,
@@ -328,7 +331,8 @@ window.TBMINI = {
      "tok_per_s": 24.2,
      "req_max_s": 142,
      "req_mean_s": 40,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/cobol-modernization.json"
     },
     "configure-git-webserver": {
      "passed": false,
@@ -351,7 +355,8 @@ window.TBMINI = {
      "tok_per_s": 23.7,
      "req_max_s": 121,
      "req_mean_s": 35,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/configure-git-webserver.json"
     },
     "extract-elf": {
      "passed": true,
@@ -374,7 +379,8 @@ window.TBMINI = {
      "tok_per_s": 22.7,
      "req_max_s": 353,
      "req_mean_s": 111,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/extract-elf.json"
     },
     "fix-git": {
      "passed": true,
@@ -397,7 +403,8 @@ window.TBMINI = {
      "tok_per_s": 22.6,
      "req_max_s": 30,
      "req_mean_s": 17,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/fix-git.json"
     },
     "fix-ocaml-gc": {
      "passed": true,
@@ -420,7 +427,8 @@ window.TBMINI = {
      "tok_per_s": 21.2,
      "req_max_s": 324,
      "req_mean_s": 45,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/fix-ocaml-gc.json"
     },
     "git-leak-recovery": {
      "passed": true,
@@ -443,7 +451,8 @@ window.TBMINI = {
      "tok_per_s": 23.6,
      "req_max_s": 27,
      "req_mean_s": 18,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/git-leak-recovery.json"
     },
     "headless-terminal": {
      "passed": true,
@@ -466,7 +475,8 @@ window.TBMINI = {
      "tok_per_s": 25.2,
      "req_max_s": 167,
      "req_mean_s": 53,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/headless-terminal.json"
     },
     "llm-inference-batching-scheduler": {
      "passed": true,
@@ -494,7 +504,8 @@ window.TBMINI = {
      "tok_per_s": 21.1,
      "req_max_s": 468,
      "req_mean_s": 135,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/llm-inference-batching-scheduler.json"
     },
     "mailman": {
      "passed": true,
@@ -517,7 +528,8 @@ window.TBMINI = {
      "tok_per_s": 19.7,
      "req_max_s": 203,
      "req_mean_s": 39,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/mailman.json"
     },
     "mteb-retrieve": {
      "passed": false,
@@ -540,7 +552,8 @@ window.TBMINI = {
      "tok_per_s": 23.9,
      "req_max_s": 51,
      "req_mean_s": 23,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/mteb-retrieve.json"
     },
     "nginx-request-logging": {
      "passed": true,
@@ -563,7 +576,8 @@ window.TBMINI = {
      "tok_per_s": 25.6,
      "req_max_s": 24,
      "req_mean_s": 17,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/nginx-request-logging.json"
     },
     "openssl-selfsigned-cert": {
      "passed": true,
@@ -586,7 +600,8 @@ window.TBMINI = {
      "tok_per_s": 27.5,
      "req_max_s": 36,
      "req_mean_s": 26,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/openssl-selfsigned-cert.json"
     },
     "overfull-hbox": {
      "passed": true,
@@ -609,7 +624,8 @@ window.TBMINI = {
      "tok_per_s": 24.3,
      "req_max_s": 403,
      "req_mean_s": 72,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/overfull-hbox.json"
     },
     "pypi-server": {
      "passed": true,
@@ -632,7 +648,8 @@ window.TBMINI = {
      "tok_per_s": 25.6,
      "req_max_s": 34,
      "req_mean_s": 16,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/pypi-server.json"
     },
     "regex-log": {
      "passed": true,
@@ -655,7 +672,8 @@ window.TBMINI = {
      "tok_per_s": 15.0,
      "req_max_s": 1146,
      "req_mean_s": 328,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/regex-log.json"
     },
     "sparql-university": {
      "passed": false,
@@ -678,7 +696,8 @@ window.TBMINI = {
      "tok_per_s": 27.7,
      "req_max_s": 172,
      "req_mean_s": 63,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/sparql-university.json"
     },
     "sqlite-with-gcov": {
      "passed": false,
@@ -701,7 +720,8 @@ window.TBMINI = {
      "tok_per_s": 22.2,
      "req_max_s": 32,
      "req_mean_s": 15,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q2_K_XL-medium/sqlite-with-gcov.json"
     }
    }
   },
@@ -756,7 +776,8 @@ window.TBMINI = {
      "tok_per_s": 26.0,
      "req_max_s": 13,
      "req_mean_s": 11,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-Q4_K_XL-medium/git-leak-recovery.json"
     }
    }
   },
@@ -811,7 +832,8 @@ window.TBMINI = {
      "tok_per_s": 11.4,
      "req_max_s": 726,
      "req_mean_s": 121,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/break-filter-js-from-html.json"
     },
     "build-cython-ext": {
      "passed": true,
@@ -834,7 +856,8 @@ window.TBMINI = {
      "tok_per_s": 22.6,
      "req_max_s": 158,
      "req_mean_s": 30,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/build-cython-ext.json"
     },
     "build-pov-ray": {
      "passed": false,
@@ -857,7 +880,8 @@ window.TBMINI = {
      "tok_per_s": 19.5,
      "req_max_s": 104,
      "req_mean_s": 24,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/build-pov-ray.json"
     },
     "cobol-modernization": {
      "passed": true,
@@ -880,7 +904,8 @@ window.TBMINI = {
      "tok_per_s": 25.2,
      "req_max_s": 312,
      "req_mean_s": 52,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/cobol-modernization.json"
     },
     "configure-git-webserver": {
      "passed": true,
@@ -903,7 +928,8 @@ window.TBMINI = {
      "tok_per_s": 24.7,
      "req_max_s": 46,
      "req_mean_s": 25,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/configure-git-webserver.json"
     },
     "extract-elf": {
      "passed": false,
@@ -931,7 +957,8 @@ window.TBMINI = {
      "tok_per_s": 23.3,
      "req_max_s": 535,
      "req_mean_s": 137,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/extract-elf.json"
     },
     "fix-git": {
      "passed": true,
@@ -954,7 +981,8 @@ window.TBMINI = {
      "tok_per_s": 23.1,
      "req_max_s": 83,
      "req_mean_s": 23,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/fix-git.json"
     },
     "fix-ocaml-gc": {
      "passed": true,
@@ -977,7 +1005,8 @@ window.TBMINI = {
      "tok_per_s": 24.5,
      "req_max_s": 347,
      "req_mean_s": 52,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/fix-ocaml-gc.json"
     },
     "git-leak-recovery": {
      "passed": true,
@@ -1000,7 +1029,8 @@ window.TBMINI = {
      "tok_per_s": 25.4,
      "req_max_s": 20,
      "req_mean_s": 14,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/git-leak-recovery.json"
     },
     "headless-terminal": {
      "passed": true,
@@ -1023,7 +1053,8 @@ window.TBMINI = {
      "tok_per_s": 24.1,
      "req_max_s": 63,
      "req_mean_s": 30,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/headless-terminal.json"
     },
     "llm-inference-batching-scheduler": {
      "passed": false,
@@ -1051,7 +1082,8 @@ window.TBMINI = {
      "tok_per_s": 19.1,
      "req_max_s": 674,
      "req_mean_s": 252,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/llm-inference-batching-scheduler.json"
     },
     "mailman": {
      "passed": true,
@@ -1074,7 +1106,8 @@ window.TBMINI = {
      "tok_per_s": 21.0,
      "req_max_s": 470,
      "req_mean_s": 57,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/mailman.json"
     },
     "mteb-retrieve": {
      "passed": false,
@@ -1097,7 +1130,8 @@ window.TBMINI = {
      "tok_per_s": 24.7,
      "req_max_s": 100,
      "req_mean_s": 28,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/mteb-retrieve.json"
     },
     "nginx-request-logging": {
      "passed": true,
@@ -1120,7 +1154,8 @@ window.TBMINI = {
      "tok_per_s": 29.2,
      "req_max_s": 21,
      "req_mean_s": 14,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/nginx-request-logging.json"
     },
     "openssl-selfsigned-cert": {
      "passed": true,
@@ -1143,7 +1178,8 @@ window.TBMINI = {
      "tok_per_s": 30.1,
      "req_max_s": 66,
      "req_mean_s": 29,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/openssl-selfsigned-cert.json"
     },
     "overfull-hbox": {
      "passed": true,
@@ -1166,7 +1202,8 @@ window.TBMINI = {
      "tok_per_s": 26.2,
      "req_max_s": 175,
      "req_mean_s": 74,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/overfull-hbox.json"
     },
     "pypi-server": {
      "passed": true,
@@ -1189,7 +1226,8 @@ window.TBMINI = {
      "tok_per_s": 25.2,
      "req_max_s": 28,
      "req_mean_s": 17,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/pypi-server.json"
     },
     "regex-log": {
      "passed": false,
@@ -1217,7 +1255,8 @@ window.TBMINI = {
      "tok_per_s": 5.4,
      "req_max_s": 2951,
      "req_mean_s": 2951,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/regex-log.json"
     },
     "sparql-university": {
      "passed": true,
@@ -1240,7 +1279,8 @@ window.TBMINI = {
      "tok_per_s": 19.8,
      "req_max_s": 1175,
      "req_mean_s": 103,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/sparql-university.json"
     },
     "sqlite-with-gcov": {
      "passed": true,
@@ -1263,7 +1303,8 @@ window.TBMINI = {
      "tok_per_s": 24.0,
      "req_max_s": 17,
      "req_mean_s": 12,
-     "attempts": 1
+     "attempts": 1,
+     "transcript": "transcripts/UD-IQ1_M-medium/sqlite-with-gcov.json"
     }
    }
   }
@@ -1343,13 +1384,13 @@ window.TBMINI = {
    "server_log": "state/logs/tbench-server-20260905-071456.log",
    "command": "ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{\"reasoning_effort\": \"medium\"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4",
    "server": {
-    "requests": 1,
-    "prompt_tokens": 836,
-    "generated_tokens": 222,
-    "pp_tps": 283.3,
-    "tg_tps": 26.4,
-    "draft_accept": 0.773,
-    "draft_mean_len": 3.57,
+    "requests": 85,
+    "prompt_tokens": 87141,
+    "generated_tokens": 74980,
+    "pp_tps": 234.1,
+    "tg_tps": 24.0,
+    "draft_accept": 0.665,
+    "draft_mean_len": 3.46,
     "load_s": 50
    },
    "memory": [

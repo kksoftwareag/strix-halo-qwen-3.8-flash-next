@@ -9,31 +9,32 @@ Stand: 2026-09-05. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1 auf 
 | UD-IQ1_M · medium | 15/20 | 75% | 8 h 16 min | 459.008 | 15.4 | 0.3147 | 79.7 % |
 | UD-Q2_K_XL · medium | 16/20 | 80% | 7 h 36 min | 385.970 | 14.1 | 0.2246 | 82.7 % |
 | UD-IQ3_XXS · medium | 15/20 | 75% | 6 h 27 min | 273.296 | 11.8 | 0.1651 | 85.4 % |
+| UD-IQ4_XS · medium | 15/20 | 75% | 6 h 57 min | 343.555 | 13.7 | 0.0836 | 89.6 % |
 
 ## Aufgaben im Einzelnen
 
-| Aufgabe | Kategorie | Schwierigkeit | UD-IQ1_M · medium | UD-Q2_K_XL · medium | UD-IQ3_XXS · medium |
-| --- | --- | --- | --- | --- | --- |
-| `pypi-server` | software-engineering | medium | **ja** (3:08) | **ja** (3:53) | **ja** (3:42) |
-| `nginx-request-logging` | system-administration | medium | **ja** (2:32) | **ja** (4:08) | **ja** (2:53) |
-| `git-leak-recovery` | software-engineering | medium | **ja** (2:25) | **ja** (2:55) | **ja** (2:29) |
-| `fix-git` | software-engineering | easy | **ja** (4:31) | **ja** (3:30) | **ja** (3:21) |
-| `cobol-modernization` | software-engineering | easy | **ja** (16:30) | **ja** (9:36) | **ja** (16:32) |
-| `regex-log` | data-processing | medium | Zeitlimit (1:00:47) | **ja** (23:15) | **ja** (24:26) |
-| `headless-terminal` | software-engineering | medium | **ja** (9:48) | **ja** (17:42) | **ja** (6:50) |
-| `mailman` | system-administration | medium | **ja** (46:45) | **ja** (44:47) | **ja** (24:55) |
-| `fix-ocaml-gc` | software-engineering | hard | **ja** (38:27) | **ja** (41:13) | **ja** (32:03) |
-| `break-filter-js-from-html` | security | medium | **ja** (20:50) | **ja** (57:40) | **ja** (35:20) |
-| `sqlite-with-gcov` | system-administration | medium | **ja** (5:34) | nicht bestanden (8:22) | **ja** (6:45) |
-| `sparql-university` | data-querying | hard | **ja** (34:10) | nicht bestanden (15:21) | **ja** (17:45) |
-| `llm-inference-batching-scheduler` | machine-learning | hard | Zeitlimit (1:00:30) | **ja** (1:00:30) | Zeitlimit (1:00:38) |
-| `configure-git-webserver` | system-administration | hard | **ja** (10:50) | nicht bestanden (6:45) | nicht bestanden (6:20) |
-| `build-cython-ext` | debugging | medium | **ja** (35:11) | **ja** (30:07) | **ja** (33:24) |
-| `extract-elf` | file-operations | medium | Zeitlimit (1:00:29) | **ja** (26:53) | nicht bestanden (9:28) |
-| `build-pov-ray` | software-engineering | medium | nicht bestanden (42:18) | **ja** (1:00:44) | Zeitlimit (1:00:46) |
-| `openssl-selfsigned-cert` | security | medium | **ja** (3:09) | **ja** (3:48) | **ja** (2:28) |
-| `overfull-hbox` | debugging | easy | **ja** (21:26) | **ja** (21:15) | **ja** (15:58) |
-| `mteb-retrieve` | data-science | medium | nicht bestanden (16:59) | nicht bestanden (13:36) | nicht bestanden (21:15) |
+| Aufgabe | Kategorie | Schwierigkeit | UD-IQ1_M · medium | UD-Q2_K_XL · medium | UD-IQ3_XXS · medium | UD-IQ4_XS · medium |
+| --- | --- | --- | --- | --- | --- | --- |
+| `pypi-server` | software-engineering | medium | **ja** (3:08) | **ja** (3:53) | **ja** (3:42) | **ja** (10:09) |
+| `nginx-request-logging` | system-administration | medium | **ja** (2:32) | **ja** (4:08) | **ja** (2:53) | **ja** (3:18) |
+| `git-leak-recovery` | software-engineering | medium | **ja** (2:25) | **ja** (2:55) | **ja** (2:29) | **ja** (8:52) |
+| `fix-git` | software-engineering | easy | **ja** (4:31) | **ja** (3:30) | **ja** (3:21) | **ja** (2:57) |
+| `cobol-modernization` | software-engineering | easy | **ja** (16:30) | **ja** (9:36) | **ja** (16:32) | **ja** (13:31) |
+| `regex-log` | data-processing | medium | Zeitlimit (1:00:47) | **ja** (23:15) | **ja** (24:26) | **ja** (11:40) |
+| `headless-terminal` | software-engineering | medium | **ja** (9:48) | **ja** (17:42) | **ja** (6:50) | **ja** (8:39) |
+| `mailman` | system-administration | medium | **ja** (46:45) | **ja** (44:47) | **ja** (24:55) | **ja** (21:38) |
+| `fix-ocaml-gc` | software-engineering | hard | **ja** (38:27) | **ja** (41:13) | **ja** (32:03) | **ja** (1:22:10) |
+| `break-filter-js-from-html` | security | medium | **ja** (20:50) | **ja** (57:40) | **ja** (35:20) | **ja** (20:35) |
+| `sqlite-with-gcov` | system-administration | medium | **ja** (5:34) | nicht bestanden (8:22) | **ja** (6:45) | **ja** (8:14) |
+| `sparql-university` | data-querying | hard | **ja** (34:10) | nicht bestanden (15:21) | **ja** (17:45) | **ja** (12:37) |
+| `llm-inference-batching-scheduler` | machine-learning | hard | Zeitlimit (1:00:30) | **ja** (1:00:30) | Zeitlimit (1:00:38) | Zeitlimit (1:03:22) |
+| `configure-git-webserver` | system-administration | hard | **ja** (10:50) | nicht bestanden (6:45) | nicht bestanden (6:20) | **ja** (5:48) |
+| `build-cython-ext` | debugging | medium | **ja** (35:11) | **ja** (30:07) | **ja** (33:24) | **ja** (28:09) |
+| `extract-elf` | file-operations | medium | Zeitlimit (1:00:29) | **ja** (26:53) | nicht bestanden (9:28) | nicht bestanden (17:32) |
+| `build-pov-ray` | software-engineering | medium | nicht bestanden (42:18) | **ja** (1:00:44) | Zeitlimit (1:00:46) | Zeitlimit (1:00:48) |
+| `openssl-selfsigned-cert` | security | medium | **ja** (3:09) | **ja** (3:48) | **ja** (2:28) | **ja** (6:24) |
+| `overfull-hbox` | debugging | easy | **ja** (21:26) | **ja** (21:15) | **ja** (15:58) | nicht bestanden (19:53) |
+| `mteb-retrieve` | data-science | medium | nicht bestanden (16:59) | nicht bestanden (13:36) | nicht bestanden (21:15) | nicht bestanden (11:26) |
 
 ## Einordnung
 
@@ -51,6 +52,7 @@ Zwei Dinge dazu, bevor man Quants anhand einzelner Aufgaben vergleicht:
 | UD-IQ1_M · medium | 361 | 332.812 | 459.008 | 216.6 | 26.0 | 0.683 | 3.52 |
 | UD-Q2_K_XL · medium | 399 | 404.631 | 385.970 | 243.4 | 24.4 | 0.67 | 3.48 |
 | UD-IQ3_XXS · medium | 287 | 301.122 | 273.296 | 252.7 | 25.1 | 0.681 | 3.6 |
+| UD-IQ4_XS · medium | 294 | 339.204 | 343.555 | 263.9 | 23.9 | 0.678 | 3.63 |
 
 Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Agenten, nicht nur die Antworten, die in die Wertung eingehen). `Decode t/s` ist die reine Erzeugungsrate, gemittelt über alle Anfragen.
 
@@ -58,32 +60,33 @@ Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Age
 
 Ausgabe-Token geteilt durch die Zeit, die der Agent tatsächlich auf das Modell gewartet hat (Summe aller Antwortzeiten). Der Wert liegt unter der reinen Decode-Rate, weil jede Anfrage auch den Prompt verarbeitet; er sagt, wie schnell der Agent bei dieser Aufgabe vorankam.
 
-| Aufgabe | UD-IQ1_M · medium t/s | UD-Q2_K_XL · medium t/s | UD-IQ3_XXS · medium t/s | UD-IQ1_M · medium Modellzeit | UD-Q2_K_XL · medium Modellzeit | UD-IQ3_XXS · medium Modellzeit |
-| --- | --- | --- | --- | --- | --- | --- |
-| `pypi-server` | 25,2 | 25,6 | 23,9 | 1:40 | 1:55 | 2:03 |
-| `nginx-request-logging` | 29,2 | 25,6 | 27,3 | 1:23 | 2:54 | 1:44 |
-| `git-leak-recovery` | 25,4 | 23,6 | 23,6 | 1:40 | 2:06 | 1:43 |
-| `fix-git` | 23,1 | 22,6 | 23,9 | 3:49 | 2:48 | 2:35 |
-| `cobol-modernization` | 25,2 | 24,2 | 23,1 | 15:39 | 8:46 | 15:00 |
-| `regex-log` | 5,4 | 15,0 | 15,5 | 49:11 | 21:52 | 23:28 |
-| `headless-terminal` | 24,1 | 25,2 | 26,3 | 7:29 | 14:13 | 5:28 |
-| `mailman` | 21,0 | 19,7 | 11,9 | 40:08 | 30:33 | 21:18 |
-| `fix-ocaml-gc` | 24,5 | 21,2 | 20,6 | 25:01 | 27:10 | 17:39 |
-| `break-filter-js-from-html` | 11,4 | 6,5 | 16,6 | 18:10 | 55:22 | 33:28 |
-| `sqlite-with-gcov` | 24,0 | 22,2 | 19,5 | 2:22 | 4:22 | 2:38 |
-| `sparql-university` | 19,8 | 27,7 | 26,5 | 30:59 | 11:33 | 12:04 |
-| `llm-inference-batching-scheduler` | 19,1 | 21,1 | 6,1 | 58:46 | 54:09 | 52:23 |
-| `configure-git-webserver` | 24,7 | 23,7 | 20,6 | 7:35 | 5:17 | 3:59 |
-| `build-cython-ext` | 22,6 | 20,4 | 20,4 | 22:57 | 15:26 | 17:17 |
-| `extract-elf` | 23,3 | 22,7 | 22,4 | 54:39 | 25:53 | 8:52 |
-| `build-pov-ray` | 19,5 | 17,4 | 18,2 | 18:20 | 33:08 | 27:13 |
-| `openssl-selfsigned-cert` | 30,1 | 27,5 | 27,2 | 2:24 | 2:34 | 1:43 |
-| `overfull-hbox` | 26,2 | 24,3 | 21,0 | 19:38 | 16:46 | 9:38 |
-| `mteb-retrieve` | 24,7 | 23,9 | 22,9 | 8:58 | 4:54 | 11:16 |
+| Aufgabe | UD-IQ1_M · medium t/s | UD-Q2_K_XL · medium t/s | UD-IQ3_XXS · medium t/s | UD-IQ4_XS · medium t/s | UD-IQ1_M · medium Modellzeit | UD-Q2_K_XL · medium Modellzeit | UD-IQ3_XXS · medium Modellzeit | UD-IQ4_XS · medium Modellzeit |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `pypi-server` | 25,2 | 25,6 | 23,9 | 25,0 | 1:40 | 1:55 | 2:03 | 2:28 |
+| `nginx-request-logging` | 29,2 | 25,6 | 27,3 | 26,5 | 1:23 | 2:54 | 1:44 | 1:55 |
+| `git-leak-recovery` | 25,4 | 23,6 | 23,6 | 25,6 | 1:40 | 2:06 | 1:43 | 1:42 |
+| `fix-git` | 23,1 | 22,6 | 23,9 | 24,4 | 3:49 | 2:48 | 2:35 | 2:16 |
+| `cobol-modernization` | 25,2 | 24,2 | 23,1 | 23,3 | 15:39 | 8:46 | 15:00 | 12:25 |
+| `regex-log` | 5,4 | 15,0 | 15,5 | 27,9 | 49:11 | 21:52 | 23:28 | 8:37 |
+| `headless-terminal` | 24,1 | 25,2 | 26,3 | 27,0 | 7:29 | 14:13 | 5:28 | 6:42 |
+| `mailman` | 21,0 | 19,7 | 11,9 | 22,1 | 40:08 | 30:33 | 21:18 | 14:09 |
+| `fix-ocaml-gc` | 24,5 | 21,2 | 20,6 | 21,1 | 25:01 | 27:10 | 17:39 | 31:45 |
+| `break-filter-js-from-html` | 11,4 | 6,5 | 16,6 | 23,9 | 18:10 | 55:22 | 33:28 | 19:12 |
+| `sqlite-with-gcov` | 24,0 | 22,2 | 19,5 | 22,3 | 2:22 | 4:22 | 2:38 | 2:27 |
+| `sparql-university` | 19,8 | 27,7 | 26,5 | 25,0 | 30:59 | 11:33 | 12:04 | 6:36 |
+| `llm-inference-batching-scheduler` | 19,1 | 21,1 | 6,1 | 19,9 | 58:46 | 54:09 | 52:23 | 57:48 |
+| `configure-git-webserver` | 24,7 | 23,7 | 20,6 | 26,2 | 7:35 | 5:17 | 3:59 | 3:36 |
+| `build-cython-ext` | 22,6 | 20,4 | 20,4 | 22,4 | 22:57 | 15:26 | 17:17 | 14:13 |
+| `extract-elf` | 23,3 | 22,7 | 22,4 | 24,5 | 54:39 | 25:53 | 8:52 | 16:44 |
+| `build-pov-ray` | 19,5 | 17,4 | 18,2 | 17,8 | 18:20 | 33:08 | 27:13 | 37:16 |
+| `openssl-selfsigned-cert` | 30,1 | 27,5 | 27,2 | 30,2 | 2:24 | 2:34 | 1:43 | 2:10 |
+| `overfull-hbox` | 26,2 | 24,3 | 21,0 | 22,1 | 19:38 | 16:46 | 9:38 | 15:25 |
+| `mteb-retrieve` | 24,7 | 23,9 | 22,9 | 25,4 | 8:58 | 4:54 | 11:16 | 3:56 |
 
 - UD-IQ1_M · medium: 5,4 bis 30,1 t/s je Aufgabe, über alle Aufgaben 19,6 t/s; der Agent wartete 6 h 30 min auf das Modell, das sind 79 % der Laufzeit.
 - UD-Q2_K_XL · medium: 6,5 bis 27,7 t/s je Aufgabe, über alle Aufgaben 18,8 t/s; der Agent wartete 5 h 41 min auf das Modell, das sind 75 % der Laufzeit.
 - UD-IQ3_XXS · medium: 6,1 bis 27,3 t/s je Aufgabe, über alle Aufgaben 16,8 t/s; der Agent wartete 4 h 31 min auf das Modell, das sind 70 % der Laufzeit.
+- UD-IQ4_XS · medium: 17,8 bis 30,2 t/s je Aufgabe, über alle Aufgaben 21,9 t/s; der Agent wartete 4 h 21 min auf das Modell, das sind 63 % der Laufzeit.
 
 ## Ausführung
 
@@ -155,6 +158,27 @@ ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/b
 | Verfügbar (MemAvailable) | 106.5 GiB |
 | Reserve OS/Page-Cache | 6.0 GiB |
 | Spielraum | 38.4 GiB |
+
+### UD-IQ4_XS · medium
+
+```bash
+ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{"reasoning_effort": "medium"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4
+```
+
+| Posten | Größe |
+| --- | --- |
+| Gewichte (resident) | 63.0 GiB |
+| PLE-Tabelle lazy (nicht resident) | 26.8 GiB |
+| KV-Cache (12 Attn-Layer) | 2.0 GiB |
+| Indexer-Cache | 0.7 GiB |
+| DeltaNet-Zustand | 0.1 GiB |
+| Compute-Buffer (Schätzung) | 1.6 GiB |
+| MTP-Head + Draft-KV | 3.4 GiB |
+| Prompt-Cache (max) | 2.0 GiB |
+| Summe | 72.9 GiB |
+| Verfügbar (MemAvailable) | 106.5 GiB |
+| Reserve OS/Page-Cache | 6.0 GiB |
+| Spielraum | 27.5 GiB |
 
 ## Weitere Läufe
 

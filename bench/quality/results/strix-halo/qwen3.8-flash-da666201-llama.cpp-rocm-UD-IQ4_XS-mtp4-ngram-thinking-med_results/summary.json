@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-05T18:42:15.920958+00:00",
+  "generated_at": "2026-09-05T18:42:15.925762+00:00",
   "platform": {
     "id": "strix-halo",
     "name": "AMD Ryzen AI MAX+ 395 (Strix Halo)"
@@ -15,7 +15,7 @@
       ],
       "tags": [],
       "object": "model",
-      "created": 1788555483,
+      "created": 1788608667,
       "owned_by": "llamacpp",
       "meta": {
         "vocab_type": true,
@@ -24,8 +24,8 @@
         "n_ctx_train": 262144,
         "n_embd": 2560,
         "n_params": 176943899520,
-        "size": 74527731200,
-        "ftype": "IQ1_M - 1.75 bpw"
+        "size": 93671559680,
+        "ftype": "IQ4_XS - 4.25 bpw"
       }
     }
   },
@@ -33,18 +33,18 @@
   "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
   "backend": "rocm",
   "backend_version": "7.1.52802",
-  "quant": "UD-IQ1_M",
+  "quant": "UD-IQ4_XS",
   "inference_profile": "mtp4-ngram-thinking-medium",
   "tag": null,
-  "result_tag": "llama.cpp-rocm-UD-IQ1_M-mtp4-ngram-thinking-medium-terminus-2",
+  "result_tag": "llama.cpp-rocm-UD-IQ4_XS-mtp4-ngram-thinking-medium-terminus-2",
   "total_tasks": 20,
   "passed_tasks": 15,
   "pass_rate": 0.75,
-  "total_duration_ms": 29779640,
+  "total_duration_ms": 25062317,
   "tokens": {
-    "input": 5591475,
-    "cached": 5258663,
-    "output": 459008
+    "input": 4218352,
+    "cached": 3879148,
+    "output": 343555
   },
   "results": [
     "results-break-filter-js-from-html.json",

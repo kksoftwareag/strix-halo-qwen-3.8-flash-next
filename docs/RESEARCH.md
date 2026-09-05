@@ -235,7 +235,8 @@ Vorbereitet ist beides: Die 18 Commits des PR sind auf unseren Basis-Commit übe
 `engine/patches/0003-27311-uma-ring-buffer.patch` (auf den Stock-Fork direkt anwendbar, auf EngramHalo per
 Drei-Wege-Merge, beides geprüft); dazu `0004-28433-draft-ctx-per-seq.patch`, der den Draft-Kontext aus
 `llama_n_ctx_seq()` statt `llama_n_ctx()` dimensioniert ([Issue #28433](https://github.com/ggml-org/llama.cpp/issues/28433)).
-`engine/fetch.sh` wendet beide an; `ENGINE_RING_PATCH=0` lässt sie weg. Die Messreihe dazu ist
+`engine/fetch.sh` lässt beide standardmäßig weg, `ENGINE_RING_PATCH=1` schaltet sie an — so entspricht ein
+frischer Build genau dem, mit dem alle Messwerte hier entstanden sind. Die Messreihe dazu ist
 `bench/mtp_multiuser.sh` (1/2/4/8 Nutzer, 15k Prompt je Nutzer, 2k Ausgabe, MTP an) — einmal mit den bestehenden
 Builds als Vergleichswert, dann nach dem Neubau, jeweils über UD-IQ4_XS, UD-IQ3_XXS, UD-Q2_K_XL und UD-IQ1_M.
 UD-Q4_K_XL ist nicht voreingestellt, passt bei acht Slots aber ebenfalls.

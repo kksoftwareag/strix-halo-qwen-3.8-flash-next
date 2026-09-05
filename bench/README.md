@@ -27,9 +27,13 @@ mehreren Slots und langen Prompts auf 0,00 fällt.
 
 ```bash
 bench/mtp_multiuser.sh vorher     # alle vier kleinen Quants, bestehende Builds
-engine/fetch.sh && engine/build-engramhalo.sh && engine/build.sh hip
+ENGINE_RING_PATCH=1 engine/fetch.sh && engine/build-engramhalo.sh && engine/build.sh hip
 bench/mtp_multiuser.sh nachher    # mit Patch 0003 (PR #27311) und 0004 (Issue #28433)
 ```
+
+Gemessen wurde bisher nur „vorher": Bei langen Prompts bringt Parallelität keinen Durchsatz (siehe
+`docs/RESEARCH.md`), deshalb wurden die Patches nicht gebaut. Die Ergebnisse stehen in
+`state/bench/mtp-multiuser-*.log`, aufbereitet über `analyze_multiuser.py`.
 
 Ohne Argument laufen UD-IQ4_XS, UD-IQ3_XXS, UD-Q2_K_XL und UD-IQ1_M nacheinander; einzelne Quants als weitere
 Argumente. Voreinstellung: Stufen 1/2/4/8, 15 000 Token Prompt je Nutzer, 2 000 Token Ausgabe – rund 30 Minuten je

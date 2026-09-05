@@ -150,6 +150,29 @@ nur ~5 % (Messrauschen ~3 %). Temperatur 1.0 (Qwen-Empfehlung) kostet gegenüber
 | 4 | 42,4 t/s | 11,6 t/s | 1,8 s | 0 |
 | 8 | 50,4 t/s | 6,8 t/s | 2,7 s | 0 |
 
+**Gemessen mit langen Prompts (2026-09-05, UD-IQ4_XS, je Nutzer ~16k Token Prompt, 2k Ausgabe, MTP an):**
+
+| Slots | Prompt-Token | erzeugte Token | Dauer | Token gesamt/s | je Anfrage | Draft-Akzeptanz | saubere Antworten |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 16 253 | 1 130 | 86 s | 203 | 29,9 t/s | 0,70 | 1 von 1 |
+| 2 | 32 624 | 1 192 | 141 s | 240 | 14,2 t/s | 0,69 | 2 von 2 |
+| 4 | 65 144 | 3 378 | 307 s | 223 | 6,5 t/s | 0,71 | 4 von 4 |
+| 8 | 130 457 | 7 011 | 678 s | 203 | 2,8 t/s | 0,60 | **2 von 8** |
+
+Zwei Ergebnisse: **Parallelität bringt bei langen Prompts nichts** — der Gesamtdurchsatz aus Prompt- und
+Ausgabe-Token bleibt über alle Stufen bei 203 bis 240 t/s, während die einzelne Antwort von 29,9 auf 2,8 t/s
+einbricht. Bei kurzen Prompts steigt der Durchsatz mit der Slotzahl (20 → 50 t/s, Tabelle oben), weil die Maschine
+zwischen den Token Leerlauf hat; bei langen Prompts ist sie schon mit einem Strom ausgelastet.
+
+Und **bei acht Slots geht die Ausgabe kaputt**: Nur zwei von acht Nutzern geben das vorgegebene Codewort korrekt
+wieder, zwei Antworten bleiben leer, eine wiederholt den Prompt, drei verfälschen das Codewort um ein bis zwei
+Zeichen. Echtes Übersprechen zwischen Slots gibt es nicht (kein fremdes Codewort in einer Antwort) — der Schaden
+entsteht innerhalb der Antwort, wie in Issue #27572 beschrieben. Bis vier Slots ist alles sauber.
+
+Betriebsempfehlung: langer Kontext → ein Slot; mehrere Slots nur für Chat mit kurzen Prompts. Der Fix
+(`engine/patches/0003-27311-uma-ring-buffer.patch`) liegt bereit, ist aber nicht gebaut — er würde die kaputten
+Antworten beheben, nicht den fehlenden Durchsatzgewinn. Auswertung: `bench/analyze_multiuser.py`.
+
 **Parallelitätsgrenzen je Quant.** `-c` ist der Gesamtkontext über alle Slots; bei `-np 4 -c 262144` bekommt jeder
 Slot 65536 Token. Es zählen zwei Größen: KV- und Indexer-Cache mit **17952 Byte je Token** (0,55 GiB je 32k, gleich
 für alle Quants, weil nur 12 der 48 Layer Attention haben und der KV-Typ q8_0 ist) und der DeltaNet-Zustand mit

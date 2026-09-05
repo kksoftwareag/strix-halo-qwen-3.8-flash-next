@@ -108,6 +108,35 @@ Durchsatz von 50 auf 35 t/s. Und mehrere Slots brauchen auf gfx1151 den Patch au
 <a href="https://github.com/ggml-org/llama.cpp/issues/25992">llama.cpp #25992</a>, sonst liefert der Server ab dem
 zweiten Slot fehlerhafte Antworten.</p>
 
+<h3>Gemessen mit langen Prompts (2026-09-05)</h3>
+<p>Die Zahlen oben stammen aus einem Test mit kurzen Prompts. Mit Agenten-typischen Prompts sieht es anders aus:
+je Nutzer ein eigener Text von rund 16 000 Token, 2 000 Token Antwort, MTP an, UD-IQ4_XS.</p>
+<div class="tablewrap"><table>
+<thead><tr><th class="num">Slots</th><th class="num">Prompt-Token</th><th class="num">erzeugte Token</th><th class="num">Dauer</th><th class="num">Token gesamt/s</th><th class="num">je Anfrage</th><th class="num">Draft-Akzeptanz</th><th class="num">saubere Antworten</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="num">16 253</td><td class="num">1 130</td><td class="num">86 s</td><td class="num">203</td><td class="num">29,9 t/s</td><td class="num">0,70</td><td class="num">1 von 1</td></tr>
+<tr><td class="num">2</td><td class="num">32 624</td><td class="num">1 192</td><td class="num">141 s</td><td class="num">240</td><td class="num">14,2 t/s</td><td class="num">0,69</td><td class="num">2 von 2</td></tr>
+<tr><td class="num">4</td><td class="num">65 144</td><td class="num">3 378</td><td class="num">307 s</td><td class="num">223</td><td class="num">6,5 t/s</td><td class="num">0,71</td><td class="num">4 von 4</td></tr>
+<tr><td class="num">8</td><td class="num">130 457</td><td class="num">7 011</td><td class="num">678 s</td><td class="num">203</td><td class="num">2,8 t/s</td><td class="num">0,60</td><td class="num bad">2 von 8</td></tr>
+</tbody></table></div>
+<p><strong>Parallelität bringt hier nichts.</strong> Der Gesamtdurchsatz aus Prompt- und Ausgabe-Token liegt bei jeder
+Stufe zwischen 203 und 240 Token pro Sekunde – acht Slots verarbeiten in derselben Zeit genauso viel wie einer. Bei
+kurzen Prompts steigt der Durchsatz mit der Slotzahl, weil die Maschine zwischen den Token Leerlauf hat; bei langen
+Prompts ist sie schon mit einem Strom ausgelastet, und mehr Slots verteilen dieselbe Leistung nur auf mehr Wartende.
+Die einzelne Antwort wird dabei von 29,9 auf 2,8 Token pro Sekunde langsamer.</p>
+<p><strong>Dazu kommt, dass die Ausgabe bei acht Slots kaputtgeht.</strong> Jeder Nutzer sollte seine Antwort mit einem
+vorgegebenen Codewort beginnen. Bei einem bis vier Slots klappt das immer; bei acht schaffen es nur zwei von acht –
+zwei Antworten bleiben leer, eine wiederholt den Prompt, drei verfälschen das Codewort um ein bis zwei Zeichen. Kein
+Slot bekommt dabei das Codewort eines anderen zu sehen, es gibt also kein Übersprechen zwischen den Slots; der Schaden
+entsteht innerhalb der einzelnen Antwort. Das entspricht der Beschreibung in
+<a href="https://github.com/ggml-org/llama.cpp/issues/27572">llama.cpp-Issue #27572</a>, wo bei mehreren Slots und
+langen Prompts Müll in den Kontext des MTP-Kopfs gerät.</p>
+<p><strong>Folge für den Betrieb:</strong> Für Arbeit mit langem Kontext – Agenten, Codeanalyse, lange Dokumente – ein
+Slot. Mehrere Slots lohnen nur bei kurzen Prompts, also Chat. Der Fix für das Ausgabe-Problem liegt als
+<code>engine/patches/0003-27311-uma-ring-buffer.patch</code> bereit, ist aber nicht gebaut: Er würde die kaputten
+Antworten beheben, nicht aber den fehlenden Durchsatzgewinn – und der ist der eigentliche Grund, bei langem Kontext
+einen Slot zu fahren.</p>
+
 </div></main>
 <footer><div class="wrap">Stand: 4. September 2026 · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next">kksoftwareag/strix-halo-qwen-3.8-flash-next</a> · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>
 </body>

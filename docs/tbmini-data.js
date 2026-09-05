@@ -1,5 +1,5 @@
 window.TBMINI = {
- "generated_at": "2026-09-04T22:21:04+00:00",
+ "generated_at": "2026-09-05T05:17:20+00:00",
  "tasks": [
   {
    "id": "pypi-server",
@@ -221,7 +221,7 @@ window.TBMINI = {
    "tb_revision": "5c8eadf1f393183288fa08b8f73ca9a469cc5e00",
    "harbor_version": "0.20.0",
    "agent_timeout_s": 3600,
-   "generated_at": "2026-09-04T20:57:22.815082+00:00",
+   "generated_at": "2026-09-05T05:14:30.061010+00:00",
    "total_tasks": 20,
    "passed_tasks": 16,
    "pass_rate": 0.8,
@@ -723,7 +723,7 @@ window.TBMINI = {
    "tb_revision": "5c8eadf1f393183288fa08b8f73ca9a469cc5e00",
    "harbor_version": "0.20.0",
    "agent_timeout_s": 3600,
-   "generated_at": "2026-09-04T20:57:22.816805+00:00",
+   "generated_at": "2026-09-05T05:14:30.062736+00:00",
    "total_tasks": 1,
    "passed_tasks": 1,
    "pass_rate": 1.0,
@@ -759,6 +759,513 @@ window.TBMINI = {
      "attempts": 1
     }
    }
+  },
+  {
+   "quant": "UD-IQ1_M",
+   "inference_profile": "mtp4-ngram-thinking-medium",
+   "effort": "medium",
+   "label": "UD-IQ1_M · medium",
+   "log_key": "UD-IQ1_M",
+   "engine": "llama.cpp",
+   "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+   "backend": "rocm",
+   "backend_version": "7.1.52802",
+   "platform": "AMD Ryzen AI MAX+ 395 (Strix Halo)",
+   "model": "Qwen3.8-Flash-Next",
+   "n_ctx": 163840,
+   "benchmark": "Terminal-Bench-Local",
+   "tb_version": "2.1",
+   "tb_revision": "5c8eadf1f393183288fa08b8f73ca9a469cc5e00",
+   "harbor_version": "0.20.0",
+   "agent_timeout_s": 3600,
+   "generated_at": "2026-09-05T05:14:30.058734+00:00",
+   "total_tasks": 20,
+   "passed_tasks": 15,
+   "pass_rate": 0.75,
+   "duration_s": 29780,
+   "tokens": {
+    "input": 5591475,
+    "cached": 5258663,
+    "output": 459008
+   },
+   "dir": "state/quality/tbench/strix-halo/qwen3.8-flash-da666201-llama.cpp-rocm-UD-IQ1_M-mtp4-ngram-thinking-medi_results",
+   "per_task": {
+    "break-filter-js-from-html": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 1250,
+     "steps": 9,
+     "tokens": {
+      "input": 26242,
+      "cached": 23292,
+      "output": 12383
+     },
+     "peak_context": 4173,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 9,
+     "requests": 9,
+     "model_s": 1090,
+     "tok_per_s": 11.4,
+     "req_max_s": 726,
+     "req_mean_s": 121,
+     "attempts": 1
+    },
+    "build-cython-ext": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 2111,
+     "steps": 46,
+     "tokens": {
+      "input": 1370523,
+      "cached": 1320525,
+      "output": 31057
+     },
+     "peak_context": 49818,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 46,
+     "requests": 46,
+     "model_s": 1377,
+     "tok_per_s": 22.6,
+     "req_max_s": 158,
+     "req_mean_s": 30,
+     "attempts": 1
+    },
+    "build-pov-ray": {
+     "passed": false,
+     "reward": 0.0,
+     "duration_s": 2538,
+     "steps": 46,
+     "tokens": {
+      "input": 1180926,
+      "cached": 1134091,
+      "output": 21483
+     },
+     "peak_context": 46655,
+     "exception": null,
+     "outcome": "nicht bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 46,
+     "requests": 46,
+     "model_s": 1100,
+     "tok_per_s": 19.5,
+     "req_max_s": 104,
+     "req_mean_s": 24,
+     "attempts": 1
+    },
+    "cobol-modernization": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 990,
+     "steps": 18,
+     "tokens": {
+      "input": 164846,
+      "cached": 149783,
+      "output": 23640
+     },
+     "peak_context": 14995,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 18,
+     "requests": 18,
+     "model_s": 939,
+     "tok_per_s": 25.2,
+     "req_max_s": 312,
+     "req_mean_s": 52,
+     "attempts": 1
+    },
+    "configure-git-webserver": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 650,
+     "steps": 18,
+     "tokens": {
+      "input": 126298,
+      "cached": 112975,
+      "output": 11223
+     },
+     "peak_context": 13255,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 18,
+     "requests": 18,
+     "model_s": 455,
+     "tok_per_s": 24.7,
+     "req_max_s": 46,
+     "req_mean_s": 25,
+     "attempts": 1
+    },
+    "extract-elf": {
+     "passed": false,
+     "reward": 0.0,
+     "duration_s": 3629,
+     "steps": 24,
+     "tokens": {
+      "input": 310161,
+      "cached": 282250,
+      "output": 76386
+     },
+     "peak_context": 27819,
+     "exception": {
+      "exception_type": "AgentTimeoutError",
+      "exception_message": "Agent execution timed out after 3600.0 seconds",
+      "exception_traceback": "Traceback (most recent call last):\n  File \"/usr/lib64/python3.14/asyncio/tasks.py\", line 488, in wait_for\n    return await fut\n           ^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1607, in run\n    await self._run_agent_loop(\n    ...<3 lines>...\n    )\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1286, in _run_agent_loop\n    ) = await self._handle_llm_interaction(\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        chat, prompt, original_instruction, self._session\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1164, in _handle_llm_interaction\n    llm_response = await self._query_llm(\n                   ^^^^^^^^^^^^^^^^^^^^^^\n        chat, prompt, original_instruction, session\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 193, in async_wrapped\n    return await copy(fn, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 112, in __call__\n    do = await self.iter(retry_state=retry_state)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 157, in iter\n    result = await action(retry_state)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/_utils.py\", line 111, in inner\n    return call(*args, **kwargs)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/__init__.py\", line 393, in <lambda>\n    self._add_action_func(lambda rs: rs.outcome.result())\n                                     ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 447, in result\n    return self.__get_result()\n           ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 396, in __get_result\n    raise self._exception\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 116, in __call__\n    result = await fn(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1004, in _query_llm\n    llm_response = await chat.chat(\n                   ^^^^^^^^^^^^^^^^\n    ...<2 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/llms/chat.py\", line 89, in chat\n    llm_response: LLMResponse = await self._model.call(\n                                ^^^^^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 193, in async_wrapped\n    return await copy(fn, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 112, in __call__\n    do = await self.iter(retry_state=retry_state)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 157, in iter\n    result = await action(retry_state)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/_utils.py\", line 111, in inner\n    return call(*args, **kwargs)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/__init__.py\", line 393, in <lambda>\n    self._add_action_func(lambda rs: rs.outcome.result())\n                                     ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 447, in result\n    return self.__get_result()\n           ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 396, in __get_result\n    raise self._exception\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 116, in __call__\n    result = await fn(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/llms/lite_llm.py\", line 370, in call\n    response = await litellm.acompletion(**completion_kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/utils.py\", line 1761, in wrapper_async\n    result = await original_function(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/main.py\", line 645, in acompletion\n    response = await _resolve_dispatched_chat_response(init_response)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/main.py\", line 710, in _resolve_dispatched_chat_response\n    return await pending\n           ^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/openai/openai.py\", line 887, in acompletion\n    headers, response = await self.make_openai_chat_completion_request(\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py\", line 300, in async_wrapper\n    result: Final = await func(*args, **kwargs)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/openai/openai.py\", line 422, in make_openai_chat_completion_request\n    raw_response = await openai_aclient.chat.completions.with_raw_response.create(**data, timeout=timeout)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_legacy_response.py\", line 386, in wrapped\n    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))\n                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/resources/chat/completions/completions.py\", line 2907, in create\n    return await self._post(\n           ^^^^^^^^^^^^^^^^^\n    ...<55 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1992, in post\n    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1709, in request\n    response = await self._send_request(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_client.py\", line 1097, in _send_request\n    response = await self._send_with_auth_retry(request, stream=stream, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_client.py\", line 1075, in _send_with_auth_retry\n    response = await super()._send_request(request, stream=stream, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1628, in _send_request\n    return await self._client.send(request, stream=stream, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1629, in send\n    response = await self._send_handling_auth(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1657, in _send_handling_auth\n    response = await self._send_handling_redirects(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1694, in _send_handling_redirects\n    response = await self._send_single_request(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1730, in _send_single_request\n    response = await transport.handle_async_request(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py\", line 389, in handle_async_request\n    response = await self._make_aiohttp_request(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<6 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py\", line 367, in _make_aiohttp_request\n    response: Final = await client_session.request(**request_kwargs).__aenter__()\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 1693, in __aenter__\n    self._resp: _RetType_co = await self._coro\n                              ^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 858, in _request\n    resp = await handler(req)\n           ^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 836, in _connect_and_send_request\n    await resp.start(conn)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client_reqrep.py\", line 558, in start\n    message, payload = await protocol.read()  # type: ignore[union-attr]\n                       ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/streams.py\", line 705, in read\n    await self._waiter\nasyncio.exceptions.CancelledError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/trial.py\", line 450, in _run_agent_phase\n    await asyncio.wait_for(\n    ...<6 lines>...\n    )\n  File \"/usr/lib64/python3.14/asyncio/tasks.py\", line 487, in wait_for\n    async with timeouts.timeout(timeout):\n               ~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/usr/lib64/python3.14/asyncio/timeouts.py\", line 115, in __aexit__\n    raise TimeoutError from exc_val\nTimeoutError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/single_step.py\", line 77, in _run_agent\n    await self._run_agent_phase(\n    ...<4 lines>...\n    )\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/trial.py\", line 459, in _run_agent_phase\n    raise AgentTimeoutError(\n        f\"Agent execution timed out after {timeout_sec} seconds\"\n    ) from exc\nharbor.trial.errors.AgentTimeoutError: Agent execution timed out after 3600.0 seconds\n",
+      "occurred_at": "2026-09-05T02:03:57.217235"
+     },
+     "outcome": "Zeitlimit",
+     "exception_type": "AgentTimeoutError",
+     "exception_message": "Agent execution timed out after 3600.0 seconds",
+     "episodes": 25,
+     "requests": 24,
+     "model_s": 3279,
+     "tok_per_s": 23.3,
+     "req_max_s": 535,
+     "req_mean_s": 137,
+     "attempts": 1
+    },
+    "fix-git": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 271,
+     "steps": 10,
+     "tokens": {
+      "input": 52033,
+      "cached": 41962,
+      "output": 5297
+     },
+     "peak_context": 10035,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 10,
+     "requests": 10,
+     "model_s": 229,
+     "tok_per_s": 23.1,
+     "req_max_s": 83,
+     "req_mean_s": 23,
+     "attempts": 1
+    },
+    "fix-ocaml-gc": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 2307,
+     "steps": 29,
+     "tokens": {
+      "input": 338377,
+      "cached": 319666,
+      "output": 36704
+     },
+     "peak_context": 18599,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 29,
+     "requests": 29,
+     "model_s": 1501,
+     "tok_per_s": 24.5,
+     "req_max_s": 347,
+     "req_mean_s": 52,
+     "attempts": 1
+    },
+    "git-leak-recovery": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 145,
+     "steps": 7,
+     "tokens": {
+      "input": 18298,
+      "cached": 14146,
+      "output": 2552
+     },
+     "peak_context": 4128,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 7,
+     "requests": 7,
+     "model_s": 100,
+     "tok_per_s": 25.4,
+     "req_max_s": 20,
+     "req_mean_s": 14,
+     "attempts": 1
+    },
+    "headless-terminal": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 588,
+     "steps": 15,
+     "tokens": {
+      "input": 95355,
+      "cached": 82748,
+      "output": 10842
+     },
+     "peak_context": 12551,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 15,
+     "requests": 15,
+     "model_s": 449,
+     "tok_per_s": 24.1,
+     "req_max_s": 63,
+     "req_mean_s": 30,
+     "attempts": 1
+    },
+    "llm-inference-batching-scheduler": {
+     "passed": false,
+     "reward": 0.0,
+     "duration_s": 3630,
+     "steps": 14,
+     "tokens": {
+      "input": 157745,
+      "cached": 139196,
+      "output": 67399
+     },
+     "peak_context": 19836,
+     "exception": {
+      "exception_type": "AgentTimeoutError",
+      "exception_message": "Agent execution timed out after 3600.0 seconds",
+      "exception_traceback": "Traceback (most recent call last):\n  File \"/usr/lib64/python3.14/asyncio/tasks.py\", line 488, in wait_for\n    return await fut\n           ^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1607, in run\n    await self._run_agent_loop(\n    ...<3 lines>...\n    )\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1286, in _run_agent_loop\n    ) = await self._handle_llm_interaction(\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        chat, prompt, original_instruction, self._session\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1164, in _handle_llm_interaction\n    llm_response = await self._query_llm(\n                   ^^^^^^^^^^^^^^^^^^^^^^\n        chat, prompt, original_instruction, session\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 193, in async_wrapped\n    return await copy(fn, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 112, in __call__\n    do = await self.iter(retry_state=retry_state)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 157, in iter\n    result = await action(retry_state)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/_utils.py\", line 111, in inner\n    return call(*args, **kwargs)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/__init__.py\", line 393, in <lambda>\n    self._add_action_func(lambda rs: rs.outcome.result())\n                                     ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 447, in result\n    return self.__get_result()\n           ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 396, in __get_result\n    raise self._exception\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 116, in __call__\n    result = await fn(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1004, in _query_llm\n    llm_response = await chat.chat(\n                   ^^^^^^^^^^^^^^^^\n    ...<2 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/llms/chat.py\", line 89, in chat\n    llm_response: LLMResponse = await self._model.call(\n                                ^^^^^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 193, in async_wrapped\n    return await copy(fn, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 112, in __call__\n    do = await self.iter(retry_state=retry_state)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 157, in iter\n    result = await action(retry_state)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/_utils.py\", line 111, in inner\n    return call(*args, **kwargs)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/__init__.py\", line 393, in <lambda>\n    self._add_action_func(lambda rs: rs.outcome.result())\n                                     ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 447, in result\n    return self.__get_result()\n           ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 396, in __get_result\n    raise self._exception\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 116, in __call__\n    result = await fn(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/llms/lite_llm.py\", line 370, in call\n    response = await litellm.acompletion(**completion_kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/utils.py\", line 1761, in wrapper_async\n    result = await original_function(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/main.py\", line 645, in acompletion\n    response = await _resolve_dispatched_chat_response(init_response)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/main.py\", line 710, in _resolve_dispatched_chat_response\n    return await pending\n           ^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/openai/openai.py\", line 887, in acompletion\n    headers, response = await self.make_openai_chat_completion_request(\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py\", line 300, in async_wrapper\n    result: Final = await func(*args, **kwargs)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/openai/openai.py\", line 422, in make_openai_chat_completion_request\n    raw_response = await openai_aclient.chat.completions.with_raw_response.create(**data, timeout=timeout)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_legacy_response.py\", line 386, in wrapped\n    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))\n                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/resources/chat/completions/completions.py\", line 2907, in create\n    return await self._post(\n           ^^^^^^^^^^^^^^^^^\n    ...<55 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1992, in post\n    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1709, in request\n    response = await self._send_request(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_client.py\", line 1097, in _send_request\n    response = await self._send_with_auth_retry(request, stream=stream, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_client.py\", line 1075, in _send_with_auth_retry\n    response = await super()._send_request(request, stream=stream, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1628, in _send_request\n    return await self._client.send(request, stream=stream, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1629, in send\n    response = await self._send_handling_auth(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1657, in _send_handling_auth\n    response = await self._send_handling_redirects(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1694, in _send_handling_redirects\n    response = await self._send_single_request(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1730, in _send_single_request\n    response = await transport.handle_async_request(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py\", line 389, in handle_async_request\n    response = await self._make_aiohttp_request(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<6 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py\", line 367, in _make_aiohttp_request\n    response: Final = await client_session.request(**request_kwargs).__aenter__()\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 1693, in __aenter__\n    self._resp: _RetType_co = await self._coro\n                              ^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 858, in _request\n    resp = await handler(req)\n           ^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 836, in _connect_and_send_request\n    await resp.start(conn)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client_reqrep.py\", line 558, in start\n    message, payload = await protocol.read()  # type: ignore[union-attr]\n                       ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/streams.py\", line 705, in read\n    await self._waiter\nasyncio.exceptions.CancelledError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/trial.py\", line 450, in _run_agent_phase\n    await asyncio.wait_for(\n    ...<6 lines>...\n    )\n  File \"/usr/lib64/python3.14/asyncio/tasks.py\", line 487, in wait_for\n    async with timeouts.timeout(timeout):\n               ~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/usr/lib64/python3.14/asyncio/timeouts.py\", line 115, in __aexit__\n    raise TimeoutError from exc_val\nTimeoutError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/single_step.py\", line 77, in _run_agent\n    await self._run_agent_phase(\n    ...<4 lines>...\n    )\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/trial.py\", line 459, in _run_agent_phase\n    raise AgentTimeoutError(\n        f\"Agent execution timed out after {timeout_sec} seconds\"\n    ) from exc\nharbor.trial.errors.AgentTimeoutError: Agent execution timed out after 3600.0 seconds\n",
+      "occurred_at": "2026-09-05T03:59:40.980021"
+     },
+     "outcome": "Zeitlimit",
+     "exception_type": "AgentTimeoutError",
+     "exception_message": "Agent execution timed out after 3600.0 seconds",
+     "episodes": 15,
+     "requests": 14,
+     "model_s": 3526,
+     "tok_per_s": 19.1,
+     "req_max_s": 674,
+     "req_mean_s": 252,
+     "attempts": 1
+    },
+    "mailman": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 2805,
+     "steps": 42,
+     "tokens": {
+      "input": 1112405,
+      "cached": 1068374,
+      "output": 50609
+     },
+     "peak_context": 43867,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 42,
+     "requests": 42,
+     "model_s": 2408,
+     "tok_per_s": 21.0,
+     "req_max_s": 470,
+     "req_mean_s": 57,
+     "attempts": 1
+    },
+    "mteb-retrieve": {
+     "passed": false,
+     "reward": 0.0,
+     "duration_s": 1019,
+     "steps": 19,
+     "tokens": {
+      "input": 208464,
+      "cached": 188525,
+      "output": 13298
+     },
+     "peak_context": 19867,
+     "exception": null,
+     "outcome": "nicht bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 19,
+     "requests": 19,
+     "model_s": 538,
+     "tok_per_s": 24.7,
+     "req_max_s": 100,
+     "req_mean_s": 28,
+     "attempts": 1
+    },
+    "nginx-request-logging": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 152,
+     "steps": 6,
+     "tokens": {
+      "input": 15191,
+      "cached": 11644,
+      "output": 2432
+     },
+     "peak_context": 3527,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 6,
+     "requests": 6,
+     "model_s": 83,
+     "tok_per_s": 29.2,
+     "req_max_s": 21,
+     "req_mean_s": 14,
+     "attempts": 1
+    },
+    "openssl-selfsigned-cert": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 189,
+     "steps": 5,
+     "tokens": {
+      "input": 18075,
+      "cached": 12819,
+      "output": 4323
+     },
+     "peak_context": 5240,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 5,
+     "requests": 5,
+     "model_s": 144,
+     "tok_per_s": 30.1,
+     "req_max_s": 66,
+     "req_mean_s": 29,
+     "attempts": 1
+    },
+    "overfull-hbox": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 1286,
+     "steps": 16,
+     "tokens": {
+      "input": 168220,
+      "cached": 153292,
+      "output": 30863
+     },
+     "peak_context": 14868,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 16,
+     "requests": 16,
+     "model_s": 1178,
+     "tok_per_s": 26.2,
+     "req_max_s": 175,
+     "req_mean_s": 74,
+     "attempts": 1
+    },
+    "pypi-server": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 188,
+     "steps": 6,
+     "tokens": {
+      "input": 20385,
+      "cached": 15281,
+      "output": 2517
+     },
+     "peak_context": 5084,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 6,
+     "requests": 6,
+     "model_s": 100,
+     "tok_per_s": 25.2,
+     "req_max_s": 28,
+     "req_mean_s": 17,
+     "attempts": 1
+    },
+    "regex-log": {
+     "passed": false,
+     "reward": 0.0,
+     "duration_s": 3647,
+     "steps": 1,
+     "tokens": {
+      "input": 960,
+      "cached": 956,
+      "output": 15802
+     },
+     "peak_context": 960,
+     "exception": {
+      "exception_type": "AgentTimeoutError",
+      "exception_message": "Agent execution timed out after 3600.0 seconds",
+      "exception_traceback": "Traceback (most recent call last):\n  File \"/usr/lib64/python3.14/asyncio/tasks.py\", line 488, in wait_for\n    return await fut\n           ^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1607, in run\n    await self._run_agent_loop(\n    ...<3 lines>...\n    )\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1286, in _run_agent_loop\n    ) = await self._handle_llm_interaction(\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        chat, prompt, original_instruction, self._session\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1164, in _handle_llm_interaction\n    llm_response = await self._query_llm(\n                   ^^^^^^^^^^^^^^^^^^^^^^\n        chat, prompt, original_instruction, session\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 193, in async_wrapped\n    return await copy(fn, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 112, in __call__\n    do = await self.iter(retry_state=retry_state)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 157, in iter\n    result = await action(retry_state)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/_utils.py\", line 111, in inner\n    return call(*args, **kwargs)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/__init__.py\", line 393, in <lambda>\n    self._add_action_func(lambda rs: rs.outcome.result())\n                                     ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 447, in result\n    return self.__get_result()\n           ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 396, in __get_result\n    raise self._exception\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 116, in __call__\n    result = await fn(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1004, in _query_llm\n    llm_response = await chat.chat(\n                   ^^^^^^^^^^^^^^^^\n    ...<2 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/llms/chat.py\", line 89, in chat\n    llm_response: LLMResponse = await self._model.call(\n                                ^^^^^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 193, in async_wrapped\n    return await copy(fn, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 112, in __call__\n    do = await self.iter(retry_state=retry_state)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 157, in iter\n    result = await action(retry_state)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/_utils.py\", line 111, in inner\n    return call(*args, **kwargs)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/__init__.py\", line 393, in <lambda>\n    self._add_action_func(lambda rs: rs.outcome.result())\n                                     ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 447, in result\n    return self.__get_result()\n           ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib64/python3.14/concurrent/futures/_base.py\", line 396, in __get_result\n    raise self._exception\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/tenacity/asyncio/__init__.py\", line 116, in __call__\n    result = await fn(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/llms/lite_llm.py\", line 370, in call\n    response = await litellm.acompletion(**completion_kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/utils.py\", line 1761, in wrapper_async\n    result = await original_function(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/main.py\", line 645, in acompletion\n    response = await _resolve_dispatched_chat_response(init_response)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/main.py\", line 710, in _resolve_dispatched_chat_response\n    return await pending\n           ^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/openai/openai.py\", line 887, in acompletion\n    headers, response = await self.make_openai_chat_completion_request(\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/litellm_core_utils/logging_utils.py\", line 300, in async_wrapper\n    result: Final = await func(*args, **kwargs)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/openai/openai.py\", line 422, in make_openai_chat_completion_request\n    raw_response = await openai_aclient.chat.completions.with_raw_response.create(**data, timeout=timeout)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_legacy_response.py\", line 386, in wrapped\n    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))\n                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/resources/chat/completions/completions.py\", line 2907, in create\n    return await self._post(\n           ^^^^^^^^^^^^^^^^^\n    ...<55 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1992, in post\n    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1709, in request\n    response = await self._send_request(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_client.py\", line 1097, in _send_request\n    response = await self._send_with_auth_retry(request, stream=stream, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_client.py\", line 1075, in _send_with_auth_retry\n    response = await super()._send_request(request, stream=stream, **kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/openai/_base_client.py\", line 1628, in _send_request\n    return await self._client.send(request, stream=stream, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1629, in send\n    response = await self._send_handling_auth(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1657, in _send_handling_auth\n    response = await self._send_handling_redirects(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<3 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1694, in _send_handling_redirects\n    response = await self._send_single_request(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/httpx/_client.py\", line 1730, in _send_single_request\n    response = await transport.handle_async_request(request)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py\", line 389, in handle_async_request\n    response = await self._make_aiohttp_request(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<6 lines>...\n    )\n    ^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py\", line 367, in _make_aiohttp_request\n    response: Final = await client_session.request(**request_kwargs).__aenter__()\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 1693, in __aenter__\n    self._resp: _RetType_co = await self._coro\n                              ^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 858, in _request\n    resp = await handler(req)\n           ^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client.py\", line 836, in _connect_and_send_request\n    await resp.start(conn)\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/client_reqrep.py\", line 558, in start\n    message, payload = await protocol.read()  # type: ignore[union-attr]\n                       ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/aiohttp/streams.py\", line 705, in read\n    await self._waiter\nasyncio.exceptions.CancelledError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/trial.py\", line 450, in _run_agent_phase\n    await asyncio.wait_for(\n    ...<6 lines>...\n    )\n  File \"/usr/lib64/python3.14/asyncio/tasks.py\", line 487, in wait_for\n    async with timeouts.timeout(timeout):\n               ~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"/usr/lib64/python3.14/asyncio/timeouts.py\", line 115, in __aexit__\n    raise TimeoutError from exc_val\nTimeoutError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/single_step.py\", line 77, in _run_agent\n    await self._run_agent_phase(\n    ...<4 lines>...\n    )\n  File \"/home/lyra/.cache/uv/archive-v0/lKAELigiEjYpFnuK/lib64/python3.14/site-packages/harbor/trial/trial.py\", line 459, in _run_agent_phase\n    raise AgentTimeoutError(\n        f\"Agent execution timed out after {timeout_sec} seconds\"\n    ) from exc\nharbor.trial.errors.AgentTimeoutError: Agent execution timed out after 3600.0 seconds\n",
+      "occurred_at": "2026-09-05T06:34:17.238562"
+     },
+     "outcome": "Zeitlimit",
+     "exception_type": "AgentTimeoutError",
+     "exception_message": "Agent execution timed out after 3600.0 seconds",
+     "episodes": 2,
+     "requests": 1,
+     "model_s": 2951,
+     "tok_per_s": 5.4,
+     "req_max_s": 2951,
+     "req_mean_s": 2951,
+     "attempts": 1
+    },
+    "sparql-university": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 2050,
+     "steps": 18,
+     "tokens": {
+      "input": 165844,
+      "cached": 152125,
+      "output": 36803
+     },
+     "peak_context": 15350,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 18,
+     "requests": 18,
+     "model_s": 1859,
+     "tok_per_s": 19.8,
+     "req_max_s": 1175,
+     "req_mean_s": 103,
+     "attempts": 1
+    },
+    "sqlite-with-gcov": {
+     "passed": true,
+     "reward": 1.0,
+     "duration_s": 334,
+     "steps": 12,
+     "tokens": {
+      "input": 41127,
+      "cached": 35013,
+      "output": 3395
+     },
+     "peak_context": 6070,
+     "exception": null,
+     "outcome": "bestanden",
+     "exception_type": null,
+     "exception_message": null,
+     "episodes": 12,
+     "requests": 12,
+     "model_s": 142,
+     "tok_per_s": 24.0,
+     "req_max_s": 17,
+     "req_mean_s": 12,
+     "attempts": 1
+    }
+   }
   }
  ],
  "commands": {
@@ -767,13 +1274,13 @@ window.TBMINI = {
    "server_log": "state/logs/tbench-server-20260904-225745.log",
    "command": "ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/38bb39ee97821de2c9009abb7e93950eec396e66/UD-IQ1_M/Qwen3.8-Flash-Next-UD-IQ1_M-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{\"reasoning_effort\": \"medium\"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4",
    "server": {
-    "requests": 82,
-    "prompt_tokens": 80822,
-    "generated_tokens": 57964,
-    "pp_tps": 211.5,
-    "tg_tps": 26.5,
-    "draft_accept": 0.603,
-    "draft_mean_len": 3.63,
+    "requests": 361,
+    "prompt_tokens": 332812,
+    "generated_tokens": 459008,
+    "pp_tps": 216.6,
+    "tg_tps": 26.0,
+    "draft_accept": 0.683,
+    "draft_mean_len": 3.52,
     "load_s": 16
    },
    "memory": [
@@ -824,6 +1331,75 @@ window.TBMINI = {
     [
      "Spielraum",
      "45.4 GiB"
+    ]
+   ],
+   "ctx_total": 163840,
+   "ctx_per_slot": 163840,
+   "slots": 1,
+   "apt_mirror": "ftp.fau.de (131.188.12.211)"
+  },
+  "UD-IQ3_XXS": {
+   "log": "state/quality/tbmini-UD-IQ3_XXS.log",
+   "server_log": "state/logs/tbench-server-20260905-071456.log",
+   "command": "ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{\"reasoning_effort\": \"medium\"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4",
+   "server": {
+    "requests": 1,
+    "prompt_tokens": 836,
+    "generated_tokens": 222,
+    "pp_tps": 283.3,
+    "tg_tps": 26.4,
+    "draft_accept": 0.773,
+    "draft_mean_len": 3.57,
+    "load_s": 50
+   },
+   "memory": [
+    [
+     "Gewichte (resident)",
+     "52.1 GiB"
+    ],
+    [
+     "PLE-Tabelle lazy (nicht resident)",
+     "26.8 GiB"
+    ],
+    [
+     "KV-Cache (12 Attn-Layer)",
+     "2.0 GiB"
+    ],
+    [
+     "Indexer-Cache",
+     "0.7 GiB"
+    ],
+    [
+     "DeltaNet-Zustand",
+     "0.1 GiB"
+    ],
+    [
+     "Compute-Buffer (Schätzung)",
+     "1.6 GiB"
+    ],
+    [
+     "MTP-Head + Draft-KV",
+     "3.4 GiB"
+    ],
+    [
+     "Prompt-Cache (max)",
+     "2.0 GiB"
+    ],
+    [
+     "Summe",
+     "62.0 GiB"
+    ],
+    [
+     "Verfügbar (MemAvailable)",
+     "106.5 GiB"
+    ],
+    [
+     "Reserve OS/Page-Cache",
+     "6.0 GiB"
+    ],
+    [
+     "Spielraum",
+     "38.4 GiB"
     ]
    ],
    "ctx_total": 163840,
@@ -902,6 +1478,12 @@ window.TBMINI = {
   }
  },
  "quant_facts": {
+  "UD-IQ1_M": {
+   "file_gib": 69.4,
+   "kld": 0.3147,
+   "top1": 79.7,
+   "footprint_gib": 55.1
+  },
   "UD-Q2_K_XL": {
    "file_gib": 73.4,
    "kld": 0.2246,

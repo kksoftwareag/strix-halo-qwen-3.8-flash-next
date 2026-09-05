@@ -29,6 +29,7 @@ Fedora 44). Eigene Messwerte sind als solche markiert. Quellen: nummerierte List
 
 | Quant | Datei (GiB, gemessen) | davon Experten | resident ohne PLE | KLD | Top-1 |
 | --- | --- | --- | --- | --- | --- |
+| UD-IQ1_M | 69,4 | 39,0 | 42,7 | 0,3147 | 79,7 % |
 | UD-Q2_K_XL | 73,4 | 42,9 | 46,6 | 0,2246 | 82,7 % |
 | UD-IQ3_XXS | 76,3 | 45,3 | 49,5 | 0,1651 | 85,4 % |
 | UD-IQ4_XS | 87,2 | 55,4 | 60,4 | 0,0836 | 89,6 % |

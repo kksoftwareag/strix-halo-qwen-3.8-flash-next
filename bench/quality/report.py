@@ -29,6 +29,7 @@ LOGS = PROJECT / "state" / "quality"
 QUANT_ORDER = ["UD-Q2_K_XL", "UD-IQ3_XXS", "UD-IQ4_XS", "UD-Q4_K_XL"]
 # Messwerte aus docs/RESEARCH.md (unsloth-KLD-Tabelle)
 QUANT_FACTS = {
+    "UD-IQ1_M": {"file_gib": 69.4, "kld": 0.3147, "top1": 79.7, "footprint_gib": 55.1},
     "UD-Q2_K_XL": {"file_gib": 73.4, "kld": 0.2246, "top1": 82.7, "footprint_gib": 59.2},
     "UD-IQ3_XXS": {"file_gib": 76.3, "kld": 0.1651, "top1": 85.4, "footprint_gib": 62.0},
     "UD-IQ4_XS": {"file_gib": 87.2, "kld": 0.0836, "top1": 89.6, "footprint_gib": 72.9},
@@ -278,8 +279,8 @@ def markdown(data: dict) -> str:
             out_tok = (r["tokens"] or {}).get("output") or 0
             tps = out_tok / r["duration_s"] if r["duration_s"] else 0
             add(f"| {r['label']} | {r['passed_tasks']}/{r['total_tasks']} | {r['pass_rate']:.0%} | "
-                f"{hm(r['duration_s'])} | {out_tok:,} | {tps:.1f} | {f.get('kld', '')} | {f.get('top1', '')} % |"
-                .replace(",", "."))
+                f"{hm(r['duration_s'])} | {out_tok:,} | {tps:.1f} | {f.get('kld', '–')} | "
+                f"{str(f.get('top1', '–')) + (' %' if f.get('top1') else '')} |".replace(",", "."))
     else:
         add("_Noch keine vollständigen Läufe._")
     add("")

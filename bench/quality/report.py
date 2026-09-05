@@ -26,7 +26,7 @@ RESULTS = PROJECT / "state" / "quality" / "tbench"
 LOGS = PROJECT / "state" / "quality"
 
 # Reihenfolge der Quants von klein nach groß
-QUANT_ORDER = ["UD-Q2_K_XL", "UD-IQ3_XXS", "UD-IQ4_XS", "UD-Q4_K_XL"]
+QUANT_ORDER = ["UD-IQ1_M", "UD-Q2_K_XL", "UD-IQ3_XXS", "UD-IQ4_XS", "UD-Q4_K_XL"]
 # Messwerte aus docs/RESEARCH.md (unsloth-KLD-Tabelle)
 QUANT_FACTS = {
     "UD-IQ1_M": {"file_gib": 69.4, "kld": 0.3147, "top1": 79.7, "footprint_gib": 55.1},

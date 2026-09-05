@@ -26,9 +26,13 @@ Stufe auch die Draft-Akzeptanz — daran zeigt sich der Fehler aus llama.cpp-Iss
 mehreren Slots und langen Prompts auf 0,00 fällt.
 
 ```bash
-bench/mtp_multiuser.sh vorher     # mit den bestehenden Builds
+bench/mtp_multiuser.sh vorher     # alle vier kleinen Quants, bestehende Builds
 engine/fetch.sh && engine/build-engramhalo.sh && engine/build.sh hip
 bench/mtp_multiuser.sh nachher    # mit Patch 0003 (PR #27311) und 0004 (Issue #28433)
 ```
+
+Ohne Argument laufen UD-IQ4_XS, UD-IQ3_XXS, UD-Q2_K_XL und UD-IQ1_M nacheinander; einzelne Quants als weitere
+Argumente. UD-Q4_K_XL fehlt mit Absicht: 16 Slots à 35k passen dort nicht mehr. Rund 2 Stunden je Quant und
+Durchgang; `TB_LEVELS`, `TB_CTX` und `TB_GEN` kürzen das bei Bedarf.
 
 `context_limits.py` sagt vorher, wie viele Slots welcher Größe in den Speicher passen.

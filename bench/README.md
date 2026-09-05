@@ -17,3 +17,18 @@ Ergebnisse: `results/raw/*.json` (llama-bench), `results/mem/*.json|csv|log` (Fo
 Wichtig beim Beenden von Probe-Servern: SIGINT löst einen minutenlangen Teardown (GTT-Freigabe) aus – die Skripte
 senden deshalb SIGKILL. `pkill -f`-Muster in der eigenen Shell mit Klammer-Trick schreiben (`mem_pro[b]e`), sonst
 trifft `pkill` die Shell, die es aufruft.
+
+## Mehrnutzer mit langen Kontexten
+
+`mtp_multiuser.sh` fährt 1/2/4/8/16 gleichzeitige Nutzer mit je ~30 000 Token Prompt und ~5 000 Token Ausgabe,
+MTP an. Jeder Nutzer bekommt einen eigenen Fülltext, damit sich der Prompt-Cache nicht teilt. Die Ausgabe zeigt je
+Stufe auch die Draft-Akzeptanz — daran zeigt sich der Fehler aus llama.cpp-Issue #27572, bei dem die Akzeptanz mit
+mehreren Slots und langen Prompts auf 0,00 fällt.
+
+```bash
+bench/mtp_multiuser.sh vorher     # mit den bestehenden Builds
+engine/fetch.sh && engine/build-engramhalo.sh && engine/build.sh hip
+bench/mtp_multiuser.sh nachher    # mit Patch 0003 (PR #27311) und 0004 (Issue #28433)
+```
+
+`context_limits.py` sagt vorher, wie viele Slots welcher Größe in den Speicher passen.

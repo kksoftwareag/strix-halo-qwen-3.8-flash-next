@@ -24,6 +24,7 @@ def main(argv: list[str] | None = None) -> int:
     p_par.add_argument("--keep-mtp", action="store_true", help="spekulatives Decoding auch bei mehreren Slots lassen")
     p_par.add_argument("--profile", default="")
     p_par.add_argument("--preset", default="")
+    p_par.add_argument("--quant", default="", help="Quant überschreiben, z.B. UD-IQ4_XS")
     sub.add_parser("presets", help="Eingebaute Presets auflisten")
     sub.add_parser("inventory", help="Gefundene Engines/Modelle/MTP-Heads als JSON")
     sub.add_parser("hw", help="Hardware-/Systemzustand als JSON")
@@ -70,6 +71,8 @@ def main(argv: list[str] | None = None) -> int:
     else:
         inv0 = discover_all()
         cfg = get_preset("eh-qualitaet" if inv0.engine("hip-engramhalo") else "stock-ausgewogen").apply()  # type: ignore[union-attr]
+    if getattr(a, "quant", ""):
+        cfg = cfg.copy(quant=a.quant)
     inv, hw = discover_all(), probe()
     cmd = build_command(cfg, inv, hw, fits=lambda m: fits(cfg, m, None, hw))
     if a.cmd == "bench-parallel":

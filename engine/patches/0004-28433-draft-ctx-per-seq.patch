@@ -1,0 +1,13 @@
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index d34d1c9c5..2ca58561f 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -2570,7 +2570,7 @@ common_speculative_init_result::common_speculative_init_result(
+     }
+ 
+     // the draft context holds as many tokens per sequence as the target context
+-    cparams.n_ctx = llama_n_ctx(ctx_tgt);
++    cparams.n_ctx = llama_n_ctx_seq(ctx_tgt);
+ 
+     // note: for small models maybe we can set this to the maximum possible draft from all speculative types
+     //       the extra memory for small models is likely negligible?

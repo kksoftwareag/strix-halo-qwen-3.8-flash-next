@@ -198,6 +198,24 @@ Gemessene Puffer (HIP): Compute 297 MiB @ub 512 bzw. 1188 MiB @ub 2048 (+121/233
 - EngramHalo: dzannotti-Head kompatibel? EasiiX-Q8_0-Sidecar (4,1 GB) mit höherer Akzeptanz [15].
 - Ob ein Rebase des lokalen Patches auf master ≥ 2026-09-01 (#28123 Rollback) die MTP-Kosten senkt.
 
+**MTP bei mehreren Slots (vorbereitet, Messung steht aus).** Bei `-np N` mit Prompts ab etwa 19000 Token und mehreren
+Ubatches fällt die Draft-Akzeptanz auf 0,0, und MTP wird langsamer als kein MTP —
+[Issue #27572](https://github.com/ggml-org/llama.cpp/issues/27572), gemeldet auf gfx1151/ROCm mit einem Hybrid aus
+Gated DeltaNet und Attention. Ursache ist ein Write-after-Read-Rennen auf Unified Memory; der Fix ist
+[PR #27311](https://github.com/ggml-org/llama.cpp/pull/27311) („Scheduler UMA ring buffer"), dort auf Strix Halo gemessen:
+Akzeptanz bei `-np 8` 0,5083 mit Ring gegen 0,0 ohne, Sanitizer-Rennen 0 gegen 3597, Durchsatzkosten unter 1 %.
+
+Unsere Messung vom 2026-09-04 traf den Fehler nicht: `-np 8` mit `draft-mtp,ngram-mod`, aber nur 71 Token Prompt —
+16 Akzeptanzmessungen zwischen 0,46 und 1,00, kein Nullwert. Der Einbruch braucht lange Prompts.
+
+Vorbereitet ist beides: Die 18 Commits des PR sind auf unseren Basis-Commit übertragen und liegen als
+`engine/patches/0003-27311-uma-ring-buffer.patch` (auf den Stock-Fork direkt anwendbar, auf EngramHalo per
+Drei-Wege-Merge, beides geprüft); dazu `0004-28433-draft-ctx-per-seq.patch`, der den Draft-Kontext aus
+`llama_n_ctx_seq()` statt `llama_n_ctx()` dimensioniert ([Issue #28433](https://github.com/ggml-org/llama.cpp/issues/28433)).
+`engine/fetch.sh` wendet beide an; `ENGINE_RING_PATCH=0` lässt sie weg. Die Messreihe dazu ist
+`bench/mtp_multiuser.sh` (1/2/4/8/16 Nutzer, 30k Prompt je Nutzer, 5k Ausgabe, MTP an) — einmal mit den bestehenden
+Builds als Vergleichswert, dann nach dem Neubau.
+
 ## Quellen
 1. https://huggingface.co/Qwen/Qwen3.8-Flash-Next
 2. https://huggingface.co/Qwen/Qwen3.8-Flash-Next/raw/main/config.json

@@ -32,7 +32,12 @@ bench/mtp_multiuser.sh nachher    # mit Patch 0003 (PR #27311) und 0004 (Issue #
 ```
 
 Ohne Argument laufen UD-IQ4_XS, UD-IQ3_XXS, UD-Q2_K_XL und UD-IQ1_M nacheinander; einzelne Quants als weitere
-Argumente. UD-Q4_K_XL fehlt mit Absicht: 16 Slots à 35k passen dort nicht mehr. Rund 2 Stunden je Quant und
-Durchgang; `TB_LEVELS`, `TB_CTX` und `TB_GEN` kürzen das bei Bedarf.
+Argumente. Voreinstellung: Stufen 1/2/4/8, 15 000 Token Prompt je Nutzer, 2 000 Token Ausgabe – rund 30 Minuten je
+Quant und Durchgang. Über `TB_LEVELS`, `TB_CTX` und `TB_GEN` lässt sich das ändern, etwa
+`TB_LEVELS=1,2,4,8,16 TB_CTX=30000 TB_GEN=5000` für die große Variante.
+
+15 000 Token Prompt genügen für den Fehler aus Issue #27572: Er braucht ein Decode über mehrere Ubatches, und das
+sind bei `ubatch 2048` schon acht. Mit acht Slots passt auch UD-Q4_K_XL wieder in den Speicher; es ist nur nicht
+voreingestellt.
 
 `context_limits.py` sagt vorher, wie viele Slots welcher Größe in den Speicher passen.

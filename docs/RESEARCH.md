@@ -213,9 +213,9 @@ Vorbereitet ist beides: Die 18 Commits des PR sind auf unseren Basis-Commit übe
 Drei-Wege-Merge, beides geprüft); dazu `0004-28433-draft-ctx-per-seq.patch`, der den Draft-Kontext aus
 `llama_n_ctx_seq()` statt `llama_n_ctx()` dimensioniert ([Issue #28433](https://github.com/ggml-org/llama.cpp/issues/28433)).
 `engine/fetch.sh` wendet beide an; `ENGINE_RING_PATCH=0` lässt sie weg. Die Messreihe dazu ist
-`bench/mtp_multiuser.sh` (1/2/4/8/16 Nutzer, 30k Prompt je Nutzer, 5k Ausgabe, MTP an) — einmal mit den bestehenden
+`bench/mtp_multiuser.sh` (1/2/4/8 Nutzer, 15k Prompt je Nutzer, 2k Ausgabe, MTP an) — einmal mit den bestehenden
 Builds als Vergleichswert, dann nach dem Neubau, jeweils über UD-IQ4_XS, UD-IQ3_XXS, UD-Q2_K_XL und UD-IQ1_M.
-UD-Q4_K_XL bleibt außen vor, weil 16 Slots à 35k dort nicht mehr in den Speicher passen.
+UD-Q4_K_XL ist nicht voreingestellt, passt bei acht Slots aber ebenfalls.
 
 ## Quellen
 1. https://huggingface.co/Qwen/Qwen3.8-Flash-Next

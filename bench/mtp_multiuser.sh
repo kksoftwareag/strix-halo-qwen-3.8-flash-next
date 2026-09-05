@@ -4,23 +4,23 @@
 #   bench/mtp_multiuser.sh vorher                    # alle vier Quants, bestehende Builds
 #   bench/mtp_multiuser.sh nachher                   # nach engine/fetch.sh + Neubau
 #   bench/mtp_multiuser.sh vorher UD-IQ4_XS          # nur ein Quant
-#   TB_LEVELS=1,4,16 TB_GEN=2000 bench/mtp_multiuser.sh vorher
+#   TB_LEVELS=1,2,4,8,16 TB_CTX=30000 TB_GEN=5000 bench/mtp_multiuser.sh vorher
 #
-# Je Quant: 1/2/4/8/16 gleichzeitige Nutzer, je ~30k Token Prompt (eigener Text je Nutzer, kein
-# geteilter Prompt-Cache) und ~5k Token Ausgabe, MTP an. Entscheidend ist die Spalte "Draft": ohne
-# den Patch fällt die Akzeptanz bei mehreren Slots und langen Prompts auf 0,00.
+# Je Quant: 1/2/4/8 gleichzeitige Nutzer, je ~15k Token Prompt (eigener Text je Nutzer, kein
+# geteilter Prompt-Cache) und ~2k Token Ausgabe, MTP an. Entscheidend ist die Spalte "Draft": ohne
+# den Patch fällt die Akzeptanz bei mehreren Slots und langen Prompts auf 0,00. 15k Prompt reichen
+# dafür: der Fehler braucht ein Decode über mehrere Ubatches, und das sind bei ubatch 2048 schon acht.
 #
-# Zeitbedarf: rund 2 Stunden je Quant und Durchgang – der Löwenanteil ist das Verarbeiten der
-# Prompts (16 × 30k = 480k Token je Stufe).
+# Zeitbedarf: rund 30 Minuten je Quant und Durchgang, davon der größere Teil Prompt-Verarbeitung.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
 LABEL="${1:-lauf}"; shift || true
 QUANTS=("$@")
 [ ${#QUANTS[@]} -eq 0 ] && QUANTS=(UD-IQ4_XS UD-IQ3_XXS UD-Q2_K_XL UD-IQ1_M)
-LEVELS="${TB_LEVELS:-1,2,4,8,16}"
-CTX="${TB_CTX:-30000}"
-GEN="${TB_GEN:-5000}"
+LEVELS="${TB_LEVELS:-1,2,4,8}"
+CTX="${TB_CTX:-15000}"
+GEN="${TB_GEN:-2000}"
 FREI_GIB="${TB_FREE_GIB:-95}"
 mkdir -p state/bench
 

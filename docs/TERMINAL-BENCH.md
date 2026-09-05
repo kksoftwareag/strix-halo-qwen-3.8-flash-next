@@ -4,12 +4,12 @@ Stand: 2026-09-05. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1 auf 
 
 ## Ergebnis
 
-| Quant | bestanden | Quote | Dauer | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| UD-IQ1_M · medium | 15/20 | 75% | 8 h 16 min | 459.008 | 15.4 | 0.3147 | 79.7 % |
-| UD-Q2_K_XL · medium | 16/20 | 80% | 7 h 36 min | 385.970 | 14.1 | 0.2246 | 82.7 % |
-| UD-IQ3_XXS · medium | 15/20 | 75% | 6 h 27 min | 273.296 | 11.8 | 0.1651 | 85.4 % |
-| UD-IQ4_XS · medium | 15/20 | 75% | 6 h 57 min | 343.555 | 13.7 | 0.0836 | 89.6 % |
+| Quant | pass@1 | Dauer | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |
+| --- | --- | --- | --- | --- | --- | --- |
+| UD-IQ1_M · medium | 15/20 | 8 h 16 min | 459.008 | 15.4 | 0.3147 | 79.7 % |
+| UD-Q2_K_XL · medium | 16/20 | 7 h 36 min | 385.970 | 14.1 | 0.2246 | 82.7 % |
+| UD-IQ3_XXS · medium | 15/20 | 6 h 27 min | 273.296 | 11.8 | 0.1651 | 85.4 % |
+| UD-IQ4_XS · medium | 15/20 | 6 h 57 min | 343.555 | 13.7 | 0.0836 | 89.6 % |
 
 ## Aufgaben im Einzelnen
 

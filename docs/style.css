@@ -62,6 +62,8 @@ figcaption{color:var(--muted);font-size:.9rem;margin-top:.4rem;max-width:48rem}
 .matrix td.pass{background:color-mix(in srgb,var(--ok) 18%,transparent)}
 .matrix td.fail{background:color-mix(in srgb,var(--bad) 14%,transparent)}
 .matrix td.err{background:color-mix(in srgb,var(--warn) 18%,transparent)}
+.matrix td.pass2{background:color-mix(in srgb,var(--ok) 10%,transparent);box-shadow:inset 3px 0 0 var(--ok)}
+.legend .l-pass2::before{background:color-mix(in srgb,var(--ok) 25%,transparent);box-shadow:inset 3px 0 0 var(--ok)}
 .matrix td.none{color:var(--muted)}
 .matrix .task{min-width:15rem}
 .matrix .meta{color:var(--muted);font-size:.82rem;display:block}

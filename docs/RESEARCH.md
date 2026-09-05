@@ -150,6 +150,29 @@ nur ~5 % (Messrauschen ~3 %). Temperatur 1.0 (Qwen-Empfehlung) kostet gegenüber
 | 4 | 42,4 t/s | 11,6 t/s | 1,8 s | 0 |
 | 8 | 50,4 t/s | 6,8 t/s | 2,7 s | 0 |
 
+**Parallelitätsgrenzen je Quant.** `-c` ist der Gesamtkontext über alle Slots; bei `-np 4 -c 262144` bekommt jeder
+Slot 65536 Token. Es zählen zwei Größen: KV- und Indexer-Cache mit **17952 Byte je Token** (0,55 GiB je 32k, gleich
+für alle Quants, weil nur 12 der 48 Layer Attention haben und der KV-Typ q8_0 ist) und der DeltaNet-Zustand mit
+**113 MiB je Slot**, unabhängig von der Kontextlänge. Der Kontext eines einzelnen Slots ist durch die Trainingslänge
+auf 262144 Token begrenzt, nicht durch den Speicher — diese 256k passen bei jedem Quant, auch bei UD-Q4_K_XL
+(94,1 GiB belegt, 6,4 GiB Spielraum).
+
+Höchstzahl gleichzeitiger Kontexte der angegebenen Größe (mit MTP / ohne MTP), berechnet mit `bench/context_limits.py`
+auf dem Speichermodell des Programms für 106,5 GiB freien Speicher, Prompt-Cache 2 GiB, ubatch 2048, 6 GiB Reserve; bei 64 abgeschnitten:
+
+| Quant | Gewichte resident | 16k je Slot | 32k | 64k | 128k | 256k |
+| --- | --- | --- | --- | --- | --- | --- |
+| UD-IQ1_M | 45,2 GiB | 64 / 64 | 64 / 64 | 37 / 42 | 19 / 22 | 10 / 11 |
+| UD-Q2_K_XL | 49,2 GiB | 64 / 64 | 63 / 64 | 34 / 39 | 18 / 20 | 9 / 10 |
+| UD-IQ3_XXS | 52,1 GiB | 64 / 64 | 59 / 64 | 32 / 37 | 17 / 19 | 8 / 9 |
+| UD-IQ4_XS | 63,0 GiB | 64 / 64 | 44 / 51 | 23 / 27 | 12 / 14 | 6 / 7 |
+| UD-Q4_K_XL | 79,5 GiB | 27 / 37 | 16 / 21 | 8 / 11 | 4 / 6 | 2 / 3 |
+
+Praktisch ist bei den kleinen Quants nicht der Speicher die Grenze, sondern der Durchsatz: Bei 8 Slots bleiben
+6,8 t/s je Anfrage (siehe Tabelle oben). Für Chat reicht das, für Agenten nicht — ein Agent mit 30000 Ausgabe-Token
+wartet dann 74 statt 25 Minuten. Deshalb laufen die Agenten-Benchmarks mit einem Slot. Dazu kommt: MTP lohnt nur bei
+einem Slot (bei 8 Slots 35 statt 50 t/s), und mehrere Slots brauchen auf gfx1151 den Patch aus Issue #25992.
+
 Mit MTP (UD-Q4_K_XL, n4/p0.75+ngram, sonst gleich): 1 Nutzer 35,9 t/s (Akzeptanz 82 %), 2 Nutzer Σ 30,8, 4 Nutzer Σ 35,5,
 8 Nutzer Σ 34,8 t/s (Akzeptanz 59–66 %). **MTP lohnt nur für Einzelnutzer**; ab 2 gleichzeitigen Anfragen liegt Continuous
 Batching ohne Draft vorn (bei 8 Nutzern 50 vs 35 t/s).

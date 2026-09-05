@@ -62,6 +62,52 @@ plus Indexer-Cache (K 128 + V 256 Dimensionen). Gemessen bei 32k q8_0: 408 + 153
 <p>Weil nur 12 der 48 Layer einen KV-Cache haben, sind 256k Kontext mit q8_0 nur 3,3 GB KV plus 0,8 GB Indexer.
 Die Kontextlänge ist bei diesem Modell vor allem eine Frage der Prompt-Processing-Geschwindigkeit, nicht des Speichers.</p>
 
+<h2>Gleichzeitige Kontexte</h2>
+<p>Mit <code>-np N</code> bedient der Server N Anfragen gleichzeitig. Der Wert von <code>-c</code> ist dabei der
+Gesamtkontext über alle Slots: Bei <code>-np 4 -c 262144</code> bekommt jeder Slot 65 536 Token. Zwei Größen bestimmen,
+was passt:</p>
+<ul>
+<li><strong>KV- und Indexer-Cache: 17 952 Byte je Token</strong>, also 0,55 GB je 32k Kontext – unabhängig vom Quant,
+weil nur 12 der 48 Layer Attention haben und der KV-Typ q8_0 ist.</li>
+<li><strong>DeltaNet-Zustand: 113 MB je Slot</strong>, unabhängig von der Kontextlänge. Bei 16 Slots sind das 1,8 GB.</li>
+</ul>
+<p>Der Kontext eines einzelnen Slots ist durch die Trainingslänge des Modells auf 262 144 Token begrenzt, nicht durch
+den Speicher: Diese 256k passen bei <em>jedem</em> Quant, auch bei UD-Q4_K_XL (94,1 GB belegt, 6,4 GB Spielraum).
+Erst bei mehreren Slots wird der Speicher zum Thema.</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>Quant</th><th class="num">Gewichte</th><th class="num">16k je Slot</th><th class="num">32k</th><th class="num">64k</th><th class="num">128k</th><th class="num">256k</th></tr></thead>
+<tbody>
+<tr><td>UD-IQ1_M</td><td class="num">45,2 GB</td><td class="num">64</td><td class="num">64</td><td class="num">37</td><td class="num">19</td><td class="num">10</td></tr>
+<tr><td>UD-Q2_K_XL</td><td class="num">49,2 GB</td><td class="num">64</td><td class="num">63</td><td class="num">34</td><td class="num">18</td><td class="num">9</td></tr>
+<tr><td>UD-IQ3_XXS</td><td class="num">52,1 GB</td><td class="num">64</td><td class="num">59</td><td class="num">32</td><td class="num">17</td><td class="num">8</td></tr>
+<tr><td>UD-IQ4_XS</td><td class="num">63,0 GB</td><td class="num">64</td><td class="num">44</td><td class="num">23</td><td class="num">12</td><td class="num">6</td></tr>
+<tr><td>UD-Q4_K_XL</td><td class="num">79,5 GB</td><td class="num">27</td><td class="num">16</td><td class="num">8</td><td class="num">4</td><td class="num">2</td></tr>
+</tbody></table></div>
+<p class="sub">Höchstzahl gleichzeitiger Kontexte der angegebenen Größe, mit MTP-Draft-Head, Prompt-Cache 2 GB,
+ubatch 2048, 6 GB Reserve für das Betriebssystem, bezogen auf 106,5 GB freien Speicher. Ohne MTP sind es etwa
+10 bis 30 Prozent mehr (UD-Q4_K_XL bei 32k: 21 statt 16), weil Draft-Modell und Draft-KV rund 3,3 GB kosten.
+Die Werte sind bei 64 Slots abgeschnitten; darüber ist der Wert ohnehin theoretisch. Nachrechnen mit <code>bench/context_limits.py</code>.</p>
+
+<h3>Was praktisch geht</h3>
+<p>Der Speicher ist bei den kleinen Quants nicht die Grenze – der Durchsatz ist es. Gemessen mit UD-IQ4_XS ohne MTP,
+20 480 Token je Slot:</p>
+<div class="tablewrap"><table>
+<thead><tr><th class="num">Slots</th><th class="num">Durchsatz gesamt</th><th class="num">je Anfrage</th><th class="num">Wartezeit bis zum ersten Token</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="num">20,4 t/s</td><td class="num">21,4 t/s</td><td class="num">0,6 s</td></tr>
+<tr><td class="num">2</td><td class="num">32,0 t/s</td><td class="num">17,2 t/s</td><td class="num">0,9 s</td></tr>
+<tr><td class="num">4</td><td class="num">42,4 t/s</td><td class="num">11,6 t/s</td><td class="num">1,8 s</td></tr>
+<tr><td class="num">8</td><td class="num">50,4 t/s</td><td class="num">6,8 t/s</td><td class="num">2,7 s</td></tr>
+</tbody></table></div>
+<p>Der Gesamtdurchsatz steigt bis 8 Slots noch, die einzelne Antwort wird aber immer langsamer: Bei 8 gleichzeitigen
+Nutzern bleiben 6,8 Token pro Sekunde je Anfrage. Für Chat ist das brauchbar, für Agenten nicht – ein Agent, der
+30 000 Token erzeugt, wartet dann 74 Minuten statt 25. Deshalb laufen die Agenten-Benchmarks mit einem Slot.</p>
+<p>Zwei weitere Einschränkungen: Spekulatives Decoding (MTP) bringt nur bei einem Slot etwas – bei 8 Slots sinkt der
+Durchsatz von 50 auf 35 t/s. Und mehrere Slots brauchen auf gfx1151 den Patch aus
+<a href="https://github.com/ggml-org/llama.cpp/issues/25992">llama.cpp #25992</a>, sonst liefert der Server ab dem
+zweiten Slot fehlerhafte Antworten.</p>
+
 </div></main>
 <footer><div class="wrap">Stand: 4. September 2026 · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next">kksoftwareag/strix-halo-qwen-3.8-flash-next</a> · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>
 </body>

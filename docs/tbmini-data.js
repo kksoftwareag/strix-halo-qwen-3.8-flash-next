@@ -1,5 +1,5 @@
 window.TBMINI = {
- "generated_at": "2026-09-06T06:54:12+00:00",
+ "generated_at": "2026-09-06T08:48:02+00:00",
  "tasks": [
   {
    "id": "pypi-server",
@@ -1612,7 +1612,22 @@ window.TBMINI = {
      "req_max_s": 292,
      "req_mean_s": 89,
      "attempts": 1,
-     "transcript": "transcripts/UD-IQ3_XXS-medium/extract-elf.json"
+     "transcript": "transcripts/UD-IQ3_XXS-medium/extract-elf.json",
+     "attempt2": {
+      "passed": false,
+      "duration_s": 1372,
+      "outcome": "nicht bestanden",
+      "tokens": {
+       "input": 136939,
+       "cached": 118099,
+       "output": 32883
+      },
+      "steps": 12,
+      "episodes": 12,
+      "model_s": 1311,
+      "tok_per_s": 25.1,
+      "timeout_s": 5400
+     }
     },
     "fix-git": {
      "passed": true,
@@ -1800,7 +1815,22 @@ window.TBMINI = {
      "req_max_s": 88,
      "req_mean_s": 40,
      "attempts": 1,
-     "transcript": "transcripts/UD-IQ3_XXS-medium/mteb-retrieve.json"
+     "transcript": "transcripts/UD-IQ3_XXS-medium/mteb-retrieve.json",
+     "attempt2": {
+      "passed": false,
+      "duration_s": 575,
+      "outcome": "nicht bestanden",
+      "tokens": {
+       "input": 22825,
+       "cached": 16646,
+       "output": 3471
+      },
+      "steps": 6,
+      "episodes": 6,
+      "model_s": 141,
+      "tok_per_s": 24.5,
+      "timeout_s": 5400
+     }
     },
     "nginx-request-logging": {
      "passed": true,
@@ -2173,7 +2203,22 @@ window.TBMINI = {
      "req_max_s": 211,
      "req_mean_s": 100,
      "attempts": 1,
-     "transcript": "transcripts/UD-IQ4_XS-medium/extract-elf.json"
+     "transcript": "transcripts/UD-IQ4_XS-medium/extract-elf.json",
+     "attempt2": {
+      "passed": true,
+      "duration_s": 3064,
+      "outcome": "bestanden",
+      "tokens": {
+       "input": 336474,
+       "cached": 307949,
+       "output": 63208
+      },
+      "steps": 22,
+      "episodes": 22,
+      "model_s": 2902,
+      "tok_per_s": 21.8,
+      "timeout_s": 5400
+     }
     },
     "fix-git": {
      "passed": true,
@@ -2361,7 +2406,22 @@ window.TBMINI = {
      "req_max_s": 52,
      "req_mean_s": 24,
      "attempts": 1,
-     "transcript": "transcripts/UD-IQ4_XS-medium/mteb-retrieve.json"
+     "transcript": "transcripts/UD-IQ4_XS-medium/mteb-retrieve.json",
+     "attempt2": {
+      "passed": false,
+      "duration_s": 477,
+      "outcome": "nicht bestanden",
+      "tokens": {
+       "input": 26213,
+       "cached": 20998,
+       "output": 2786
+      },
+      "steps": 8,
+      "episodes": 8,
+      "model_s": 114,
+      "tok_per_s": 24.4,
+      "timeout_s": 5400
+     }
     },
     "nginx-request-logging": {
      "passed": true,
@@ -2433,7 +2493,22 @@ window.TBMINI = {
      "req_max_s": 208,
      "req_mean_s": 54,
      "attempts": 1,
-     "transcript": "transcripts/UD-IQ4_XS-medium/overfull-hbox.json"
+     "transcript": "transcripts/UD-IQ4_XS-medium/overfull-hbox.json",
+     "attempt2": {
+      "passed": true,
+      "duration_s": 2336,
+      "outcome": "bestanden",
+      "tokens": {
+       "input": 346066,
+       "cached": 321157,
+       "output": 48442
+      },
+      "steps": 26,
+      "episodes": 26,
+      "model_s": 2059,
+      "tok_per_s": 23.5,
+      "timeout_s": 5400
+     }
     },
     "pypi-server": {
      "passed": true,
@@ -2532,8 +2607,8 @@ window.TBMINI = {
      "transcript": "transcripts/UD-IQ4_XS-medium/sqlite-with-gcov.json"
     }
    },
-   "passed_2": 16,
-   "passed_3": 16,
+   "passed_2": 18,
+   "passed_3": 18,
    "task_mean_s": 1253,
    "task_median_s": 757,
    "task_max_s": 4930,
@@ -2890,13 +2965,13 @@ window.TBMINI = {
    "server_log": "state/logs/tbench-server-20260906-082901.log",
    "command": "ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{\"reasoning_effort\": \"medium\"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4",
    "server": {
-    "requests": 19,
-    "prompt_tokens": 23248,
-    "generated_tokens": 32128,
-    "pp_tps": 279.1,
-    "tg_tps": 27.5,
-    "draft_accept": 0.721,
-    "draft_mean_len": 3.56,
+    "requests": 28,
+    "prompt_tokens": 32457,
+    "generated_tokens": 41205,
+    "pp_tps": 272.8,
+    "tg_tps": 27.1,
+    "draft_accept": 0.717,
+    "draft_mean_len": 3.67,
     "load_s": 45
    },
    "memory": [
@@ -3077,6 +3152,75 @@ window.TBMINI = {
     [
      "Verfügbar (MemAvailable)",
      "106.5 GiB"
+    ],
+    [
+     "Reserve OS/Page-Cache",
+     "6.0 GiB"
+    ],
+    [
+     "Spielraum",
+     "27.5 GiB"
+    ]
+   ],
+   "ctx_total": 163840,
+   "ctx_per_slot": 163840,
+   "slots": 1,
+   "apt_mirror": "ftp.fau.de (131.188.12.211)"
+  },
+  "UD-IQ4_XS-versuch2b": {
+   "log": "state/quality/tbmini-UD-IQ4_XS-versuch2b.log",
+   "server_log": "state/logs/tbench-server-20260906-090751.log",
+   "command": "ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-IQ4_XS/Qwen3.8-Flash-Next-UD-IQ4_XS-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{\"reasoning_effort\": \"medium\"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4",
+   "server": {
+    "requests": 56,
+    "prompt_tokens": 58649,
+    "generated_tokens": 114436,
+    "pp_tps": 260.0,
+    "tg_tps": 23.6,
+    "draft_accept": 0.717,
+    "draft_mean_len": 3.55,
+    "load_s": 54
+   },
+   "memory": [
+    [
+     "Gewichte (resident)",
+     "63.0 GiB"
+    ],
+    [
+     "PLE-Tabelle lazy (nicht resident)",
+     "26.8 GiB"
+    ],
+    [
+     "KV-Cache (12 Attn-Layer)",
+     "2.0 GiB"
+    ],
+    [
+     "Indexer-Cache",
+     "0.7 GiB"
+    ],
+    [
+     "DeltaNet-Zustand",
+     "0.1 GiB"
+    ],
+    [
+     "Compute-Buffer (Schätzung)",
+     "1.6 GiB"
+    ],
+    [
+     "MTP-Head + Draft-KV",
+     "3.4 GiB"
+    ],
+    [
+     "Prompt-Cache (max)",
+     "2.0 GiB"
+    ],
+    [
+     "Summe",
+     "72.9 GiB"
+    ],
+    [
+     "Verfügbar (MemAvailable)",
+     "106.4 GiB"
     ],
     [
      "Reserve OS/Page-Cache",

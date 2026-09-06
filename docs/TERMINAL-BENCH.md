@@ -9,9 +9,9 @@ Stand: 2026-09-06. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1 auf 
 | UD-IQ1_M · medium | 15/20 | **19/20** | 8 h 16 min | 24:49 | 20:50 | 459.008 | 15.4 | 0.3147 | 79.7 % |
 | UD-Q2_K_XL · medium | 16/20 | **18/20** | 7 h 36 min | 22:48 | 17:42 | 385.970 | 14.1 | 0.2246 | 82.7 % |
 | UD-IQ3_XXS · medium | 15/20 | **18/20** | 6 h 27 min | 19:22 | 16:32 | 273.296 | 11.8 | 0.1651 | 85.4 % |
-| UD-IQ4_XS · medium | 15/20 | **16/20** | 6 h 57 min | 20:53 | 12:37 | 343.555 | 13.7 | 0.0836 | 89.6 % |
+| UD-IQ4_XS · medium | 15/20 | **18/20** | 6 h 57 min | 20:53 | 12:37 | 343.555 | 13.7 | 0.0836 | 89.6 % |
 
-pass@2: Ein zweiter Versuch mit 5400 s statt 3600 s lief bisher für 14 der 19 gescheiterten Aufgaben; für die übrigen ist pass@2 = pass@1.
+pass@2: Jede im ersten Durchgang gescheiterte Aufgabe bekam genau einen zweiten Versuch, mit 5400 s Zeitlimit statt 3600 s.
 
 „Ø je Aufgabe“ und „Median“ beziehen sich auf den ersten Durchgang und zählen die volle Zeit je Aufgabe: Container-Aufbau, Arbeit des Agenten und Verifier.
 
@@ -34,11 +34,11 @@ pass@2: Ein zweiter Versuch mit 5400 s statt 3600 s lief bisher für 14 der 19 g
 | `llm-inference-batching-scheduler` | machine-learning | hard | Zeitlimit (1:00:30) → Zeitlimit (1:30:35) | **ja** (1:00:30) | Zeitlimit (1:00:38) → **ja** (34:04) | Zeitlimit (1:03:22) → **ja** (1:30:13) |
 | `configure-git-webserver` | system-administration | hard | **ja** (10:50) | nicht bestanden (6:45) → nicht bestanden (3:59) | nicht bestanden (6:20) → **ja** (5:12) | **ja** (5:48) |
 | `build-cython-ext` | debugging | medium | **ja** (35:11) | **ja** (30:07) | **ja** (33:24) | **ja** (28:09) |
-| `extract-elf` | file-operations | medium | Zeitlimit (1:00:29) → **ja** (32:36) | **ja** (26:53) | nicht bestanden (9:28) | nicht bestanden (17:32) |
+| `extract-elf` | file-operations | medium | Zeitlimit (1:00:29) → **ja** (32:36) | **ja** (26:53) | nicht bestanden (9:28) → nicht bestanden (22:52) | nicht bestanden (17:32) → **ja** (51:04) |
 | `build-pov-ray` | software-engineering | medium | nicht bestanden (42:18) → **ja** (42:01) | **ja** (1:00:44) | Zeitlimit (1:00:46) → **ja** (37:32) | Zeitlimit (1:00:48) → nicht bestanden (58:11) |
 | `openssl-selfsigned-cert` | security | medium | **ja** (3:09) | **ja** (3:48) | **ja** (2:28) | **ja** (6:24) |
-| `overfull-hbox` | debugging | easy | **ja** (21:26) | **ja** (21:15) | **ja** (15:58) | nicht bestanden (19:53) |
-| `mteb-retrieve` | data-science | medium | nicht bestanden (16:59) → **ja** (15:02) | nicht bestanden (13:36) → nicht bestanden (12:06) | nicht bestanden (21:15) | nicht bestanden (11:26) |
+| `overfull-hbox` | debugging | easy | **ja** (21:26) | **ja** (21:15) | **ja** (15:58) | nicht bestanden (19:53) → **ja** (38:56) |
+| `mteb-retrieve` | data-science | medium | nicht bestanden (16:59) → **ja** (15:02) | nicht bestanden (13:36) → nicht bestanden (12:06) | nicht bestanden (21:15) → nicht bestanden (9:35) | nicht bestanden (11:26) → nicht bestanden (7:57) |
 
 ## Einordnung
 

@@ -219,7 +219,16 @@ Gemessene Puffer (HIP): Compute 297 MiB @ub 512 bzw. 1188 MiB @ub 2048 (+121/233
 - Akzeptanz/Speedup von MTP bei Qwen-Sampling (temp 1.0) statt greedy; bester n_max/p_min-Punkt je Quant.
 - Rotation an (ohne Env) vs aus: Load-Verhalten und tg-Kosten.
 - EngramHalo: dzannotti-Head kompatibel? EasiiX-Q8_0-Sidecar (4,1 GB) mit höherer Akzeptanz [15].
-- Ob ein Rebase des lokalen Patches auf master ≥ 2026-09-01 (#28123 Rollback) die MTP-Kosten senkt.
+- Ob der Rollback des rekurrenten Zustands (#28123) die MTP-Kosten senkt. Der Commit ist am 2026-09-04 in master
+  gelandet und liegt als `engine/patches/0005-qwen4exp-upstream-28123-28023.patch` bereit (zusammen mit #28023,
+  einer schnelleren Indexer-Summe). Aus der Commit-Beschreibung: Ohne Rollback stuft llama.cpp den Kontext als
+  `SEQ_RM_TYPE_FULL` ein und schreibt den **gesamten rekurrenten Zustand bei jeder MTP-Runde in den Host-Speicher**,
+  „which costs more than the drafting saves". Beide Commits lassen sich sauber auf unseren Stand übertragen
+  (EngramHalo per Drei-Wege-Merge). Standardmäßig aus, weil ungemessen; `ENGINE_QWEN4EXP_PATCH=1` schaltet sie an.
+  Vorsicht: [Issue #28019](https://github.com/ggml-org/llama.cpp/issues/28019) meldet mit aktiviertem Rollback
+  Schäden am rekurrenten Zustand bei mehreren Sequenzen — bei einem Slot vermutlich unkritisch, aber ungeprüft.
+- Der MTP-Draft-Head ist weiterhin nicht in master (Stand 2026-09-06, 141 Commits nach unserem Basis-Commit);
+  Patch 0001 bleibt nötig. Der EngramHalo-Fork steht unverändert auf `60bce1a` vom 2026-09-03.
 
 **MTP bei mehreren Slots (vorbereitet, Messung steht aus).** Bei `-np N` mit Prompts ab etwa 19000 Token und mehreren
 Ubatches fällt die Draft-Akzeptanz auf 0,0, und MTP wird langsamer als kein MTP —

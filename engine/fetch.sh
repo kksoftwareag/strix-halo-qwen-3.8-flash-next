@@ -5,9 +5,13 @@
 # Patches:
 #   0001 qwen4exp-MTP-Draft-Head (nach dzannotti, PR #27836)
 #   0002 ROCm/iGPU-Host-Puffer (Issue #25992) – ohne den liefern mehrere Slots auf gfx1151 Unsinn
-# Optional, standardmäßig AUS (ENGINE_RING_PATCH=1 schaltet sie an):
+# Optional, standardmäßig AUS:
 #   0003 Scheduler-Ring-Puffer (PR #27311) – repariert kaputte Ausgaben bei mehreren Slots mit langen Prompts
-#   0004 Draft-Kontext je Sequenz statt gesamt (Issue #28433)
+#   0004 Draft-Kontext je Sequenz statt gesamt (Issue #28433)          [beide: ENGINE_RING_PATCH=1]
+#   0005 qwen4exp aus master: Rollback des rekurrenten Zustands (#28123) und schnellere Indexer-Summe (#28023)
+#        [ENGINE_QWEN4EXP_PATCH=1] – #28123 spart laut Commit-Text das Auslagern des gesamten rekurrenten
+#        Zustands bei jeder MTP-Runde; ungemessen, deshalb aus. Achtung: Issue #28019 meldet mit aktiviertem
+#        Rollback Schäden am rekurrenten Zustand bei mehreren Sequenzen.
 # Aus, weil alle dokumentierten Messwerte ohne die beiden entstanden sind und mehrere Slots bei langen
 # Prompts ohnehin keinen Durchsatz bringen (siehe docs/RESEARCH.md). Wer mit vielen Slots arbeitet,
 # schaltet sie ein und baut neu.
@@ -32,6 +36,9 @@ fetch_stock() {
   fi
   git -C "$HERE/src" fetch --quiet origin "$LLAMA_COMMIT" || true
   git -C "$HERE/src" checkout --quiet "$LLAMA_COMMIT"
+  if [[ "${ENGINE_QWEN4EXP_PATCH:-0}" == "1" ]]; then
+    apply_patch "$HERE/src" "$HERE/patches/0005-qwen4exp-upstream-28123-28023.patch"
+  fi
   apply_patch "$HERE/src" "$HERE/patches/0001-qwen4exp-mtp-draft-head-local.patch"
   apply_patch "$HERE/src" "$HERE/patches/0002-25992-rocm-igpu-host-buffer.patch"
   if [[ "${ENGINE_RING_PATCH:-0}" == "1" ]]; then
@@ -45,6 +52,10 @@ fetch_engramhalo() {
   fi
   git -C "$HERE/engramhalo-src" fetch --quiet origin "$EH_BRANCH" || true
   git -C "$HERE/engramhalo-src" checkout --quiet "$EH_COMMIT" 2>/dev/null || git -C "$HERE/engramhalo-src" checkout --quiet "$EH_BRANCH"
+  if [[ "${ENGINE_QWEN4EXP_PATCH:-0}" == "1" ]]; then
+    git -C "$HERE/engramhalo-src" fetch --quiet https://github.com/ggml-org/llama.cpp "$LLAMA_COMMIT" 2>/dev/null || true
+    apply_patch "$HERE/engramhalo-src" "$HERE/patches/0005-qwen4exp-upstream-28123-28023.patch"
+  fi
   if [[ "${ENGINE_RING_PATCH:-0}" == "1" ]]; then
     # Für den Drei-Wege-Merge braucht git die Blobs des llama.cpp-Basis-Commits.
     git -C "$HERE/engramhalo-src" fetch --quiet https://github.com/ggml-org/llama.cpp "$LLAMA_COMMIT" 2>/dev/null || \

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory · Qwen3.8-Flash-Next on Strix Halo</title>
+<meta name="description" content="Documentation of the decisions, measurements and sources for running Qwen3.8-Flash-Next with llama.cpp on AMD Strix Halo.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next on Strix Halo</a><nav><a href="index.html">Overview</a><a href="decisions.html">Decisions</a><a href="memory.html" aria-current="page">Memory</a><a href="measurements.html">Measurements</a><a href="terminal-bench.html">Terminal-Bench</a><a href="guide.html">Guide</a><a href="research.html">Research & sources</a><a class="gh" href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a></nav></div></header>
+<main><div class="wrap">
+<h1>Memory</h1>
+<p class="lead">Memory model on unified-memory systems, size of the quantizations, behavior of the embedding table per engine, and how the memory requirement is calculated.</p>
+
+<h2>Memory split on Strix Halo</h2>
+<p>A Strix Halo has one memory shared by CPU and GPU. On the test machine the operating system sees 109.7 GB;
+of that the GPU gets 16 GB fixed (VRAM) and may use the rest as GTT. Everything shares the same physical RAM:
+weights, KV cache, compute buffers, the embedding table, the page cache and the operating system.</p>
+
+<div class="note">GTT memory does not show up in the RSS of the process. Tools such as <code>top</code> therefore report usage
+50 to 80 GB too low. <code>MemAvailable</code> from <code>/proc/meminfo</code> is reliable.</div>
+
+<h2>Quantizations</h2>
+<div class="tablewrap"><table>
+<tr><th>Quant</th><th class="num">File</th><th class="num">of which experts</th><th class="num">Weights in GPU</th><th class="num">KLD</th><th class="num">Top-1</th></tr>
+<tr><td>UD-Q2_K_XL</td><td class="num">73.4 GB</td><td class="num">42.9</td><td class="num">46.6</td><td class="num">0.225</td><td class="num">82.7%</td></tr>
+<tr><td>UD-IQ3_XXS</td><td class="num">76.3 GB</td><td class="num">45.3</td><td class="num">49.5</td><td class="num">0.165</td><td class="num">85.4%</td></tr>
+<tr><td>UD-IQ4_XS</td><td class="num">87.2 GB</td><td class="num">55.4</td><td class="num">60.4</td><td class="num">0.084</td><td class="num">89.6%</td></tr>
+<tr><td>UD-Q4_K_XL</td><td class="num">103.7 GB</td><td class="num">71.7</td><td class="num">76.9</td><td class="num">0.047</td><td class="num">92.3%</td></tr>
+</table></div>
+<p>All four contain the same <code>per_layer_token_embd</code> table: 160 × 320 million entries, IQ4_NL, 26.8 GB.
+The only difference between the quants is the precision of the routed experts. (GB here means GiB; unsloth
+states decimal GB.)</p>
+
+<h2>Embedding table per engine and load mode</h2>
+<div class="tablewrap"><table>
+<tr><th>Engine and load mode</th><th>Table</th><th>Load time Q4_K_XL</th><th>Requirement Q4_K_XL + MTP</th></tr>
+<tr><td>llama.cpp, <code>--load-mode auto</code></td><td>entirely in RAM (28 GB anonymous)</td><td>28 s</td><td class="bad">over 107 GB → OOM</td></tr>
+<tr><td>llama.cpp, <code>--load-mode mmap</code></td><td>lazy (page cache)</td><td class="bad">140 minutes</td><td>≈ 82 GB</td></tr>
+<tr><td>EngramHalo, <code>-lm none</code></td><td>lazy, 2.7 GB resident</td><td class="ok">28 s</td><td class="ok">84.7 GB</td></tr>
+<tr><td>EngramHalo, <code>-lm mmap</code></td><td>lazy</td><td class="ok">39 s</td><td class="ok">83.4 GB</td></tr>
+</table></div>
+<p>Cause of the long mmap load time on the stock fork: the weights are read page by page via page faults, without readahead,
+and the page cache competes with the GTT for the same RAM. As soon as the model no longer fits into memory twice,
+pages are evicted and read again: 149 GB of reads for a 104 GB file. EngramHalo issues readahead hints
+and frees the page cache behind the upload.</p>
+
+<h2>Memory estimate in the program</h2>
+<ul>
+<li>Weights in the GPU (file minus table) plus 2.7 GB of table with EngramHalo, otherwise plus 26.8 GB.</li>
+<li>KV cache of the 12 full-attention layers: 2 KV heads × 256 dimensions → 24 KB per token at f16, 12.75 KB at q8_0;
+plus indexer cache (K 128 + V 256 dimensions). Measured at 32k q8_0: 408 + 153 MB.</li>
+<li>Recurrent DeltaNet state: 113 MB per slot, independent of the context.</li>
+<li>Compute buffer: 297 MB at ubatch 512, 1188 MB at ubatch 2048 (measured), plus host buffer.</li>
+<li>MTP draft model 2.1 GB plus its own compute and KV buffer.</li>
+<li>Prompt cache (<code>--cache-ram</code>) as the upper bound; 6 GB reserve for operating system and page cache.</li>
+</ul>
+<p>Example, default preset (EngramHalo, Q4_K_XL, 128k, MTP): estimated 90.0 GB, measured 89.7 GB.</p>
+
+<h2>Context length</h2>
+<p>Because only 12 of the 48 layers have a KV cache, 256k of context with q8_0 is only 3.3 GB of KV plus 0.8 GB of indexer.
+With this model the context length is above all a question of prompt-processing speed, not of memory.</p>
+
+<h2>Concurrent contexts</h2>
+<p>With <code>-np N</code> the server serves N requests at the same time. The value of <code>-c</code> is then the
+total context across all slots: with <code>-np 4 -c 262144</code> each slot gets 65,536 tokens. Two quantities determine
+what fits:</p>
+<ul>
+<li><strong>KV and indexer cache: 17,952 bytes per token</strong>, that is 0.55 GB per 32k of context – independent of the quant,
+because only 12 of the 48 layers have attention and the KV type is q8_0.</li>
+<li><strong>DeltaNet state: 113 MB per slot</strong>, independent of the context length. With 16 slots that is 1.8 GB.</li>
+</ul>
+<p>The context of a single slot is limited to 262,144 tokens by the training length of the model, not by
+memory: these 256k fit with <em>every</em> quant, including UD-Q4_K_XL (94.1 GB used, 6.4 GB headroom).
+Only with several slots does memory become an issue.</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>Quant</th><th class="num">Weights</th><th class="num">16k per slot</th><th class="num">32k</th><th class="num">64k</th><th class="num">128k</th><th class="num">256k</th></tr></thead>
+<tbody>
+<tr><td>UD-IQ1_M</td><td class="num">45.2 GB</td><td class="num">64</td><td class="num">64</td><td class="num">37</td><td class="num">19</td><td class="num">10</td></tr>
+<tr><td>UD-Q2_K_XL</td><td class="num">49.2 GB</td><td class="num">64</td><td class="num">63</td><td class="num">34</td><td class="num">18</td><td class="num">9</td></tr>
+<tr><td>UD-IQ3_XXS</td><td class="num">52.1 GB</td><td class="num">64</td><td class="num">59</td><td class="num">32</td><td class="num">17</td><td class="num">8</td></tr>
+<tr><td>UD-IQ4_XS</td><td class="num">63.0 GB</td><td class="num">64</td><td class="num">44</td><td class="num">23</td><td class="num">12</td><td class="num">6</td></tr>
+<tr><td>UD-Q4_K_XL</td><td class="num">79.5 GB</td><td class="num">27</td><td class="num">16</td><td class="num">8</td><td class="num">4</td><td class="num">2</td></tr>
+</tbody></table></div>
+<p class="sub">Maximum number of concurrent contexts of the given size, with MTP draft head, prompt cache 2 GB,
+ubatch 2048, 6 GB reserve for the operating system, based on 106.5 GB of free memory. Without MTP it is about
+10 to 30 percent more (UD-Q4_K_XL at 32k: 21 instead of 16), because the draft model and draft KV cost around 3.3 GB.
+The values are cut off at 64 slots; above that the number is theoretical anyway. Recalculate with <code>bench/context_limits.py</code>.</p>
+
+<h3>What works in practice</h3>
+<p>With the small quants memory is not the limit – throughput is. Measured with UD-IQ4_XS without MTP,
+20,480 tokens per slot:</p>
+<div class="tablewrap"><table>
+<thead><tr><th class="num">Slots</th><th class="num">Total throughput</th><th class="num">per request</th><th class="num">Time to first token</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="num">20.4 t/s</td><td class="num">21.4 t/s</td><td class="num">0.6 s</td></tr>
+<tr><td class="num">2</td><td class="num">32.0 t/s</td><td class="num">17.2 t/s</td><td class="num">0.9 s</td></tr>
+<tr><td class="num">4</td><td class="num">42.4 t/s</td><td class="num">11.6 t/s</td><td class="num">1.8 s</td></tr>
+<tr><td class="num">8</td><td class="num">50.4 t/s</td><td class="num">6.8 t/s</td><td class="num">2.7 s</td></tr>
+</tbody></table></div>
+<p>Total throughput still rises up to 8 slots, but the individual response keeps getting slower: with 8 concurrent
+users, 6.8 tokens per second per request remain. That is usable for chat, but not for agents – an agent that
+produces 30,000 tokens then waits 74 minutes instead of 25. That is why the agent benchmarks run with one slot.</p>
+<p>Two further limitations: speculative decoding (MTP) only helps with one slot – with 8 slots throughput drops
+from 50 to 35 t/s. And on gfx1151 several slots need the patch from
+<a href="https://github.com/ggml-org/llama.cpp/issues/25992">llama.cpp #25992</a>, otherwise the server returns
+faulty responses from the second slot onwards.</p>
+
+<h3>Measured with long prompts (2026-09-05)</h3>
+<p>The numbers above come from a test with short prompts. With prompts typical of agents it looks different:
+one text of its own per user of around 16,000 tokens, 2,000 tokens of response, MTP on, UD-IQ4_XS.</p>
+<div class="tablewrap"><table>
+<thead><tr><th class="num">Slots</th><th class="num">Prompt tokens</th><th class="num">generated tokens</th><th class="num">Duration</th><th class="num">Total tokens/s</th><th class="num">per request</th><th class="num">Draft acceptance</th><th class="num">clean responses</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="num">16,253</td><td class="num">1,130</td><td class="num">86 s</td><td class="num">203</td><td class="num">29.9 t/s</td><td class="num">0.70</td><td class="num">1 of 1</td></tr>
+<tr><td class="num">2</td><td class="num">32,624</td><td class="num">1,192</td><td class="num">141 s</td><td class="num">240</td><td class="num">14.2 t/s</td><td class="num">0.69</td><td class="num">2 of 2</td></tr>
+<tr><td class="num">4</td><td class="num">65,144</td><td class="num">3,378</td><td class="num">307 s</td><td class="num">223</td><td class="num">6.5 t/s</td><td class="num">0.71</td><td class="num">4 of 4</td></tr>
+<tr><td class="num">8</td><td class="num">130,457</td><td class="num">7,011</td><td class="num">678 s</td><td class="num">203</td><td class="num">2.8 t/s</td><td class="num">0.60</td><td class="num bad">2 of 8</td></tr>
+</tbody></table></div>
+<p><strong>Parallelism gains nothing here.</strong> The total throughput of prompt and output tokens lies at every
+level between 203 and 240 tokens per second – eight slots process just as much in the same time as one. With
+short prompts throughput rises with the number of slots, because the machine idles between tokens; with long
+prompts it is already fully occupied by a single stream, and more slots merely spread the same performance over more waiting requests.
+The individual response slows from 29.9 to 2.8 tokens per second in the process.</p>
+<p><strong>On top of that, the output breaks at eight slots.</strong> Every user was to begin their response with a
+prescribed code word. With one to four slots that always works; with eight only two out of eight manage it –
+two responses stay empty, one repeats the prompt, three corrupt the code word by one or two characters. No
+slot ever gets to see another slot's code word, so there is no cross-talk between the slots; the damage
+arises within the individual response. That matches the description in
+<a href="https://github.com/ggml-org/llama.cpp/issues/27572">llama.cpp issue #27572</a>, where with several slots and
+long prompts garbage gets into the context of the MTP head.</p>
+<p><strong>Consequence for operation:</strong> for work with long context – agents, code analysis, long documents – one
+slot. Several slots are only worth it with short prompts, that is chat. The fix for the output problem is available as
+<code>engine/patches/0003-27311-uma-ring-buffer.patch</code>, but has not been built: it would fix the broken
+responses, but not the missing throughput gain – and that is the actual reason to run one slot with long
+context.</p>
+
+</div></main>
+<footer><div class="wrap">Last updated: 4 September 2026 · Measurements on a Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) under Fedora 44, ROCm/HIP 7.1 · Project: <a href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next">kksoftwareag/strix-halo-qwen-3.8-flash-next</a> · These pages live in the <code>docs/</code> folder of the project</div></footer>
+</body>
+</html>

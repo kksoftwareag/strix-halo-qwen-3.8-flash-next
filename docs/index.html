@@ -1,56 +1,56 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Überblick · Qwen3.8-Flash-Next auf Strix Halo</title>
-<meta name="description" content="Dokumentation der Entscheidungen, Messungen und Quellen zum Betrieb von Qwen3.8-Flash-Next mit llama.cpp auf AMD Strix Halo.">
+<title>Overview · Qwen3.8-Flash-Next on Strix Halo</title>
+<meta name="description" content="Documentation of the decisions, measurements and sources for running Qwen3.8-Flash-Next with llama.cpp on AMD Strix Halo.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html" aria-current="page">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="terminal-bench.html">Terminal-Bench</a><a href="anleitung.html">Anleitung</a><a href="recherche.html">Recherche & Quellen</a><a class="gh" href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a></nav></div></header>
+<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next on Strix Halo</a><nav><a href="index.html" aria-current="page">Overview</a><a href="decisions.html">Decisions</a><a href="memory.html">Memory</a><a href="measurements.html">Measurements</a><a href="terminal-bench.html">Terminal-Bench</a><a href="guide.html">Guide</a><a href="research.html">Research & sources</a><a class="gh" href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a></nav></div></header>
 <main><div class="wrap">
-<h1>Überblick</h1>
-<p class="lead">Dokumentation zum Betrieb von Qwen3.8-Flash-Next mit llama.cpp auf AMD Strix Halo (128 GB Unified Memory): Konfiguration, Speichermodell, Messungen und Quellen.</p>
+<h1>Overview</h1>
+<p class="lead">Documentation on running Qwen3.8-Flash-Next with llama.cpp on AMD Strix Halo (128 GB unified memory): configuration, memory model, measurements and sources.</p>
 
 <div class="cards">
-<div class="card"><h3>Empfohlene Konfiguration</h3><div class="big">UD-Q4_K_XL + MTP</div><div class="sub">EngramHalo.cpp, 128k Kontext, 33–41 Tokens/s, 85 GB Speicher</div></div>
-<div class="card"><h3>Speicherbedarf mit Standard-llama.cpp</h3><div class="big bad">über 107 GB</div><div class="sub">UD-Q4_K_XL + MTP passt nicht in 128 GB (Kernel-OOM), siehe Speicher</div></div>
-<div class="card"><h3>Mehrnutzer-Durchsatz</h3><div class="big">50 t/s</div><div class="sub">Gesamtdurchsatz bei 8 gleichzeitigen Anfragen, ohne MTP</div></div>
+<div class="card"><h3>Recommended configuration</h3><div class="big">UD-Q4_K_XL + MTP</div><div class="sub">EngramHalo.cpp, 128k context, 33–41 tokens/s, 85 GB memory</div></div>
+<div class="card"><h3>Memory requirement with standard llama.cpp</h3><div class="big bad">over 107 GB</div><div class="sub">UD-Q4_K_XL + MTP does not fit into 128 GB (kernel OOM), see Memory</div></div>
+<div class="card"><h3>Multi-user throughput</h3><div class="big">50 t/s</div><div class="sub">Total throughput with 8 concurrent requests, without MTP</div></div>
 </div>
 
-<h2>Einführung</h2>
-<p>Qwen3.8-Flash-Next ist ein großes Mixture-of-Experts-Modell (125 Milliarden Parameter, 6 Milliarden aktiv) mit einer
-Besonderheit: einer 51-Milliarden-Parameter-Tabelle für n-Gram-Embeddings. Auf einem Strix-Halo-Rechner mit 128 GB
-Unified Memory passt das Modell nur, wenn Engine, Quantisierung, Lade-Modus und Kontext zusammenpassen. Diese Seite
-dokumentiert, welche Entscheidungen dabei getroffen wurden, warum, und was gemessen wurde.</p>
+<h2>Introduction</h2>
+<p>Qwen3.8-Flash-Next is a large mixture-of-experts model (125 billion parameters, 6 billion active) with one
+peculiarity: a 51-billion-parameter table for n-gram embeddings. On a Strix Halo machine with 128 GB of
+unified memory the model only fits if engine, quantization, load mode and context fit together. This page
+documents which decisions were made, why, and what was measured.</p>
 
-<p>Das zugehörige Werkzeug ist ein Terminal-Programm (Python/Textual), das die Konfiguration übernimmt, den Speicherbedarf
-vorab berechnet, den Server startet und überwacht und Benchmarks ausführt. Siehe <a href="anleitung.html">Anleitung</a>.</p>
+<p>The accompanying tool is a terminal program (Python/Textual) that takes care of the configuration, computes the memory
+requirement in advance, starts and monitors the server and runs benchmarks. See <a href="guide.html">Guide</a>.</p>
 <figure>
-<img src="screenshot-konfiguration.png" width="1136" height="919" alt="Konfigurations-Tab des Terminal-Programms: links Auswahlfelder für Engine, Quant, Lade-Modus und KV-Cache, rechts die Speicherbilanz mit Bewertung, Warnungen und die fertige Kommandozeile" loading="lazy">
-<figcaption>Konfigurations-Tab des Terminal-Programms. Rechts stehen Speicherbilanz, Warnungen und die erzeugte Kommandozeile.</figcaption>
+<img src="screenshot-configuration.png" width="1136" height="919" alt="Configuration tab of the terminal program: on the left selection fields for engine, quant, load mode and KV cache, on the right the memory budget with rating, warnings and the finished command line" loading="lazy">
+<figcaption>Configuration tab of the terminal program. On the right are the memory budget, warnings and the generated command line.</figcaption>
 </figure>
 
-<h2>Zusammenfassung</h2>
+<h2>Summary</h2>
 <ol>
-<li><strong>Speicher:</strong> Die n-Gram-Tabelle ist in jedem Quant 26,8 GB groß. Standard-llama.cpp lädt sie auf ROCm zusätzlich zu den
-GPU-Gewichten in den RAM. <a href="speicher.html">Speicher</a></li>
-<li><strong>Engine:</strong> EngramHalo.cpp (Strix-Halo-Fork) lässt die Tabelle auf der NVMe, lädt in unter 30 Sekunden und macht den
-besten Quant mit MTP nutzbar. <a href="entscheidungen.html#engine">Entscheidung</a></li>
-<li><strong>MTP:</strong> Spekulatives Decoding erhöht den Durchsatz bei einem Nutzer von 21 auf 33–41 Tokens/s; ab zwei gleichzeitigen
-Nutzern senkt es den Gesamtdurchsatz. <a href="benchmarks.html#mtp">Messungen</a></li>
-<li><strong>MTP-Head:</strong> Der dzannotti-Head hat die Tensornamen, die die Builds erwarten; der unsloth-Head setzt einen anderen Fork
-voraus. <a href="entscheidungen.html#mtp-head">Entscheidung</a></li>
-<li><strong>Backend:</strong> ROCm/HIP. Vulkan ist beim reinen Decode oft schneller, verliert mit MTP bei diesem Modell jedoch deutlich.
-<a href="entscheidungen.html#backend">Entscheidung</a></li>
+<li><strong>Memory:</strong> The n-gram table is 26.8 GB in every quant. On ROCm, standard llama.cpp loads it into RAM in addition to the
+GPU weights. <a href="memory.html">Memory</a></li>
+<li><strong>Engine:</strong> EngramHalo.cpp (Strix Halo fork) leaves the table on the NVMe, loads in under 30 seconds and makes the
+best quant usable with MTP. <a href="decisions.html#engine">Decision</a></li>
+<li><strong>MTP:</strong> Speculative decoding raises throughput for a single user from 21 to 33–41 tokens/s; from two concurrent
+users on it lowers total throughput. <a href="measurements.html#mtp">Measurements</a></li>
+<li><strong>MTP head:</strong> The dzannotti head has the tensor names the builds expect; the unsloth head requires a different
+fork. <a href="decisions.html#mtp-head">Decision</a></li>
+<li><strong>Backend:</strong> ROCm/HIP. Vulkan is often faster at plain decoding, but loses clearly with MTP on this model.
+<a href="decisions.html#backend">Decision</a></li>
 </ol>
 
-<h2>Decode-Geschwindigkeit (ein Nutzer)</h2>
-<div class="bars"><div class="bar"><span class="label">Q4_K_XL ohne MTP</span><span class="track"><span class="fill" style="width:51%"></span></span><span class="val">20.8 t/s</span></div><div class="bar"><span class="label">Q4_K_XL mit MTP (Code)</span><span class="track"><span class="fill" style="width:88%"></span></span><span class="val">36.1 t/s</span></div><div class="bar"><span class="label">Q4_K_XL mit MTP (Reasoning)</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">41 t/s</span></div><div class="bar"><span class="label">IQ4_XS mit MTP</span><span class="track"><span class="fill" style="width:89%"></span></span><span class="val">36.5 t/s</span></div><div class="bar"><span class="label">IQ3_XXS mit MTP</span><span class="track"><span class="fill" style="width:84%"></span></span><span class="val">34.4 t/s</span></div></div>
-<p class="sub">EngramHalo.cpp, 32k Kontext, KV-Cache q8_0, dzannotti-Head. Alle Zahlen: <a href="benchmarks.html">Messungen</a>.</p>
+<h2>Decode speed (single user)</h2>
+<div class="bars"><div class="bar"><span class="label">Q4_K_XL without MTP</span><span class="track"><span class="fill" style="width:51%"></span></span><span class="val">20.8 t/s</span></div><div class="bar"><span class="label">Q4_K_XL with MTP (code)</span><span class="track"><span class="fill" style="width:88%"></span></span><span class="val">36.1 t/s</span></div><div class="bar"><span class="label">Q4_K_XL with MTP (reasoning)</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">41 t/s</span></div><div class="bar"><span class="label">IQ4_XS with MTP</span><span class="track"><span class="fill" style="width:89%"></span></span><span class="val">36.5 t/s</span></div><div class="bar"><span class="label">IQ3_XXS with MTP</span><span class="track"><span class="fill" style="width:84%"></span></span><span class="val">34.4 t/s</span></div></div>
+<p class="sub">EngramHalo.cpp, 32k context, KV cache q8_0, dzannotti head. All numbers: <a href="measurements.html">Measurements</a>.</p>
 
 </div></main>
-<footer><div class="wrap">Stand: 4. September 2026 · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next">kksoftwareag/strix-halo-qwen-3.8-flash-next</a> · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>
+<footer><div class="wrap">As of 4 September 2026 · Measurements on a Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) under Fedora 44, ROCm/HIP 7.1 · Project: <a href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next">kksoftwareag/strix-halo-qwen-3.8-flash-next</a> · These pages are in the <code>docs/</code> folder of the project</div></footer>
 </body>
 </html>

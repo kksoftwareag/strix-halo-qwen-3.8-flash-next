@@ -757,10 +757,10 @@ class Qwen38App(App):
 
     # ------------------------------------------------------------------ Hilfe
     def _help_text(self) -> str:
-        p = PROJECT_DIR / "docs" / "HILFE.md"
+        p = PROJECT_DIR / "docs" / "HELP.md"
         if p.exists():
             return p.read_text()
-        return "# Hilfe\n\nDokumentation fehlt (docs/HILFE.md)."
+        return "# Hilfe\n\nDokumentation fehlt (docs/HELP.md)."
 
 
 def probe_fast() -> int:

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research & sources · Qwen3.8-Flash-Next on Strix Halo</title>
+<meta name="description" content="Documentation of the decisions, measurements and sources for running Qwen3.8-Flash-Next with llama.cpp on AMD Strix Halo.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next on Strix Halo</a><nav><a href="index.html">Overview</a><a href="decisions.html">Decisions</a><a href="memory.html">Memory</a><a href="measurements.html">Measurements</a><a href="terminal-bench.html">Terminal-Bench</a><a href="guide.html">Guide</a><a href="research.html" aria-current="page">Research & sources</a><a class="gh" href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a></nav></div></header>
+<main><div class="wrap">
+<h1>Research & sources</h1>
+<p class="lead">How the research was done, model facts, alternatives to llama.cpp, open points and the list of sources.</p>
+
+<h2>Approach</h2>
+<p>The research ran along several strands: official model card and configuration, unsloth documentation of the quants,
+llama.cpp pull requests and issues on model support and on MTP, community reports on Strix Halo (forums, blogs,
+fork documentation), and alternatives to llama.cpp. Every statement was checked, where possible, against the source code of the local
+builds and against our own measurements. The short version is in the project file <a href="RESEARCH.md"><code>docs/RESEARCH.md</code></a>.</p>
+
+<h2>Model</h2>
+<ul>
+<li>125 billion parameters, 6 billion active, plus a 51-billion n-gram embedding and a 4-billion MTP head. 48 layers:
+twelve times three gated DeltaNet layers plus one sparse-attention layer. 512 experts, 10 active plus 1 shared.</li>
+<li>Context 262144 native, up to 1 million with YaRN.</li>
+<li>Thinking on by default; <code>reasoning_effort</code> xhigh (default), medium, low; <code>enable_thinking</code> to switch it off.</li>
+<li>Sampling: thinking temp 1.0 / top_p 0.95 / top_k 20; non-thinking temp 0.7 / top_p 0.8 / presence 1.5.</li>
+</ul>
+
+<h2>Alternatives to llama.cpp (as of September 2026)</h2>
+<p>None of them runs this model on a single Strix Halo: vLLM is validated only on MI355X and all vLLM checkpoints
+leave the embedding table in BF16 (126 to 173 GB). SGLang rejects gfx1151. ik_llama.cpp supports the model, but not
+ROCm. Ollama offers only MLX variants. LM Studio and Lemonade use upstream llama.cpp without MTP. The real competition
+are Strix Halo forks of llama.cpp.</p>
+
+<h2>Quality benchmarks</h2>
+<p>Which benchmarks (KL divergence, Aider Polyglot, HumanEval+, IFEval, SWE-bench Verified Mini, Terminal-Bench 2.0, DeepSWE)
+are suitable for the quant comparison within an 8-hour budget is set out, with effort estimates and example commands, in
+<a href="QUALITY-BENCHMARKS.md"><code>docs/QUALITY-BENCHMARKS.md</code></a>.</p>
+
+<h2>Open points</h2>
+<ul>
+<li>The EasiiX Q8_0 MTP head (4 GB) is said to have higher acceptance; not tested.</li>
+<li>A rebase of the MTP patch onto llama.cpp with PR #28123 (recurrence rollback) could speed MTP up further.</li>
+<li>Vulkan with the patched sources has not been measured.</li>
+<li>Governor “performance” and tuned “accelerator-performance” were not measured; all numbers were produced with powersave/balanced.</li>
+</ul>
+
+<h2>Sources</h2>
+<ol>
+<li><a href="https://huggingface.co/Qwen/Qwen3.8-Flash-Next">Qwen3.8-Flash-Next model card</a></li>
+<li><a href="https://huggingface.co/Qwen/Qwen3.8-Flash-Next/raw/main/config.json">config.json of the model</a></li>
+<li><a href="https://unsloth.ai/docs/models/qwen3.8-next">unsloth: quants, KLD table, MTP</a></li>
+<li><a href="https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF">unsloth GGUF repository</a> and <a href="https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/blob/main/MTP/README.md">MTP README</a></li>
+<li><a href="https://huggingface.co/dzannotti/Qwen3.8-Flash-Next-MTP-GGUF">dzannotti MTP head and patch</a></li>
+<li><a href="https://github.com/Aristo94/EngramHalo.cpp">EngramHalo.cpp</a> (branch strix-halo-qwen4exp, docs/strix-halo)</li>
+<li><a href="https://github.com/abliter8-ai/qwen-3.8-next-flash-amd-strix-halo">Independent reproduction on a 128 GB Strix Halo</a></li>
+<li><a href="https://github.com/ggml-org/llama.cpp/pull/27742">llama.cpp PR #27742 (qwen4exp)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/27836">#27836 (MTP, draft)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/28123">#28123 (rollback)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/28243">#28243 (unsloth MTP)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/21038">#21038 (KV rotation)</a>, <a href="https://github.com/ggml-org/llama.cpp/issues/25992">#25992 (multi-slot bug)</a>, <a href="https://github.com/ggml-org/llama.cpp/issues/22629">#22629 (cache-ram)</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/28136">#28136 (lazy-mode on-direct)</a></li>
+<li><a href="https://github.com/ggml-org/llama.cpp/discussions/23470">KV cache quantization: KLD comparison</a></li>
+<li><a href="https://www.soothill.io/blog/2026/08/03/llamacpp-vulkan-vs-rocm-strix-halo/">Vulkan vs. ROCm on Strix Halo</a></li>
+<li><a href="https://github.com/lemonade-sdk/lemonade/issues/2624">rocWMMA-FA on Strix Halo</a></li>
+<li><a href="https://rocmdocs.amd.com/en/develop/how-to/system-optimization/strixhalo.html">AMD: Strix Halo system optimization</a></li>
+<li><a href="https://github.com/kyuz0/amd-strix-halo-toolboxes">kyuz0 Strix-Halo-Toolboxes</a></li>
+<li><a href="https://recipes.vllm.ai/Qwen/Qwen3.8-Flash-Next">vLLM recipe (MI355X only)</a></li>
+<li><a href="https://github.com/ggml-org/llama.cpp/discussions/25198">MTP tuning on high-end GPUs</a></li>
+</ol>
+
+</div></main>
+<footer><div class="wrap">Last updated: 4 September 2026 · Measurements on a Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) under Fedora 44, ROCm/HIP 7.1 · Project: <a href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next">kksoftwareag/strix-halo-qwen-3.8-flash-next</a> · These pages live in the <code>docs/</code> folder of the project</div></footer>
+</body>
+</html>

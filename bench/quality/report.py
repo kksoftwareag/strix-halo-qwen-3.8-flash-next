@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Ergebnisse der Terminal-Bench-Mini-Läufe einsammeln und aufbereiten.
+"""Collect and prepare the results of the Terminal-Bench-Mini runs.
 
-Liest die exportierten Ergebnisse aus state/quality/tbench, die Aufgaben-Metadaten aus dem
-Benchmark und die genauen Server-Kommandos aus den Lauf-Logs. Schreibt:
+Reads the exported results from state/quality/tbench, the task metadata from the benchmark
+and the exact server command lines from the run logs. Writes:
 
-  docs/tbmini-data.js    Datensatz für die interaktive Seite (window.TBMINI = {...})
-  docs/TERMINAL-BENCH.md Dokumentation mit Tabellen
+  docs/tbmini-data.js    data set for the interactive page (window.TBMINI = {...})
+  docs/TERMINAL-BENCH.md documentation with tables
 
   bench/quality/report.py [--results DIR] [--out-json DATEI] [--out-md DATEI]
 """
@@ -24,10 +24,10 @@ TASKS_DIR = HERE / "terminal-bench-mini" / "tasks"
 SUBSET = HERE / "terminal-bench-mini" / "subsets" / "full.txt"
 RESULTS = PROJECT / "state" / "quality" / "tbench"
 RESULTS2 = PROJECT / "state" / "quality" / "tbench-versuch2"   # zweiter Versuch
-RESULTS3 = PROJECT / "state" / "quality" / "tbench-versuch3"   # dritter Versuch, nur Zeitlimit-Fälle
+RESULTS3 = PROJECT / "state" / "quality" / "tbench-versuch3"   # third attempt, time-limit cases only
 LOGS = PROJECT / "state" / "quality"
 
-# Reihenfolge der Quants von klein nach groß
+# quant order, smallest first
 QUANT_ORDER = ["UD-IQ1_M", "UD-Q2_K_XL", "UD-IQ3_XXS", "UD-IQ4_XS", "UD-Q4_K_XL"]
 # Messwerte aus docs/RESEARCH.md (unsloth-KLD-Tabelle)
 QUANT_FACTS = {
@@ -62,7 +62,7 @@ def task_meta() -> list[dict]:
 
 
 def server_commands() -> dict[str, dict]:
-    """Zu jedem Quant das exakte Server-Kommando und die Speicherbilanz aus dem Lauf-Log."""
+    """For each quant: the exact server command line and the memory breakdown from the run log."""
     out: dict[str, dict] = {}
     for log in sorted(LOGS.glob("tbmini-*.log")):
         key = log.name[len("tbmini-"):-len(".log")]
@@ -94,7 +94,7 @@ JOBS = HERE / "terminal-bench-mini"
 
 
 def trial_details(rel_trial: str | None) -> dict:
-    """Zusatzangaben aus dem Harbor-Trial: Episoden und Dauer der längsten Modellanfrage."""
+    """Extra details from the Harbor trial: episodes and the duration of the longest model request."""
     if not rel_trial:
         return {}
     f = JOBS / rel_trial / "result.json"
@@ -129,7 +129,7 @@ RE_DRAFT = re.compile(r"draft acceptance = ([\d.]+) \(\s*(\d+) accepted /\s*(\d+
 
 
 def server_stats(path: Path) -> dict:
-    """Durchsatz und MTP-Akzeptanz aus dem Server-Log zusammenzählen."""
+    """Sum up throughput and MTP acceptance from the server log."""
     if not path.is_file():
         return {}
     text = path.read_text(errors="replace")
@@ -180,9 +180,9 @@ def load_runs(results: Path) -> list[dict]:
                 "tokens": r.get("tokens") or {},
                 "peak_context": (att.get("tokens") or {}).get("peak_context"),
                 "exception": att.get("exception"),
-                "outcome": ("bestanden" if r.get("passed") else
-                            "Zeitlimit" if exc_type == "AgentTimeoutError" else
-                            "Abbruch" if exc_type else "nicht bestanden"),
+                "outcome": ("passed" if r.get("passed") else
+                            "time limit" if exc_type == "AgentTimeoutError" else
+                            "aborted" if exc_type else "not passed"),
                 "exception_type": det.get("exception_type"),
                 "exception_message": det.get("exception_message"),
                 "episodes": det.get("episodes"),
@@ -262,12 +262,30 @@ REPO_RESULTS = HERE / "results"
 DOCS_TRANSCRIPTS = PROJECT / "docs" / "transcripts"
 
 
+# Die Speicherbilanz kommt aus dem deutschsprachigen Programm; für die englische Doku übersetzt.
+MEMORY_LABELS = {
+    "Gewichte (resident)": "weights (resident)",
+    "PLE-Tabelle lazy (nicht resident)": "embedding table, lazy (not resident)",
+    "KV-Cache (12 Attn-Layer)": "KV cache (12 attention layers)",
+    "Indexer-Cache": "indexer cache",
+    "DeltaNet-Zustand": "DeltaNet state",
+    "Compute-Buffer (gemessen)": "compute buffer (measured)",
+    "Compute-Buffer (Schätzung)": "compute buffer (estimated)",
+    "MTP-Head + Draft-KV": "MTP head + draft KV",
+    "Prompt-Cache (max)": "prompt cache (max)",
+    "Summe": "total",
+    "Verfügbar (MemAvailable)": "available (MemAvailable)",
+    "Reserve OS/Page-Cache": "reserved for OS/page cache",
+    "Spielraum": "headroom",
+}
+
+
 def run_slug(quant: str | None, effort: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "-", f"{quant or 'unbekannt'}-{effort}")
 
 
 def copy_results(results: Path) -> tuple[int, int]:
-    """Ergebnisse ins Repo spiegeln: Kennzahlen nach bench/quality/results, Transkripte nach docs/."""
+    """Mirror results into the repo: metrics to bench/quality/results, transcripts to docs/."""
     n = t = 0
     for summary in sorted(results.glob("*/*_results/summary.json")):
         src = summary.parent
@@ -295,7 +313,7 @@ def copy_results(results: Path) -> tuple[int, int]:
 
 
 def second_attempts(root: Path) -> dict[tuple[str, str], dict]:
-    """Ergebnisse des zweiten Versuchs, geschlüsselt nach (Quant, Denkstufe)."""
+    """Results of the second attempt, keyed by (quant, reasoning effort)."""
     out: dict[tuple[str, str], dict] = {}
     if not root.is_dir():
         return out
@@ -313,9 +331,9 @@ def second_attempts(root: Path) -> dict[tuple[str, str], dict]:
             per[r["task"]] = {
                 "passed": bool(r.get("passed")),
                 "duration_s": round((r.get("duration_ms") or 0) / 1000),
-                "outcome": ("bestanden" if r.get("passed") else
-                            "Zeitlimit" if exc == "AgentTimeoutError" else
-                            "Abbruch" if exc else "nicht bestanden"),
+                "outcome": ("passed" if r.get("passed") else
+                            "time limit" if exc == "AgentTimeoutError" else
+                            "aborted" if exc else "not passed"),
                 "tokens": r.get("tokens") or {},
                 "steps": r.get("agent_steps"),
                 "episodes": det.get("episodes"),
@@ -345,18 +363,18 @@ def markdown(data: dict) -> str:
     part = [r for r in runs if (r["total_tasks"] or 0) < 20]
     L: list[str] = []
     add = L.append
-    add("# Terminal-Bench-Mini-20: Ergebnisse\n")
-    add(f"Stand: {data['generated_at'][:10]}. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench "
-        f"{(full[0].get('tb_version') if full else None) or '2.1'} auf dieser Maschine, ein Quant nach dem anderen. "
-        "Aufbau und Bedienung: [`bench/quality/README.md`](../bench/quality/README.md), Einordnung in "
-        "[`QUALITAETS-BENCHMARKS.md`](QUALITAETS-BENCHMARKS.md).\n")
+    add("# Terminal-Bench-Mini-20: results\n")
+    add(f"As of {data['generated_at'][:10]}. Agent benchmark with 20 tasks from Terminal-Bench "
+        f"{(full[0].get('tb_version') if full else None) or '2.1'} on this machine, one quant after another. "
+        "Setup and usage: [`bench/quality/README.md`](../bench/quality/README.md), context in "
+        "[`QUALITY-BENCHMARKS.md`](QUALITY-BENCHMARKS.md).\n")
 
-    add("## Ergebnis\n")
+    add("## Result\n")
     if full:
         zwei = any(r.get("has_attempt2") for r in full)
         drei = any(r.get("has_attempt3") for r in full)
         add("| Quant | pass@1 | " + ("pass@2 | " if zwei else "") + ("pass@3 | " if drei else "") +
-            "Dauer | Ø je Aufgabe | Median | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |")
+            "Duration | avg per task | median | output tokens | tokens/s over the run | KLD | top-1 |")
         add("| --- | --- | " + ("--- | " if zwei else "") + ("--- | " if drei else "") +
             "--- | --- | --- | --- | --- | --- | --- |")
         for r in full:
@@ -373,7 +391,7 @@ def markdown(data: dict) -> str:
             add(f"| {r['label']} | {r['passed_tasks']}/{r['total_tasks']} | {p2}"
                 f"{hm(r['duration_s'])} | {hms(r['task_mean_s'] or 0)} | {hms(r['task_median_s'] or 0)} | "
                 f"{out_tok:,} | {tps:.1f} | {f.get('kld', '–')} | "
-                f"{str(f.get('top1', '–')) + (' %' if f.get('top1') else '')} |".replace(",", "."))
+                f"{str(f.get('top1', '–')) + ('%' if f.get('top1') else '')} |")
         if zwei:
             tmo = next((r.get("attempt2_timeout_s") for r in full if r.get("attempt2_timeout_s")), None)
             add("")
@@ -381,25 +399,25 @@ def markdown(data: dict) -> str:
             wiederholt = sum(1 for r in full for d in r["per_task"].values() if d.get("attempt2"))
             t1 = full[0].get("agent_timeout_s") or 3600
             if wiederholt >= gescheitert:
-                add(f"pass@2: Jede im ersten Durchgang gescheiterte Aufgabe bekam genau einen zweiten Versuch, "
-                    f"mit {tmo or 5400} s Zeitlimit statt {t1} s.")
+                add(f"pass@2: every task that failed in the first round got exactly one second attempt, with a "
+                    f"{tmo or 5400} s time limit instead of {t1} s.")
             else:
-                add(f"pass@2: Ein zweiter Versuch mit {tmo or 5400} s statt {t1} s lief bisher für {wiederholt} der "
-                    f"{gescheitert} gescheiterten Aufgaben; für die übrigen ist pass@2 = pass@1.")
+                add(f"pass@2: a second attempt with {tmo or 5400} s instead of {t1} s has run for {wiederholt} of the "
+                    f"{gescheitert} failed tasks so far; for the rest, pass@2 = pass@1.")
             if drei:
                 t3 = next((r.get("attempt3_timeout_s") for r in full if r.get("attempt3_timeout_s")), 10800)
-                add(f"pass@3 zählt einen dritten Versuch mit {t3} s, der nur für die Aufgaben lief, die auch im "
-                    "zweiten Anlauf am Zeitlimit scheiterten.")
+                add(f"pass@3 counts a third attempt with {t3} s, run only for the tasks that hit the time limit in the "
+                    "second attempt as well.")
             add("")
-            add("„Ø je Aufgabe“ und „Median“ beziehen sich auf den ersten Durchgang und zählen die volle Zeit je "
-                "Aufgabe: Container-Aufbau, Arbeit des Agenten und Verifier.")
+            add("\u201cAvg per task\u201d and \u201cmedian\u201d refer to the first round and count the full time per "
+                "task: container setup, the agent's work and the verifier.")
     else:
-        add("_Noch keine vollständigen Läufe._")
+        add("_No complete runs yet._")
     add("")
 
     if full:
-        add("## Aufgaben im Einzelnen\n")
-        head = "| Aufgabe | Kategorie | Schwierigkeit | " + " | ".join(r["label"] for r in full) + " |"
+        add("## Tasks in detail\n")
+        head = "| Task | Category | Difficulty | " + " | ".join(r["label"] for r in full) + " |"
         add(head)
         add("| --- | --- | --- | " + " | ".join("---" for _ in full) + " |")
         for t in tasks:
@@ -409,60 +427,58 @@ def markdown(data: dict) -> str:
                 if not d:
                     cells.append("–")
                 elif d["passed"]:
-                    cells.append(f"**ja** ({hms(d['duration_s'])})")
+                    cells.append(f"**yes** ({hms(d['duration_s'])})")
                 else:
-                    txt = f"{d.get('outcome', 'nein')} ({hms(d['duration_s'])})"
+                    txt = f"{d.get('outcome', 'no')} ({hms(d['duration_s'])})"
                     for a in (d.get("attempt2"), d.get("attempt3")):
                         if a:
-                            txt += (f" → **ja** ({hms(a['duration_s'])})" if a["passed"]
-                                    else f" → {a.get('outcome', 'nein')} ({hms(a['duration_s'])})")
+                            txt += (f" → **yes** ({hms(a['duration_s'])})" if a["passed"]
+                                    else f" → {a.get('outcome', 'no')} ({hms(a['duration_s'])})")
                     cells.append(txt)
             add(f"| `{t['id']}` | {t['category']} | {t['difficulty']} | " + " | ".join(cells) + " |")
         add("")
 
     if full:
-        add("## Einordnung\n")
-        add("Das Projekt, aus dem der Benchmark stammt, veröffentlicht Läufe anderer Modelle auf vergleichbarer "
-            "Hardware (Strix Halo, 128 GB): 11 bis 18 von 20 Aufgaben – allerdings mit **zwei** Versuchen je Aufgabe "
-            "und einem Zeitlimit von drei Stunden. Die Zahlen hier sind mit einem Versuch gemessen und deshalb eher "
-            "konservativ.\n")
-        add("Zwei Dinge dazu, bevor man Quants anhand einzelner Aufgaben vergleicht:\n")
-        add("- Bei 20 Aufgaben liegt das 95-%-Intervall um ein Ergebnis bei rund ±11 Prozentpunkten. Ein Unterschied "
-            "von ein bis zwei Aufgaben zwischen zwei Quants ist Rauschen.")
-        add("- Gemessen wird mit `temp 1.0`, also nicht deterministisch. In einem verworfenen Vorlauf mit 30-Minuten-"
-            "Limit war `configure-git-webserver` bestanden, im gewerteten Lauf nicht – bei einem Agenten, der nach "
-            "sieben Minuten fertig war, lag das nicht am Zeitlimit.")
+        add("## How to read this\n")
+        add("The project the benchmark comes from publishes runs of other models on comparable hardware "
+            "(Strix Halo, 128 GB): 11 to 18 of 20 tasks — but with **two** attempts per task and a three-hour time "
+            "limit. The numbers here are measured with one attempt and are therefore on the conservative side.\n")
+        add("Two caveats before comparing quants on individual tasks:\n")
+        add("- With 20 tasks, the 95% interval around a result is about ±11 percentage points. A difference of one "
+            "or two tasks between two quants is noise.")
+        add("- Measurements use `temp 1.0`, so they are not deterministic. In a discarded preliminary run with a "
+            "30-minute limit, `configure-git-webserver` passed; in the run that counts, it did not — with an agent "
+            "that finished after seven minutes, that was not the time limit.")
         add("")
 
-        add("## Durchsatz und Draft-Akzeptanz\n")
-        add("| Quant | Anfragen | Prompt-Token | erzeugte Token | Prompt t/s | Decode t/s | MTP-Akzeptanz | mittlere Draft-Länge |")
+        add("## Throughput and draft acceptance\n")
+        add("| Quant | requests | prompt tokens | generated tokens | prompt t/s | decode t/s | MTP acceptance | mean draft length |")
         add("| --- | --- | --- | --- | --- | --- | --- | --- |")
         for r in full:
             cmds0 = data.get("commands") or {}
             st = ((cmds0.get(r["log_key"]) or cmds0.get(r["quant"]) or {}).get("server")) or {}
             def g(key):
                 v = st.get(key)
-                return f"{v:,}".replace(",", ".") if isinstance(v, int) else ("–" if v is None else str(v))
+                return f"{v:,}" if isinstance(v, int) else ("–" if v is None else str(v))
             add(f"| {r['label']} | {g('requests')} | {g('prompt_tokens')} | {g('generated_tokens')} | "
                 f"{g('pp_tps')} | {g('tg_tps')} | {g('draft_accept')} | {g('draft_mean_len')} |")
         add("")
-        add("Die Werte stammen aus dem Server-Log des jeweiligen Laufs (alle Anfragen des Agenten, "
-            "nicht nur die Antworten, die in die Wertung eingehen). `Decode t/s` ist die reine "
-            "Erzeugungsrate, gemittelt über alle Anfragen.")
+        add("The values come from the server log of each run (all requests the agent made, not only the answers "
+            "that count towards the score). `Decode t/s` is the pure generation rate, averaged over all requests.")
         add("")
 
-        add("### Tempo je Aufgabe\n")
-        add("Ausgabe-Token geteilt durch die Zeit, die der Agent tatsächlich auf das Modell gewartet hat "
-            "(Summe aller Antwortzeiten). Der Wert liegt unter der reinen Decode-Rate, weil jede Anfrage "
-            "auch den Prompt verarbeitet; er sagt, wie schnell der Agent bei dieser Aufgabe vorankam.\n")
-        add("| Aufgabe | " + " | ".join(f"{r['label']} t/s" for r in full) + " | " +
-            " | ".join(f"{r['label']} Modellzeit" for r in full) + " |")
+        add("### Speed per task\n")
+        add("Output tokens divided by the time the agent actually waited for the model (the sum of all response "
+            "times). The value is below the pure decode rate because every request also processes the prompt; it "
+            "says how fast the agent made progress on that task.\n")
+        add("| Task | " + " | ".join(f"{r['label']} t/s" for r in full) + " | " +
+            " | ".join(f"{r['label']} model time" for r in full) + " |")
         add("| --- | " + " | ".join("---" for _ in full * 2) + " |")
         for t in tasks:
             rates, times = [], []
             for r in full:
                 d = r["per_task"].get(t["id"]) or {}
-                rates.append(f"{d['tok_per_s']:.1f}".replace(".", ",") if d.get("tok_per_s") else "–")
+                rates.append(f"{d['tok_per_s']:.1f}" if d.get("tok_per_s") else "–")
                 times.append(hms(d["model_s"]) if d.get("model_s") else "–")
             add(f"| `{t['id']}` | " + " | ".join(rates) + " | " + " | ".join(times) + " |")
         add("")
@@ -471,30 +487,29 @@ def markdown(data: dict) -> str:
             secs = sum(d["model_s"] for d in r["per_task"].values() if d.get("model_s"))
             toks = sum((d.get("tokens") or {}).get("output") or 0 for d in r["per_task"].values())
             if vals:
-                komma = lambda x, n=1: f"{x:.{n}f}".replace(".", ",")
-                add(f"- {r['label']}: {komma(min(vals))} bis {komma(max(vals))} t/s je Aufgabe, über alle "
-                    f"Aufgaben {komma(toks / secs)} t/s; der Agent wartete {hm(secs)} auf das Modell, "
-                    f"das sind {secs / r['duration_s'] * 100:.0f} % der Laufzeit.")
+                add(f"- {r['label']}: {min(vals):.1f} to {max(vals):.1f} t/s per task, {toks / secs:.1f} t/s "
+                    f"across all tasks; the agent waited {hm(secs)} for the model, which is "
+                    f"{secs / r['duration_s'] * 100:.0f}% of the run time.")
         add("")
 
-    add("## Ausführung\n")
+    add("## How it was run\n")
     ref = full[0] if full else {}
     rev = (ref.get("tb_revision") or "")[:12]
     add(f"- Benchmark: {ref.get('benchmark') or 'Terminal-Bench-Local'}, Terminal-Bench "
-        f"{ref.get('tb_version') or '2.1'}{f' (Revision `{rev}`)' if rev else ''}, "
+        f"{ref.get('tb_version') or '2.1'}{f' (revision `{rev}`)' if rev else ''}, "
         f"Harbor {ref.get('harbor_version') or '0.20.0'}, Agent Terminus-2")
-    add("- Ein Versuch je Aufgabe (pass@1), ein Stream (`-np 1`), MTP als Draft-Head aktiv, "
+    add("- One attempt per task (pass@1), a single stream (`-np 1`), MTP draft head active, "
         "`reasoning_effort: medium`")
     tmo = next((r.get("agent_timeout_s") for r in full if r.get("agent_timeout_s")), None)
     if tmo:
-        über = sum(1 for t in tasks if (t.get("task_timeout_s") or 0) <= tmo)
-        add(f"- Zeitlimit {tmo} s je Aufgabe statt der 3 Stunden, die der Benchmark voreinstellt; bei "
-            f"{über} der {len(tasks)} Aufgaben liegt das über dem Limit, das die Aufgabe selbst vorgibt")
-    add("- Container je Aufgabe: 1 CPU, 2 GB RAM (nur `overfull-hbox`: 2 CPUs, 4 GB)")
+        above = sum(1 for t in tasks if (t.get("task_timeout_s") or 0) <= tmo)
+        add(f"- Time limit {tmo} s per task instead of the 3 hours the benchmark defaults to; for "
+            f"{above} of the {len(tasks)} tasks that is above the limit the task itself specifies")
+    add("- Container per task: 1 CPU, 2 GB RAM (only `overfull-hbox`: 2 CPUs, 4 GB)")
     if full:
         r = full[0]
-        add(f"- Engine: {r['engine']} {r['engine_version']}, Backend {r['backend']} {r['backend_version']}, "
-            f"Kontext {r['n_ctx']}")
+        add(f"- Engine: {r['engine']} {r['engine_version']}, backend {r['backend']} {r['backend_version']}, "
+            f"context {r['n_ctx']}")
     add("")
     cmds = data.get("commands") or {}
     for r in full + part:
@@ -507,19 +522,19 @@ def markdown(data: dict) -> str:
         add("```")
         if c.get("memory"):
             add("")
-            add("| Posten | Größe |")
+            add("| Item | Size |")
             add("| --- | --- |")
             for k, v in c["memory"]:
-                add(f"| {k} | {v} |")
+                add(f"| {MEMORY_LABELS.get(k, k)} | {v} |")
         add("")
     if part:
-        add("## Weitere Läufe\n")
+        add("## Other runs\n")
         for r in part:
-            add(f"- {r['label']}: {r['passed_tasks']}/{r['total_tasks']} Aufgaben "
-                f"({hm(r['duration_s'])}), Profil `{r['inference_profile']}`")
+            add(f"- {r['label']}: {r['passed_tasks']}/{r['total_tasks']} tasks "
+                f"({hm(r['duration_s'])}), profile `{r['inference_profile']}`")
         add("")
-    add("Rohdaten: `state/quality/tbench/`, Transkripte und Verifier-Ausgaben unter "
-        "`bench/quality/terminal-bench-mini/jobs/`. Interaktive Ansicht: "
+    add("Raw data: `state/quality/tbench/`, transcripts and verifier output under "
+        "`bench/quality/terminal-bench-mini/jobs/`. Interactive view: "
         "[terminal-bench.html](terminal-bench.html).")
     return "\n".join(L) + "\n"
 
@@ -529,7 +544,7 @@ def main() -> int:
     ap.add_argument("--results", default=str(RESULTS))
     ap.add_argument("--out-json", default=str(PROJECT / "docs" / "tbmini-data.js"))
     ap.add_argument("--out-md", default=str(PROJECT / "docs" / "TERMINAL-BENCH.md"))
-    ap.add_argument("--no-copy", action="store_true", help="Ergebnisse nicht ins Repo spiegeln")
+    ap.add_argument("--no-copy", action="store_true", help="do not mirror results into the repo")
     a = ap.parse_args()
 
     data = {
@@ -541,11 +556,11 @@ def main() -> int:
     }
     if not a.no_copy:
         n, t = copy_results(Path(a.results))
-        print(f"{n} Ergebnisdateien nach {REPO_RESULTS.relative_to(PROJECT)}, "
-              f"{t} Transkripte nach {DOCS_TRANSCRIPTS.relative_to(PROJECT)} gespiegelt")
+        print(f"mirrored {n} result files to {REPO_RESULTS.relative_to(PROJECT)} and "
+              f"{t} transcripts to {DOCS_TRANSCRIPTS.relative_to(PROJECT)}")
     Path(a.out_json).write_text("window.TBMINI = " + json.dumps(data, ensure_ascii=False, indent=1) + ";\n")
     Path(a.out_md).write_text(markdown(data))
-    print(f"{len(data['runs'])} Läufe, {len(data['tasks'])} Aufgaben -> {a.out_json}, {a.out_md}")
+    print(f"{len(data['runs'])} runs, {len(data['tasks'])} tasks -> {a.out_json}, {a.out_md}")
     for r in data["runs"]:
         print(f"  {r['quant']:12} {r['passed_tasks']}/{r['total_tasks']}  {hms(r['duration_s'])}")
     return 0

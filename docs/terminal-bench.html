@@ -1,64 +1,63 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Terminal-Bench – Qwen3.8-Flash-Next auf Strix Halo</title>
+<title>Terminal-Bench – Qwen3.8-Flash-Next on Strix Halo</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next auf Strix Halo</a><nav><a href="index.html">Überblick</a><a href="entscheidungen.html">Entscheidungen</a><a href="speicher.html">Speicher</a><a href="benchmarks.html">Messungen</a><a href="terminal-bench.html" aria-current="page">Terminal-Bench</a><a href="anleitung.html">Anleitung</a><a href="recherche.html">Recherche &amp; Quellen</a><a class="gh" href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a></nav></div></header>
+<header><div class="wrap"><a class="brand" href="index.html">Qwen3.8-Flash-Next on Strix Halo</a><nav><a href="index.html">Overview</a><a href="decisions.html">Decisions</a><a href="memory.html">Memory</a><a href="measurements.html">Measurements</a><a href="terminal-bench.html" aria-current="page">Terminal-Bench</a><a href="guide.html">Guide</a><a href="research.html">Research &amp; sources</a><a class="gh" href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a></nav></div></header>
 <main><div class="wrap">
 
 <h1>Terminal-Bench-Mini-20</h1>
-<p class="lead">Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1: Der Agent bekommt eine Shell in einem
-Docker-Container und muss echte Arbeit erledigen – Pakete bauen, Dienste konfigurieren, Fehler suchen. Gewertet wird
-nur, was der Verifier der Aufgabe akzeptiert.</p>
+<p class="lead">Agent benchmark with 20 tasks from Terminal-Bench 2.1: the agent gets a shell in a Docker
+container and has to do real work – build packages, configure services, hunt down bugs. Only what the task's verifier
+accepts counts.</p>
 
 <div class="note" id="conditions">
-<strong>Messbedingungen:</strong> <span id="cond-effort">Denkmodus <code>medium</code></span> ·
-<span id="cond-attempts">ein Versuch je Aufgabe (pass@1)</span> · ein Stream, keine parallelen Anfragen · spekulatives Decoding (MTP) aktiv ·
-60 Minuten Zeitlimit je Aufgabe · <span id="cond-ctx">163 840</span> Token Kontext ·
-Agent Terminus-2 über Harbor. Der Denkmodus wirkt stark auf Token-Zahl und Laufzeit und ist deshalb Teil
-der Kennung jedes Laufs.
+<strong>Measurement conditions:</strong> <span id="cond-effort">reasoning effort <code>medium</code></span> ·
+<span id="cond-attempts">one attempt per task (pass@1)</span> · a single stream, no parallel requests · speculative decoding (MTP) active ·
+60 minutes time limit per task · <span id="cond-ctx">163,840</span> tokens of context ·
+agent Terminus-2 via Harbor. The reasoning effort strongly affects token count and run time and is therefore part
+of each run's identity.
 </div>
 
 <div id="summary" class="cards"></div>
 <div id="bars"></div>
 
-<h2>Aufgaben im Vergleich</h2>
-<p>Eine Zelle zeigt, ob der Quant die Aufgabe gelöst hat, wie lange der Agent dafür gebraucht hat und wie
-schnell das Modell dabei Token erzeugt hat. Ein Klick öffnet die Einzelheiten: Episoden, Anfragen, Zeit im
-Modell, Token, größter Kontext, Fehlerursache – und das vollständige Transkript des Agenten mit
-Gedankengang, Kommandos und Terminal-Ausgabe.</p>
+<h2>Tasks side by side</h2>
+<p>A cell shows whether the quant solved the task, how long the agent took and how fast the model generated
+tokens. Click to open the details: episodes, requests, time in the model, tokens, peak context, cause of failure –
+and the agent's full transcript with its reasoning, commands and terminal output.</p>
 
 <div class="controls">
-  <label>Schwierigkeit<select id="f-diff"><option value="">alle</option></select></label>
-  <label>Kategorie<select id="f-cat"><option value="">alle</option></select></label>
-  <label>Ergebnis<select id="f-out">
-    <option value="">alle</option>
-    <option value="pass">irgendwo bestanden</option>
-    <option value="fail">nirgends bestanden</option>
-    <option value="split">unterschiedlich</option>
+  <label>Difficulty<select id="f-diff"><option value="">all</option></select></label>
+  <label>Category<select id="f-cat"><option value="">all</option></select></label>
+  <label>Outcome<select id="f-out">
+    <option value="">all</option>
+    <option value="pass">passed somewhere</option>
+    <option value="fail">passed nowhere</option>
+    <option value="split">mixed</option>
   </select></label>
-  <label>Sortierung<select id="f-sort">
-    <option value="subset">Reihenfolge im Benchmark</option>
-    <option value="name">Name</option>
-    <option value="pass">meiste Fehlschläge zuerst</option>
-    <option value="dur">längste Laufzeit zuerst</option>
-    <option value="tps">langsamstes Tempo zuerst</option>
-    <option value="diff">Schwierigkeit</option>
+  <label>Sort<select id="f-sort">
+    <option value="subset">benchmark order</option>
+    <option value="name">name</option>
+    <option value="pass">most failures first</option>
+    <option value="dur">longest run time first</option>
+    <option value="tps">slowest speed first</option>
+    <option value="diff">difficulty</option>
   </select></label>
-  <button id="f-reset" type="button">zurücksetzen</button>
+  <button id="f-reset" type="button">reset</button>
 </div>
-<div class="legend"><span class="l-pass">bestanden</span><span class="l-fail">nicht bestanden</span><span class="l-err">Zeitlimit erreicht oder Abbruch</span><span class="l-pass2">im zweiten Versuch bestanden</span></div>
+<div class="legend"><span class="l-pass">passed</span><span class="l-fail">not passed</span><span class="l-err">time limit or abort</span><span class="l-pass2">passed on a later attempt</span></div>
 <div class="tablewrap"><table class="matrix" id="matrix"></table></div>
 <p id="count" class="empty"></p>
 
-<h2>Ausführung</h2>
+<h2>How it was run</h2>
 <div id="setup"></div>
 
-<dialog id="detail"><button class="close" type="button" aria-label="schließen">×</button><div id="detail-body"></div></dialog>
+<dialog id="detail"><button class="close" type="button" aria-label="close">×</button><div id="detail-body"></div></dialog>
 
 </div></main>
 <footer><div class="wrap">Stand: <span id="stand">–</span> · Messungen auf einem Ryzen AI MAX+ 395 (Radeon 8060S, 128 GB) unter Fedora 44, ROCm/HIP 7.1 · Projekt: <a href="https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next">kksoftwareag/strix-halo-qwen-3.8-flash-next</a> · Diese Seiten liegen im Ordner <code>docs/</code> des Projekts</div></footer>
@@ -73,27 +72,27 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const hms = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
     return h ? h + ":" + String(m).padStart(2, "0") + ":" + String(x).padStart(2, "0") : m + ":" + String(x).padStart(2, "0"); };
-  const num = n => (n == null ? "–" : n.toLocaleString("de-DE"));
+  const num = n => (n == null ? "–" : n.toLocaleString("en-US"));
   const hm = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.round(s % 3600 / 60);
     return h ? h + " h " + m + " min" : m + " min"; };
 
-  if (D.generated_at) $("stand").textContent = new Date(D.generated_at).toLocaleDateString("de-DE",
+  if (D.generated_at) $("stand").textContent = new Date(D.generated_at).toLocaleDateString("en-GB",
     { year: "numeric", month: "long", day: "numeric" });
 
   if (!runs.length) {
-    $("summary").innerHTML = '<p class="empty">Noch keine abgeschlossenen Läufe. Die Seite füllt sich, sobald ' +
-      '<code>bench/quality/report.py</code> nach einem Durchlauf neue Daten schreibt.</p>';
+    $("summary").innerHTML = '<p class="empty">No completed runs yet. The page fills up once ' +
+      '<code>bench/quality/report.py</code> writes new data after a run.</p>';
     $("matrix").innerHTML = "";
     $("setup").innerHTML = '<p class="empty">–</p>';
     return;
   }
 
   const efforts = [...new Set(runs.map(r => r.effort).filter(Boolean))];
-  if (efforts.length) $("cond-effort").innerHTML = "Denkmodus " + efforts.map(e => "<code>" + esc(e) + "</code>").join(" und ");
+  if (efforts.length) $("cond-effort").innerHTML = "reasoning effort " + efforts.map(e => "<code>" + esc(e) + "</code>").join(" and ");
   const ctxs = [...new Set(runs.map(r => r.n_ctx).filter(Boolean))];
-  if (ctxs.length) $("cond-ctx").textContent = ctxs.map(c => c.toLocaleString("de-DE")).join(" / ");
+  if (ctxs.length) $("cond-ctx").textContent = ctxs.map(c => c.toLocaleString("en-US")).join(" / ");
 
-  /* Karten und Balken */
+  /* cards and bars */
   $("summary").innerHTML = runs.map(r => {
     const f = (D.quant_facts || {})[r.quant] || {};
     const best = r.passed_3 != null ? r.passed_3 : (r.passed_2 != null ? r.passed_2 : r.passed_tasks);
@@ -102,9 +101,9 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
         ? r.passed_tasks + " → " + best + "/" + r.total_tasks
         : r.passed_tasks + "/" + r.total_tasks) +
       '</div><div class="sub">' + (best > r.passed_tasks ? "pass@1 → pass@" + (r.has_attempt3 ? "3" : "2") + " · " : "") +
-      hm(r.duration_s) + " Laufzeit · " +
-      (r.task_mean_s ? "Ø " + hms(r.task_mean_s) + " je Aufgabe" : "") +
-      (f.footprint_gib ? " · " + f.footprint_gib + " GiB Speicher" : "") + "</div></div>";
+      hm(r.duration_s) + " run time · " +
+      (r.task_mean_s ? "avg " + hms(r.task_mean_s) + " per task" : "") +
+      (f.footprint_gib ? " · " + f.footprint_gib + " GiB memory" : "") + "</div></div>";
   }).join("");
 
   $("bars").innerHTML = runs.map(r => {
@@ -118,9 +117,9 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
       "/" + r.total_tasks + "</span></div>";
   }).join("");
   if (runs.some(r => r.has_attempt2)) $("cond-attempts").textContent =
-    "zwei Versuche je Aufgabe (pass@2), der zweite nur für die Zeitlimit-Fälle mit 90 statt 60 Minuten";
+    "two attempts per task (pass@2), the second only for the time-limit cases, with 90 instead of 60 minutes";
 
-  /* Filter befüllen */
+  /* populate filters */
   const uniq = key => [...new Set(tasks.map(t => t[key]).filter(Boolean))].sort();
   for (const [sel, key] of [["f-diff", "difficulty"], ["f-cat", "category"]])
     for (const v of uniq(key)) { const o = document.createElement("option"); o.value = o.textContent = v; $(sel).appendChild(o); }
@@ -154,31 +153,31 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
 
   function render() {
     const list = visible();
-    let html = "<thead><tr><th class='task'>Aufgabe</th>" +
-      runs.map(r => "<th class='num'>" + esc(r.quant) + "<span class='meta'>Denkmodus " +
+    let html = "<thead><tr><th class='task'>Task</th>" +
+      runs.map(r => "<th class='num'>" + esc(r.quant) + "<span class='meta'>reasoning effort " +
         esc(r.effort || "?") + "</span></th>").join("") + "</tr></thead><tbody>";
     for (const t of list) {
       html += "<tr><td class='task'><code>" + esc(t.id) + "</code><span class='meta'>" +
         "<span class='pill'>" + esc(t.difficulty) + "</span><span class='pill'>" + esc(t.category) + "</span>" +
-        (t.expert_min ? "Fachmann ca. " + t.expert_min + " min" : "") + "</span></td>";
+        (t.expert_min ? "expert approx. " + t.expert_min + " min" : "") + "</span></td>";
       for (const r of runs) {
         const x = cellOf(r, t.id);
         if (!x) { html += "<td class='cell none'>–</td>"; continue; }
-        const out = x.outcome || (x.passed ? "bestanden" : "nicht bestanden");
+        const out = x.outcome || (x.passed ? "passed" : "not passed");
         const a2 = x.attempt2, a3 = x.attempt3;
         const okSpaeter = (a2 && a2.passed) || (a3 && a3.passed);
-        const cls = x.passed ? "pass" : (okSpaeter ? "pass2" : (out === "nicht bestanden" ? "fail" : "err"));
-        let mark = x.passed ? "ja" : (out === "Zeitlimit" ? "Zeit" : (out === "Abbruch" ? "Abbruch" : "nein"));
-        for (const a of [a2, a3]) if (a) mark += a.passed ? " → ja" : " → nein";
+        const cls = x.passed ? "pass" : (okSpaeter ? "pass2" : (out === "not passed" ? "fail" : "err"));
+        let mark = x.passed ? "yes" : (out === "time limit" ? "time" : (out === "aborted" ? "abort" : "no"));
+        for (const a of [a2, a3]) if (a) mark += a.passed ? " → yes" : " → no";
         html += "<td class='cell " + cls + "' data-task='" + esc(t.id) + "' data-run='" + esc(r.dir || r.quant) + "'>" +
           mark + " <span class='meta'>" + hms(x.duration_s) +
-          (x.tok_per_s != null ? " · " + x.tok_per_s.toLocaleString("de-DE") + " t/s" : "") + "</span></td>";
+          (x.tok_per_s != null ? " · " + x.tok_per_s.toLocaleString("en-US") + " t/s" : "") + "</span></td>";
       }
       html += "</tr>";
     }
     html += "</tbody>";
     $("matrix").innerHTML = html;
-    $("count").textContent = list.length + " von " + tasks.length + " Aufgaben sichtbar";
+    $("count").textContent = list.length + " of " + tasks.length + " tasks shown";
   }
 
   $("matrix").addEventListener("click", ev => {
@@ -190,29 +189,29 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
     $("detail-body").innerHTML = "<h3>" + esc(t.id) + " · " + esc(r.label || r.quant) + "</h3>" +
       "<p>" + esc(t.description) + "</p>" +
       "<dl class='kv'>" +
-      "<dt>Ergebnis</dt><dd>" + esc(x.outcome || (x.passed ? "bestanden" : "nicht bestanden")) + "</dd>" +
-      "<dt>Dauer</dt><dd>" + hms(x.duration_s) + "</dd>" +
-      "<dt>Schritte des Agenten</dt><dd>" + num(x.steps) + "</dd>" +
-      "<dt>Episoden</dt><dd>" + num(x.episodes) + "</dd>" +
-      "<dt>Modellanfragen</dt><dd>" + num(x.requests) + (x.req_mean_s != null ?
-        " (im Mittel " + x.req_mean_s + " s, längste " + x.req_max_s + " s)" : "") + "</dd>" +
-      "<dt>Zeit im Modell</dt><dd>" + (x.model_s != null ? hms(x.model_s) +
-        (x.duration_s ? " von " + hms(x.duration_s) + " (" + Math.round(x.model_s / x.duration_s * 100) + " %)" : "") : "–") + "</dd>" +
-      "<dt>Tempo</dt><dd>" + (x.tok_per_s != null ? x.tok_per_s.toLocaleString("de-DE") + " Token/s" : "–") + "</dd>" +
-      [["zweiter", x.attempt2], ["dritter", x.attempt3]].map(([n, a]) => a
-        ? "<dt>" + n + " Versuch</dt><dd>" + esc(a.outcome || "") + " nach " + hms(a.duration_s) +
-          (a.timeout_s ? " (Limit " + a.timeout_s + " s)" : "") + "</dd>" : "").join("") +
-      "<dt>Token ein / davon Cache</dt><dd>" + num(tok.input) + " / " + num(tok.cached) + "</dd>" +
-      "<dt>Token aus</dt><dd>" + num(tok.output) + "</dd>" +
-      "<dt>größter Kontext</dt><dd>" + num(x.peak_context) + "</dd>" +
-      "<dt>Zeitlimit der Aufgabe</dt><dd>" + num(t.task_timeout_s) + " s</dd>" +
-      "<dt>Container</dt><dd>" + num(t.memory_mb) + " MB, Image <code>" + esc(t.image) + "</code></dd>" +
+      "<dt>Outcome</dt><dd>" + esc(x.outcome || (x.passed ? "passed" : "not passed")) + "</dd>" +
+      "<dt>Duration</dt><dd>" + hms(x.duration_s) + "</dd>" +
+      "<dt>Agent steps</dt><dd>" + num(x.steps) + "</dd>" +
+      "<dt>Episodes</dt><dd>" + num(x.episodes) + "</dd>" +
+      "<dt>Model requests</dt><dd>" + num(x.requests) + (x.req_mean_s != null ?
+        " (mean " + x.req_mean_s + " s, longest " + x.req_max_s + " s)" : "") + "</dd>" +
+      "<dt>Time in the model</dt><dd>" + (x.model_s != null ? hms(x.model_s) +
+        (x.duration_s ? " of " + hms(x.duration_s) + " (" + Math.round(x.model_s / x.duration_s * 100) + " %)" : "") : "–") + "</dd>" +
+      "<dt>Speed</dt><dd>" + (x.tok_per_s != null ? x.tok_per_s.toLocaleString("en-US") + " tokens/s" : "–") + "</dd>" +
+      [["second", x.attempt2], ["third", x.attempt3]].map(([n, a]) => a
+        ? "<dt>" + n + " attempt</dt><dd>" + esc(a.outcome || "") + " after " + hms(a.duration_s) +
+          (a.timeout_s ? " (limit " + a.timeout_s + " s)" : "") + "</dd>" : "").join("") +
+      "<dt>Tokens in / from cache</dt><dd>" + num(tok.input) + " / " + num(tok.cached) + "</dd>" +
+      "<dt>Tokens out</dt><dd>" + num(tok.output) + "</dd>" +
+      "<dt>Peak context</dt><dd>" + num(x.peak_context) + "</dd>" +
+      "<dt>Task time limit</dt><dd>" + num(t.task_timeout_s) + " s</dd>" +
+      "<dt>Container</dt><dd>" + num(t.memory_mb) + " MB, image <code>" + esc(t.image) + "</code></dd>" +
       "</dl>" +
       (x.exception_message ? "<pre><code>" + esc(String(x.exception_message).slice(0, 800)) + "</code></pre>" :
         (x.exception ? "<pre><code>" + esc(String(x.exception).slice(0, 800)) + "</code></pre>" : "")) +
       (x.transcript ? '<div class="tbar"><button type="button" id="show-transcript" data-src="' +
-        esc(x.transcript) + '">Transkript anzeigen</button><span class="sub">' +
-        (x.steps != null ? x.steps + " Schritte" : "") + '</span></div>' : "");
+        esc(x.transcript) + '">Show transcript</button><span class="sub">' +
+        (x.steps != null ? x.steps + " steps" : "") + '</span></div>' : "");
     wireTranscriptButton($("detail-body").innerHTML, t.id + " · " + (r.label || r.quant));
     $("detail").showModal();
   });
@@ -222,21 +221,21 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
     const steps = (data && data.steps) || [];
     const fm = (data && data.final_metrics) || {};
     let h = "<h3>" + esc(title) + "</h3>" +
-      '<div class="tbar"><button type="button" id="back-detail">zurück</button>' +
-      '<span class="sub">' + steps.length + " Schritte · " + esc(String((data.agent || {}).name || "")) +
-      (fm.total_completion_tokens ? " · " + num(fm.total_completion_tokens) + " erzeugte Token" : "") +
+      '<div class="tbar"><button type="button" id="back-detail">back</button>' +
+      '<span class="sub">' + steps.length + " steps · " + esc(String((data.agent || {}).name || "")) +
+      (fm.total_completion_tokens ? " · " + num(fm.total_completion_tokens) + " generated tokens" : "") +
       "</span></div><div class='tsteps'>";
     for (const st of steps) {
-      const t = st.timestamp ? new Date(st.timestamp).toLocaleTimeString("de-DE") : "";
+      const t = st.timestamp ? new Date(st.timestamp).toLocaleTimeString("en-GB") : "";
       const m = st.metrics || {};
-      h += '<div class="tstep"><div class="head"><b>Schritt ' + esc(st.step_id) + "</b><span>" +
+      h += '<div class="tstep"><div class="head"><b>Step ' + esc(st.step_id) + "</b><span>" +
         esc(st.source || "") + "</span><span>" + esc(t) + "</span>" +
-        (m.completion_tokens ? "<span>" + num(m.completion_tokens) + " Token" : "") +
-        (m.cached_tokens ? " · " + num(m.cached_tokens) + " aus dem Cache</span>" : m.completion_tokens ? "</span>" : "") +
+        (m.completion_tokens ? "<span>" + num(m.completion_tokens) + " tokens" : "") +
+        (m.cached_tokens ? " · " + num(m.cached_tokens) + " from cache</span>" : m.completion_tokens ? "</span>" : "") +
         "</div>";
       if (st.reasoning_content)
-        h += "<details><summary>Gedankengang (" + st.reasoning_content.length.toLocaleString("de-DE") +
-          " Zeichen)</summary><div class='think'>" + esc(st.reasoning_content) + "</div></details>";
+        h += "<details><summary>Reasoning (" + st.reasoning_content.length.toLocaleString("en-US") +
+          " characters)</summary><div class='think'>" + esc(st.reasoning_content) + "</div></details>";
       if (st.message) h += '<p class="msg">' + esc(st.message) + "</p>";
       const calls = st.tool_calls || [];
       if (calls.length)
@@ -259,17 +258,17 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
     const btn = $("show-transcript");
     if (!btn) return;
     btn.addEventListener("click", async () => {
-      btn.disabled = true; btn.textContent = "lädt …";
+      btn.disabled = true; btn.textContent = "loading …";
       try {
         const res = await fetch(btn.dataset.src, { cache: "no-cache" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         renderTranscript(await res.json(), title, backHtml);
       } catch (e) {
-        btn.disabled = false; btn.textContent = "Transkript anzeigen";
+        btn.disabled = false; btn.textContent = "Show transcript";
         const p = document.createElement("p");
         p.className = "empty";
-        p.textContent = "Transkript nicht ladbar (" + e.message + "). Beim Öffnen über file:// blockiert der " +
-          "Browser das Nachladen – die Seite über einen Webserver aufrufen, etwa python3 -m http.server.";
+        p.textContent = "Could not load transcript (" + e.message + "). When opened via file:// the browser blocks " +
+          "the request – serve the page over HTTP instead, for example with python3 -m http.server.";
         btn.parentElement.after(p);
       }
     });
@@ -281,7 +280,7 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
     $("f-sort").value = "subset"; render();
   });
 
-  /* Ausführung: genaue Kommandos je Quant */
+  /* how it was run: exact command line per quant */
   const cmds = D.commands || {};
   $("setup").innerHTML = runs.map(r => {
     const c = cmds[r.quant] || {};
@@ -289,16 +288,16 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
     h += "<dl class='kv'>" +
       "<dt>Engine</dt><dd>" + esc(r.engine) + " " + esc(r.engine_version) + "</dd>" +
       "<dt>Backend</dt><dd>" + esc(r.backend) + " " + esc(r.backend_version) + "</dd>" +
-      "<dt>Kontext</dt><dd>" + num(r.n_ctx) + " Token, " + (c.slots || 1) + " Slot</dd>" +
-      "<dt>Denkmodus</dt><dd>" + esc(r.effort || "?") + "</dd>" +
-      "<dt>Profil</dt><dd>" + esc(r.inference_profile) + "</dd>" +
+      "<dt>Context</dt><dd>" + num(r.n_ctx) + " tokens, " + (c.slots || 1) + " slot</dd>" +
+      "<dt>Reasoning effort</dt><dd>" + esc(r.effort || "?") + "</dd>" +
+      "<dt>Profile</dt><dd>" + esc(r.inference_profile) + "</dd>" +
       "<dt>Benchmark</dt><dd>Terminal-Bench " + esc(r.tb_version) + " · Harbor " + esc(r.harbor_version) +
-        " · Agent Terminus-2</dd>" +
-      "<dt>Token gesamt</dt><dd>" + num((r.tokens || {}).input) + " ein, " + num((r.tokens || {}).output) + " aus</dd>" +
+        " · agent Terminus-2</dd>" +
+      "<dt>Tokens total</dt><dd>" + num((r.tokens || {}).input) + " in, " + num((r.tokens || {}).output) + " out</dd>" +
       "</dl>";
     if (c.command) h += "<pre><code>" + esc(c.command) + "</code></pre>";
     if (c.memory && c.memory.length) {
-      h += "<div class='tablewrap'><table><thead><tr><th>Posten</th><th class='num'>Größe</th></tr></thead><tbody>" +
+      h += "<div class='tablewrap'><table><thead><tr><th>Item</th><th class='num'>Size</th></tr></thead><tbody>" +
         c.memory.map(m => "<tr><td>" + esc(m[0]) + "</td><td class='num'>" + esc(m[1]) + "</td></tr>").join("") +
         "</tbody></table></div>";
     }

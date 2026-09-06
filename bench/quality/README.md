@@ -1,78 +1,78 @@
-# Agenten-Benchmarks (echte Coding-Arbeit)
+# Agent benchmarks (real coding work)
 
-Hier liegt die Anbindung an **Terminal-Bench-Mini-20** – 20 Aufgaben aus Terminal-Bench 2.1,
-ausgewählt für lokale Modelle: Pakete bauen, Dienste konfigurieren, Git-Historie reparieren,
-C- und OCaml-Fehler suchen, LaTeX und SPARQL geradeziehen. Der Agent (Terminus-2) arbeitet in
-einem Docker-Container mit einer echten Shell; gewertet wird nur, was der Verifier der Aufgabe
-am Ende akzeptiert (Reward genau 1,0).
+This is the integration with **Terminal-Bench-Mini-20** – 20 tasks from Terminal-Bench 2.1,
+selected for local models: build packages, configure services, repair git history,
+hunt down C and OCaml bugs, straighten out LaTeX and SPARQL. The agent (Terminus-2) works in
+a Docker container with a real shell; only what the task's verifier accepts
+at the end is counted (reward exactly 1.0).
 
-Der Benchmark selbst kommt aus <https://github.com/kyuz0/terminal-bench-mini> (Apache-2.0) und
-wird nicht mitversioniert, sondern geholt:
+The benchmark itself comes from <https://github.com/kyuz0/terminal-bench-mini> (Apache-2.0) and
+is not versioned along with this repository but fetched:
 
 ```bash
-bench/quality/fetch.sh          # klont den Benchmark und prüft docker, uv, Speicher, Platz
+bench/quality/fetch.sh          # clones the benchmark and checks docker, uv, memory, disk space
 ```
 
-## Alle Quants nacheinander
+## All quants one after another
 
 ```bash
 bench/quality/run-quants.sh                       # UD-Q2_K_XL, UD-IQ1_M, UD-IQ3_XXS, UD-IQ4_XS
-bench/quality/run-quants.sh UD-IQ4_XS             # nur einer
-TB_AGENT_TIMEOUT=1800 bench/quality/run-quants.sh # Zeitlimit je Aufgabe (Default 3600 s)
-TB_EFFORT=xhigh bench/quality/run-quants.sh       # Denkstufe (Default medium)
+bench/quality/run-quants.sh UD-IQ4_XS             # only one
+TB_AGENT_TIMEOUT=1800 bench/quality/run-quants.sh # time limit per task (default 3600 s)
+TB_EFFORT=xhigh bench/quality/run-quants.sh       # reasoning effort (default medium)
 ```
 
-Die Denkstufe steckt im Profilnamen (`mtp4-ngram-thinking-medium`) und damit in der Kennung jedes Laufs;
-Läufe mit unterschiedlicher Stufe landen in getrennten Ergebnisordnern und stehen auf der Website
-nebeneinander.
+The reasoning effort is part of the profile name (`mtp4-ngram-thinking-medium`) and thus part of the identifier of every run;
+runs with a different effort end up in separate results directories and appear side by side
+on the website.
 
-Das Skript wartet zwischen den Quants, bis der Speicher wieder frei ist, schreibt je Quant ein Log nach
-`state/quality/tbmini-<quant>.log` und setzt den apt-Spiegel fest (siehe unten). Danach die Auswertung:
+The script waits between the quants until the memory is free again, writes a log per quant to
+`state/quality/tbmini-<quant>.log` and pins the apt mirror (see below). Then the analysis:
 
 ```bash
-uv run python bench/quality/report.py             # schreibt docs/TERMINAL-BENCH.md und docs/tbmini-data.js
+uv run python bench/quality/report.py             # writes docs/TERMINAL-BENCH.md and docs/tbmini-data.js
 ```
 
-## Lauf starten
+## Start a run
 
-`tbench.py` startet den Server mit einer Konfiguration aus dem TUI, wartet auf `/health`, ruft den
-Runner auf und stoppt den Server danach wieder. Der Server läuft unter `bench/memguard.py`.
+`tbench.py` starts the server with a configuration from the TUI, waits for `/health`, calls the
+runner and stops the server again afterwards. The server runs under `bench/memguard.py`.
 
 ```bash
-# Rauchtest: eine Aufgabe, ein Versuch (ca. 15-40 min)
+# smoke test: one task, one attempt (about 15-40 min)
 uv run python bench/quality/tbench.py --tier smoke --attempts 1 --agent-timeout 3600
 
-# voller Lauf: 20 Aufgaben, bis zu 2 Versuche je Aufgabe
+# full run: 20 tasks, up to 2 attempts per task
 uv run python bench/quality/tbench.py --tier full
 
-# anderer Quant, dieselbe Konfiguration
+# different quant, same configuration
 uv run python bench/quality/tbench.py --tier full --quant UD-IQ4_XS
 
-# einzelne Aufgabe
+# single task
 uv run python bench/quality/tbench.py --task fix-git --attempts 1
 ```
 
-Wichtige Schalter:
+Important flags:
 
-| Schalter | Bedeutung |
+| Flag | Meaning |
 | --- | --- |
-| `--preset` | Server-Preset, Default `eh-agent` (Q4_K_XL, 160k Kontext, ein Slot, MTP+ngram) |
-| `--quant`, `--ctx`, `--no-mtp`, `--reasoning-effort` | einzelne Werte überschreiben |
-| `--concurrency N` | N Aufgaben gleichzeitig; setzt auch `-np N` (Kontext teilt sich auf die Slots) |
-| `--slots N` | Slots getrennt von der Parallelität setzen |
-| `--attempts` | Versuche je Aufgabe (Default 2 = pass@2, `1` = pass@1) |
-| `--agent-timeout` | Sekunden je Versuch (Default 10800) |
-| `--min-avail-gib` | Schwelle des Speicher-Wächters (Default aus dem Preset: 5 GiB) |
-| `--use-running` | keinen Server starten, laufenden benutzen |
-| `--dry-run` | nur Speicherbilanz und Kommandos zeigen |
+| `--preset` | server preset, default `eh-agent` (Q4_K_XL, 160k context, one slot, MTP+ngram) |
+| `--quant`, `--ctx`, `--no-mtp`, `--reasoning-effort` | override individual values |
+| `--concurrency N` | N tasks at the same time; also sets `-np N` (the context is divided among the slots) |
+| `--slots N` | set the slots separately from the concurrency |
+| `--attempts` | attempts per task (default 2 = pass@2, `1` = pass@1) |
+| `--agent-timeout` | seconds per attempt (default 10800) |
+| `--min-avail-gib` | threshold of the memory guard (default from the preset: 5 GiB) |
+| `--use-running` | do not start a server, use a running one |
+| `--dry-run` | only show the memory balance and the commands |
 
-Alles nach `--` geht unverändert an `terminal_bench.py`.
+Everything after `--` is passed unchanged to `terminal_bench.py`.
 
-## Container-Images
+## Container images
 
-Die 20 Aufgaben bringen je ein eigenes Docker-Image mit (zusammen einige GB). Beim ersten Lauf lädt Harbor
-sie einzeln nach; ein Image kann mehrere Minuten brauchen, und der Lauf wartet dabei. Schneller ist es, sie
-vorher parallel zu holen:
+Each of the 20 tasks brings its own Docker image (a few GB in total). On the first run, Harbor downloads
+them one by one; an image can take several minutes, and the run waits for it. It is faster to fetch them
+in parallel beforehand:
 
 ```bash
 python3 -c '
@@ -84,78 +84,78 @@ for d in sorted(pathlib.Path("bench/quality/terminal-bench-mini/tasks").iterdir(
 ' | xargs -P 3 -I{} docker pull -q {}
 ```
 
-Ab dem zweiten Quant liegen die Images im Cache; nur der erste Durchlauf zahlt die Ladezeit.
+From the second quant on, the images are in the cache; only the first round pays the load time.
 
-## Speicher
+## Memory
 
-Der Agent läuft im Container, das Modell im selben RAM. Die Bilanz steht am Anfang jeder Ausgabe:
+The agent runs in the container, the model in the same RAM. The balance is at the start of every output:
 
-| Quant | Footprint (160k Kontext, 1 Slot) | frei für Container |
+| Quant | Footprint (160k context, 1 slot) | free for the container |
 | --- | --- | --- |
-| UD-Q4_K_XL | 92,3 GiB | ca. 8 GiB |
-| UD-IQ4_XS | 72,9 GiB | ca. 28 GiB |
-| UD-IQ3_XXS | 62,0 GiB | ca. 38 GiB |
+| UD-Q4_K_XL | 92.3 GiB | about 8 GiB |
+| UD-IQ4_XS | 72.9 GiB | about 28 GiB |
+| UD-IQ3_XXS | 62.0 GiB | about 38 GiB |
 
-Aufgaben wie `build-pov-ray`, `sqlite-with-gcov` oder `mteb-retrieve` kompilieren oder laden
-Modelle im Container. Mit Q4_K_XL ist das knapp; für `--concurrency > 1` ist IQ4_XS die
-vernünftige Wahl. Fällt `MemAvailable` unter die Schwelle, killt der Wächter den Server –
-der Lauf bricht dann ab, aber die Maschine bleibt bedienbar.
+Tasks such as `build-pov-ray`, `sqlite-with-gcov` or `mteb-retrieve` compile or load
+models in the container. With Q4_K_XL that is tight; for `--concurrency > 1`, IQ4_XS is the
+sensible choice. If `MemAvailable` falls below the threshold, the guard kills the server –
+the run then aborts, but the machine stays usable.
 
-## Fehlerquelle: abgebrochene Modellanfragen
+## Source of error: aborted model requests
 
-Bei der Untersuchung eines Zeitlimit-Fehlschlags (`cobol-modernization`, UD-IQ3_XXS, `xhigh`) kam ein Defekt im
-Zusammenspiel von Harness und Server heraus, der alle Läufe betrifft: **LiteLLM bricht eine Anfrage nach 600 Sekunden
-ab und wiederholt sie mit demselben Prompt.** Braucht eine Antwort auf dieser Hardware länger, entsteht daraus eine
-Schleife — jeder Versuch läuft erneut in die Grenze, es kommt kein Token beim Agenten an, und das Zeitbudget der
-Aufgabe wird aufgebraucht.
+While investigating a time-limit failure (`cobol-modernization`, UD-IQ3_XXS, `xhigh`), a defect in the
+interplay of harness and server came to light that affects all runs: **LiteLLM aborts a request after 600 seconds
+and repeats it with the same prompt.** If a response takes longer on this hardware, a
+loop results — every attempt runs into the limit again, no token arrives at the agent, and the time budget of the
+task is used up.
 
-In besagtem Fall erzeugte der Server für einen einzigen Agentenschritt fünf Generierungen mit identischem Prompt
-(je etwa 11 700 Token, vier davon nach 600 s abgebrochen); im ganzen Lauf waren es 9 verworfene Generierungen mit
-zusammen rund 87 der 181 Minuten, also 48 % der Laufzeit ohne jedes Ergebnis. Im Server-Log erkennbar an
+In that case, the server produced five generations with an identical prompt for a single agent step
+(about 11,700 tokens each, four of them aborted after 600 s); over the whole run there were 9 discarded generations with
+around 87 of the 181 minutes together, i.e. 48% of the run time without any result. Recognizable in the server log by
 `W srv stop: cancel task`.
 
-Über alle bisherigen Läufe zusammen: **58 abgebrochene Generierungen**, davon 33 in der medium-Runde. Das heißt für
-die Interpretation der Ergebnisse: Ein Teil der Zeitlimit-Fehlschläge ist kein Modellversagen, sondern verlorene Zeit
-in dieser Schleife, und die dokumentierten Aufgabendauern sind entsprechend zu hoch.
+Across all runs so far: **58 aborted generations**, 33 of them in the medium round. For
+the interpretation of the results this means: part of the time-limit failures is not a model failure but time lost
+in this loop, and the documented task durations are correspondingly too high.
 
-Behoben mit `bench/quality/patches/0001-request-timeout.patch`, den `fetch.sh` auf den Benchmark anwendet:
-Das Zeitlimit einer einzelnen Anfrage ist jetzt einstellbar (`tbench.py --request-timeout`, Default 3600 s statt 600).
+Fixed with `bench/quality/patches/0001-request-timeout.patch`, which `fetch.sh` applies to the benchmark:
+the time limit of a single request is now configurable (`tbench.py --request-timeout`, default 3600 s instead of 600).
 
-## Netzwerk: apt-Spiegel
+## Network: apt mirror
 
-`archive.ubuntu.com` ist aus manchen Netzen unbrauchbar langsam (hier zeitweise 20 s je Anfrage). Terminus-2
-installiert zu Beginn jeder Aufgabe `tmux` und `asciinema` im Container und läuft dann in Harbors
-120-Sekunden-Grenze; jede Aufgabe scheitert mit `RuntimeError: Command timed out after 120 seconds`.
-`tbench.py --apt-mirror` legt `archive.ubuntu.com` und `security.ubuntu.com` per `extra_hosts` auf einen
-schnellen Spiegel (`auto` misst vorher, `off` schaltet ab, sonst ein Hostname). Umgesetzt über
-`bench/quality/dockershim/docker`, das jedem `docker compose`-Aufruf eine Overlay-Datei anhängt – der
-Benchmark und die Aufgabenbilder bleiben unverändert.
+`archive.ubuntu.com` is unusably slow from some networks (here at times 20 s per request). Terminus-2
+installs `tmux` and `asciinema` in the container at the beginning of every task and then runs into Harbor's
+120-second limit; every task fails with `RuntimeError: Command timed out after 120 seconds`.
+`tbench.py --apt-mirror` points `archive.ubuntu.com` and `security.ubuntu.com` via `extra_hosts` at a
+fast mirror (`auto` measures beforehand, `off` switches it off, otherwise a hostname). Implemented via
+`bench/quality/dockershim/docker`, which appends an overlay file to every `docker compose` call – the
+benchmark and the task images stay unchanged.
 
-## Ergebnisse
+## Results
 
-* Fortschritt und Zusammenfassung: `state/quality/*.log`
-* Normalisierte Ergebnisse je Aufgabe: `state/quality/tbench/<platform>/<modell>_results/`
-* Roh-Jobs von Harbor (Transkripte, Verifier-Ausgaben): `bench/quality/terminal-bench-mini/jobs/`
-* Server-Log und Speicherverlauf: `state/logs/tbench-server-*.log`, `state/logs/tbench-mem-*.csv`
-* Aufbereitet: `docs/TERMINAL-BENCH.md` und die interaktive Seite `docs/terminal-bench.html`
-* Versioniert im Repo: `bench/quality/results/` (Zusammenfassung und Ergebnis je Aufgabe) und
-  `docs/transcripts/<quant>-<denkstufe>/<aufgabe>.json` (vollständige Agenten-Transkripte im ATIF-Format,
-  rund 2,5 MB je Lauf)
+* Progress and summary: `state/quality/*.log`
+* Normalized results per task: `state/quality/tbench/<platform>/<model>_results/`
+* Raw jobs from Harbor (transcripts, verifier outputs): `bench/quality/terminal-bench-mini/jobs/`
+* Server log and memory history: `state/logs/tbench-server-*.log`, `state/logs/tbench-mem-*.csv`
+* Prepared: `docs/TERMINAL-BENCH.md` and the interactive page `docs/terminal-bench.html`
+* Versioned in the repository: `bench/quality/results/` (summary and result per task) and
+  `docs/transcripts/<quant>-<reasoning-effort>/<task>.json` (complete agent transcripts in ATIF format,
+  around 2.5 MB per run)
 
-Die Website lädt ein Transkript erst beim Klick nach. Beim Öffnen der Seite über `file://` blockiert der
-Browser das Nachladen; für eine lokale Vorschau `python3 -m http.server` im Ordner `docs/` starten.
+The website only loads a transcript when it is clicked. When opening the page via `file://`, the
+browser blocks that loading; for a local preview start `python3 -m http.server` in the directory `docs/`.
 
-Einen unterbrochenen Lauf fortsetzen oder Fehlschläge wiederholen (Server muss laufen,
-z. B. über das TUI, dann `--use-running`):
+Continue an interrupted run or repeat failures (the server has to be running,
+e.g. via the TUI, then `--use-running`):
 
 ```bash
 cd bench/quality/terminal-bench-mini
 python3 terminal_bench.py resume jobs/<job-name>
-python3 terminal_bench.py retry-failed <ergebnisordner>
+python3 terminal_bench.py retry-failed <results-directory>
 ```
 
-## Zeitbedarf
+## Time required
 
-Die Referenzläufe des Projekts auf vergleichbarer Hardware (Strix Halo, llama.cpp, ROCm)
-brauchen für die vollen 20 Aufgaben **12 bis 26 Stunden**. Das passt nicht in ein
-8-Stunden-Fenster; Einordnung und Alternativen stehen in `docs/QUALITAETS-BENCHMARKS.md`.
+The project's reference runs on comparable hardware (Strix Halo, llama.cpp, ROCm)
+need **12 to 26 hours** for the full 20 tasks. That does not fit into an
+8-hour window; classification and alternatives are in `docs/QUALITY-BENCHMARKS.md`.

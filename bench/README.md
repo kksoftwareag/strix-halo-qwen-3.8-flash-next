@@ -1,47 +1,47 @@
-# bench/ – Messwerkzeuge und Ergebnisse
+# bench/ – measurement tools and results
 
-Alle Läufe hier starten den Server **unter `memguard.py`** (SIGKILL bei < 10 GiB `MemAvailable`), weil GTT-Speicher
-nicht im RSS auftaucht und der Kernel-OOM-Killer sonst die ganze Sitzung mitnimmt.
+All runs here start the server **under `memguard.py`** (SIGKILL at < 10 GiB `MemAvailable`), because GTT memory
+does not show up in the RSS and the kernel OOM killer would otherwise take the whole session down with it.
 
-| Skript | Zweck |
+| Script | Purpose |
 | --- | --- |
-| `memguard.py --min-avail-gib N -- CMD…` | Wächter + CSV-Mitschrieb (MemAvailable, GTT, VRAM, RSS) |
-| `mem_probe.py NAME -- llama serve …` | Server starten, eine Anfrage, hart beenden; JSON mit Load-Zeit, tg/pp, Draft-Akzeptanz, Peak-Verbrauch |
-| `mem_sweep*.sh` | Footprint-Sweeps (1–7): Stock-Fork vs EngramHalo, Lade-Modi, Quants, MTP |
-| `sweep1-backend.sh` | llama-bench pp512/tg128 (Stock-Fork): KV-Typ, ubatch, Quant |
-| `mtp_sweep.py` / `mtp_sweep2.py` | MTP-Feintuning über den Server (n_max, p_min, temp, ngram-mod); `mtp_sweep2.py --engine engramhalo --quant Q4_K_XL --lm none` |
+| `memguard.py --min-avail-gib N -- CMD…` | guard + CSV log (MemAvailable, GTT, VRAM, RSS) |
+| `mem_probe.py NAME -- llama serve …` | start server, one request, hard stop; JSON with load time, tg/pp, draft acceptance, peak consumption |
+| `mem_sweep*.sh` | footprint sweeps (1–7): stock fork vs EngramHalo, load modes, quants, MTP |
+| `sweep1-backend.sh` | llama-bench pp512/tg128 (stock fork): KV type, ubatch, quant |
+| `mtp_sweep.py` / `mtp_sweep2.py` | MTP fine-tuning via the server (n_max, p_min, temp, ngram-mod); `mtp_sweep2.py --engine engramhalo --quant Q4_K_XL --lm none` |
 
-Ergebnisse: `results/raw/*.json` (llama-bench), `results/mem/*.json|csv|log` (Footprints), `results/mtp2/summary.jsonl`
-(MTP-Tuning). Auswertung der Kernzahlen in `../docs/RESEARCH.md`, Abschnitt 7.
+Results: `results/raw/*.json` (llama-bench), `results/mem/*.json|csv|log` (footprints), `results/mtp2/summary.jsonl`
+(MTP tuning). Analysis of the key numbers in `../docs/RESEARCH.md`, section 7.
 
-Wichtig beim Beenden von Probe-Servern: SIGINT löst einen minutenlangen Teardown (GTT-Freigabe) aus – die Skripte
-senden deshalb SIGKILL. `pkill -f`-Muster in der eigenen Shell mit Klammer-Trick schreiben (`mem_pro[b]e`), sonst
-trifft `pkill` die Shell, die es aufruft.
+Important when stopping probe servers: SIGINT triggers a teardown lasting minutes (GTT release) – the scripts
+therefore send SIGKILL. Write `pkill -f` patterns in your own shell with the bracket trick (`mem_pro[b]e`), otherwise
+`pkill` hits the shell that calls it.
 
-## Mehrnutzer mit langen Kontexten
+## Multi-user with long contexts
 
-`mtp_multiuser.sh` fährt 1/2/4/8/16 gleichzeitige Nutzer mit je ~30 000 Token Prompt und ~5 000 Token Ausgabe,
-MTP an. Jeder Nutzer bekommt einen eigenen Fülltext, damit sich der Prompt-Cache nicht teilt. Die Ausgabe zeigt je
-Stufe auch die Draft-Akzeptanz — daran zeigt sich der Fehler aus llama.cpp-Issue #27572, bei dem die Akzeptanz mit
-mehreren Slots und langen Prompts auf 0,00 fällt.
+`mtp_multiuser.sh` runs 1/2/4/8/16 simultaneous users with about 30,000 tokens of prompt and about 5,000 tokens of output each,
+MTP on. Every user gets its own filler text so that the prompt cache is not shared. Per level, the output also shows
+the draft acceptance — that is where the bug from llama.cpp issue #27572 shows up, in which the acceptance falls to 0.00 with
+several slots and long prompts.
 
 ```bash
-bench/mtp_multiuser.sh vorher     # alle vier kleinen Quants, bestehende Builds
+bench/mtp_multiuser.sh vorher     # all four small quants, existing builds
 ENGINE_RING_PATCH=1 engine/fetch.sh && engine/build-engramhalo.sh && engine/build.sh hip
-bench/mtp_multiuser.sh nachher    # mit Patch 0003 (PR #27311) und 0004 (Issue #28433)
+bench/mtp_multiuser.sh nachher    # with patch 0003 (PR #27311) and 0004 (issue #28433)
 ```
 
-Gemessen wurde bisher nur „vorher": Bei langen Prompts bringt Parallelität keinen Durchsatz (siehe
-`docs/RESEARCH.md`), deshalb wurden die Patches nicht gebaut. Die Ergebnisse stehen in
-`state/bench/mtp-multiuser-*.log`, aufbereitet über `analyze_multiuser.py`.
+So far only "vorher" has been measured: with long prompts, parallelism brings no throughput (see
+`docs/RESEARCH.md`), which is why the patches were not built. The results are in
+`state/bench/mtp-multiuser-*.log`, prepared via `analyze_multiuser.py`.
 
-Ohne Argument laufen UD-IQ4_XS, UD-IQ3_XXS, UD-Q2_K_XL und UD-IQ1_M nacheinander; einzelne Quants als weitere
-Argumente. Voreinstellung: Stufen 1/2/4/8, 15 000 Token Prompt je Nutzer, 2 000 Token Ausgabe – rund 30 Minuten je
-Quant und Durchgang. Über `TB_LEVELS`, `TB_CTX` und `TB_GEN` lässt sich das ändern, etwa
-`TB_LEVELS=1,2,4,8,16 TB_CTX=30000 TB_GEN=5000` für die große Variante.
+Without an argument, UD-IQ4_XS, UD-IQ3_XXS, UD-Q2_K_XL and UD-IQ1_M run one after another; individual quants as further
+arguments. Default: levels 1/2/4/8, 15,000 tokens of prompt per user, 2,000 tokens of output – around 30 minutes per
+quant and round. This can be changed via `TB_LEVELS`, `TB_CTX` and `TB_GEN`, for example
+`TB_LEVELS=1,2,4,8,16 TB_CTX=30000 TB_GEN=5000` for the large variant.
 
-15 000 Token Prompt genügen für den Fehler aus Issue #27572: Er braucht ein Decode über mehrere Ubatches, und das
-sind bei `ubatch 2048` schon acht. Mit acht Slots passt auch UD-Q4_K_XL wieder in den Speicher; es ist nur nicht
-voreingestellt.
+15,000 tokens of prompt are enough for the bug from issue #27572: it needs a decode across several ubatches, and with
+`ubatch 2048` that is already eight. With eight slots, UD-Q4_K_XL fits into memory again as well; it is just not
+the default.
 
-`context_limits.py` sagt vorher, wie viele Slots welcher Größe in den Speicher passen.
+`context_limits.py` predicts how many slots of which size fit into memory.

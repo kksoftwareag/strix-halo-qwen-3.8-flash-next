@@ -1,162 +1,161 @@
 # qwen38-flash
 
-> **Hinweis:** Der Großteil dieses Repositorys (Programm, Build- und Benchmark-Skripte, Recherche, Dokumentation und
-> Website) wurde von Claude Fable 5.1 (Anthropic) erstellt, gesteuert und geprüft durch den Autor. Die Messwerte stammen
-> von echten Läufen auf der beschriebenen Hardware.
+> **Note:** The bulk of this repository (program, build and benchmark scripts, research, documentation and
+> website) was created by Claude Fable 5.1 (Anthropic), directed and reviewed by the author. The measurements come
+> from real runs on the hardware described.
 
-Ein Terminal-Programm, mit dem du **Qwen3.8-Flash-Next** auf einem **AMD Strix Halo** Rechner
-(Ryzen AI MAX+ 395 / Radeon 8060S, 128 GB Unified Memory) mit **llama.cpp** einrichtest, startest,
-überwachst und misst. Es nimmt dir die Entscheidungen ab, die bei diesem Modell schwierig sind:
-Welcher Quant passt in den Speicher? Welche Startparameter sind sinnvoll? Läuft spekulatives
-Decoding (MTP)? Wie viele Nutzer gleichzeitig?
+A terminal program with which you set up, start, monitor and measure **Qwen3.8-Flash-Next** on an **AMD Strix Halo**
+machine (Ryzen AI MAX+ 395 / Radeon 8060S, 128 GB unified memory) with **llama.cpp**. It takes the decisions off your
+hands that are difficult with this model: Which quant fits into memory? Which startup parameters make sense? Does
+speculative decoding (MTP) run? How many users at the same time?
 
-Alles ist auf einer solchen Maschine gemessen. Die Ergebnisse und die Begründungen stehen in
+Everything is measured on such a machine. The results and the reasoning are in
 `docs/RESEARCH.md`.
 
-![Konfigurations-Tab: links die Einstellungen, rechts Speicherbilanz, Warnungen und die erzeugte Kommandozeile](docs/screenshot-konfiguration.png)
+![Configuration tab: the settings on the left, memory balance, warnings and the generated command line on the right](docs/screenshot-configuration.png)
 
-## Was das Programm kann
+## What the program can do
 
-- **Konfigurieren**: Modell-Quant, Kontextlänge, KV-Cache, Batch-Größen, MTP-Draft-Head, Thinking-Modus,
-  Sampling, Netzwerk. Rechts siehst du sofort den geschätzten Speicherbedarf und die fertige Kommandozeile.
-- **Speicher schützen**: Der Start wird verweigert, wenn die Konfiguration nicht in den Speicher passt.
-  Ein Wächter stoppt den Server, bevor der Kernel wegen Speichermangel Prozesse abschießt.
-- **Starten und beobachten**: Server-Log, Ladezeit, Puffergrößen, Tokens pro Sekunde, Akzeptanzrate des
-  Draft-Heads, Test-Prompt.
-- **Messen**: `llama-bench`, Server-Messung mit MTP, automatische Suche nach den besten MTP-Einstellungen
-  und ein Mehrnutzer-Test mit bis zu 8 gleichzeitigen Anfragen.
-- **Exportieren**: Startskript und systemd-Unit für den Betrieb ohne das Programm.
-- **Presets**: fertige Konfigurationen für maximale Qualität, Geschwindigkeit, langen Kontext, Chat ohne Thinking.
+- **Configure**: model quant, context length, KV cache, batch sizes, MTP draft head, thinking mode,
+  sampling, network. On the right you immediately see the estimated memory requirement and the finished command line.
+- **Protect memory**: the start is refused if the configuration does not fit into memory.
+  A guard stops the server before the kernel kills processes because of memory shortage.
+- **Start and observe**: server log, load time, buffer sizes, tokens per second, acceptance rate of the
+  draft head, test prompt.
+- **Measure**: `llama-bench`, server measurement with MTP, automatic search for the best MTP settings
+  and a multi-user test with up to 8 simultaneous requests.
+- **Export**: start script and systemd unit for operation without the program.
+- **Presets**: ready-made configurations for maximum quality, speed, long context, chat without thinking.
 
-Das Programm ändert nichts an deinen Modell-Dateien und nichts außerhalb seines eigenen Ordners.
+The program changes nothing in your model files and nothing outside its own directory.
 
-## Voraussetzungen
+## Requirements
 
-| Was | Warum |
+| What | Why |
 | --- | --- |
-| AMD Strix Halo (gfx1151) mit 128 GB, Linux | dafür ist alles gemessen; andere Rechner mit viel Unified Memory sollten funktionieren, sind aber nicht getestet |
-| ROCm/HIP 7.x mit `clang++`, `cmake`, `ninja`, `git` | zum Bauen der zwei llama.cpp-Varianten |
-| Kernel-Parameter `amd_iommu=off amdgpu.gttsize=126976 ttm.pages_limit=32505856` | sonst darf die GPU nur einen Teil des RAM benutzen |
-| Python 3.12 oder neuer, [uv](https://docs.astral.sh/uv/) | für das Terminal-Programm |
-| `hf` (Hugging-Face-CLI) | zum Herunterladen der Modelle |
-| ca. 200 GB freier Platz auf einer schnellen NVMe | Modelle 73 bis 104 GB pro Quant |
+| AMD Strix Halo (gfx1151) with 128 GB, Linux | everything is measured for that; other machines with a lot of unified memory should work, but are not tested |
+| ROCm/HIP 7.x with `clang++`, `cmake`, `ninja`, `git` | to build the two llama.cpp variants |
+| Kernel parameters `amd_iommu=off amdgpu.gttsize=126976 ttm.pages_limit=32505856` | otherwise the GPU may use only part of the RAM |
+| Python 3.12 or newer, [uv](https://docs.astral.sh/uv/) | for the terminal program |
+| `hf` (Hugging Face CLI) | to download the models |
+| about 200 GB free space on a fast NVMe | models 73 to 104 GB per quant |
 
 ## Installation
 
 ```bash
-git clone <URL dieses Repos> qwen38-flash
+git clone <URL of this repo> qwen38-flash
 cd qwen38-flash
-uv sync                      # legt .venv an und installiert Textual & Co.
+uv sync                      # creates .venv and installs Textual & co.
 ```
 
-### Modelle laden
+### Download models
 
 ```bash
-# Bester Quant, der mit MTP in 128 GB passt (Engine EngramHalo):
+# Best quant that fits into 128 GB with MTP (engine EngramHalo):
 hf download unsloth/Qwen3.8-Flash-Next-GGUF --include 'UD-Q4_K_XL/*'
-# Kleinere Alternativen:
+# Smaller alternatives:
 hf download unsloth/Qwen3.8-Flash-Next-GGUF --include 'UD-IQ4_XS/*'
 hf download unsloth/Qwen3.8-Flash-Next-GGUF --include 'UD-IQ3_XXS/*'
-# MTP-Draft-Head (nur dieser passt zu den Builds hier):
+# MTP draft head (only this one matches the builds here):
 hf download dzannotti/Qwen3.8-Flash-Next-MTP-GGUF Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf
 ```
 
-Das Programm findet die Dateien im Hugging-Face-Cache von selbst. Liegen sie woanders, setze
-`QWEN38_MODEL_DIRS=/pfad/a:/pfad/b` und `QWEN38_MTP_DIRS=/pfad/mtp`.
+The program finds the files in the Hugging Face cache by itself. If they are elsewhere, set
+`QWEN38_MODEL_DIRS=/path/a:/path/b` and `QWEN38_MTP_DIRS=/path/mtp`.
 
-### Engines bauen
-
-```bash
-engine/fetch.sh                 # holt llama.cpp und EngramHalo.cpp aus öffentlichen Repos und patcht sie
-engine/build-engramhalo.sh      # empfohlene Engine (Strix-Halo-Fork)
-engine/build.sh hip             # zweite Engine: llama.cpp + MTP-Patch
-```
-
-Beide Builds landen unter `engine/build-*/bin/`. Einen eigenen llama.cpp-Build meldest du mit
-`QWEN38_ENGINES=name=/pfad/zu/llama` an.
-
-## Benutzung
+### Build engines
 
 ```bash
-./run.sh                        # Terminal-Programm
-./run.sh presets                # alle Presets
-./run.sh show --preset eh-qualitaet    # Kommandozeile und Speicherbilanz anzeigen
-./run.sh run  --preset eh-qualitaet    # Server ohne Programm starten
-./run.sh bench-parallel --users 8      # Mehrnutzer-Benchmark ohne Programm
+engine/fetch.sh                 # fetches llama.cpp and EngramHalo.cpp from public repos and patches them
+engine/build-engramhalo.sh      # recommended engine (Strix Halo fork)
+engine/build.sh hip             # second engine: llama.cpp + MTP patch
 ```
 
-Im Programm: Preset wählen und „Preset anwenden“ drücken. Rechts stehen Speicherbilanz und Kommando.
-**F5** startet den Server, **F6** stoppt ihn, **F9** exportiert ein Startskript, **Ctrl+S** speichert
-die Konfiguration. Tabs: Konfiguration, Server, Benchmark, System, Hilfe.
+Both builds end up under `engine/build-*/bin/`. You register your own llama.cpp build with
+`QWEN38_ENGINES=name=/path/to/llama`.
 
-Der Server ist danach unter `http://<host>:8080` mit der OpenAI-kompatiblen API erreichbar
-(`/v1/chat/completions`), inklusive Web-Oberfläche von llama.cpp.
+## Usage
 
-## Die wichtigsten Erkenntnisse
+```bash
+./run.sh                        # terminal program
+./run.sh presets                # all presets
+./run.sh show --preset eh-qualitaet    # show command line and memory balance
+./run.sh run  --preset eh-qualitaet    # start server without the program
+./run.sh bench-parallel --users 8      # multi-user benchmark without the program
+```
 
-**Speicher.** Jeder Quant enthält dieselbe 26,8 GB große Tabelle für n-Gram-Embeddings. Normales
-llama.cpp lädt sie auf ROCm komplett in den RAM, zusätzlich zu den Gewichten in der GPU. Deshalb passt der
-beste Quant (UD-Q4_K_XL) mit MTP dort nicht in 128 GB. Der Fork **EngramHalo.cpp** lässt die Tabelle auf der
-NVMe liegen (nur ca. 3 GB im RAM) und lädt trotzdem in unter 30 Sekunden. Damit läuft UD-Q4_K_XL mit MTP
-bei etwa 85 GB Speicherbedarf.
+In the program: choose a preset and press "Apply preset". On the right are the memory balance and the command.
+**F5** starts the server, **F6** stops it, **F9** exports a start script, **Ctrl+S** saves
+the configuration. Tabs: Configuration, Server, Benchmark, System, Help.
 
-**Geschwindigkeit** (ein Nutzer, 32k Kontext, KV-Cache q8_0):
+The server is then reachable at `http://<host>:8080` with the OpenAI-compatible API
+(`/v1/chat/completions`), including the web interface of llama.cpp.
 
-| Engine | Quant | MTP | Decode | Speicher |
+## The most important findings
+
+**Memory.** Every quant contains the same 26.8 GB table for n-gram embeddings. Normal
+llama.cpp loads it completely into RAM on ROCm, in addition to the weights in the GPU. That is why the
+best quant (UD-Q4_K_XL) with MTP does not fit into 128 GB there. The fork **EngramHalo.cpp** leaves the table on the
+NVMe (only about 3 GB in RAM) and still loads in under 30 seconds. With that, UD-Q4_K_XL runs with MTP
+at about 85 GB memory requirement.
+
+**Speed** (one user, 32k context, KV cache q8_0):
+
+| Engine | Quant | MTP | Decode | Memory |
 | --- | --- | --- | --- | --- |
-| EngramHalo | UD-Q4_K_XL | an | 33–41 t/s | 85 GB |
-| EngramHalo | UD-IQ4_XS | an | 36 t/s | 69 GB |
-| EngramHalo | UD-IQ3_XXS | aus / an | 23 / 34 t/s | 53 / 57 GB |
-| llama.cpp + Patch | UD-IQ4_XS | an | 34 t/s | 93 GB |
-| llama.cpp + Patch | UD-Q4_K_XL | an | passt nicht | über 107 GB |
+| EngramHalo | UD-Q4_K_XL | on | 33–41 t/s | 85 GB |
+| EngramHalo | UD-IQ4_XS | on | 36 t/s | 69 GB |
+| EngramHalo | UD-IQ3_XXS | off / on | 23 / 34 t/s | 53 / 57 GB |
+| llama.cpp + patch | UD-IQ4_XS | on | 34 t/s | 93 GB |
+| llama.cpp + patch | UD-Q4_K_XL | on | does not fit | over 107 GB |
 
-**Mehrere Nutzer** (UD-IQ4_XS, ohne MTP): 1/2/4/8 gleichzeitige Anfragen ergeben 20/32/42/50 Tokens pro
-Sekunde insgesamt. MTP lohnt sich nur bei einem Nutzer; bei 8 Nutzern sind es mit MTP nur 35 statt 50 t/s.
+**Several users** (UD-IQ4_XS, without MTP): 1/2/4/8 simultaneous requests give 20/32/42/50 tokens per
+second in total. MTP only pays off with one user; with 8 users it is only 35 instead of 50 t/s with MTP.
 
-**Weitere Entscheidungen**: ROCm statt Vulkan (Vulkan bricht mit MTP bei diesem Modell ein). Nur der
-dzannotti-MTP-Head passt zu den Builds; der unsloth-Head braucht den unsloth-Fork. Die Umgebungsvariable
-`LLAMA_ATTN_ROT_DISABLE` ist nicht nötig. `reasoning_effort` kennt nur `xhigh`, `medium` und `low`.
+**Further decisions**: ROCm instead of Vulkan (Vulkan collapses with MTP on this model). Only the
+dzannotti MTP head matches the builds; the unsloth head needs the unsloth fork. The environment variable
+`LLAMA_ATTN_ROT_DISABLE` is not needed. `reasoning_effort` only knows `xhigh`, `medium` and `low`.
 
-## Ordner
+## Directories
 
-| Pfad | Inhalt |
+| Path | Content |
 | --- | --- |
-| `qwen38tui/` | das Programm (Konfiguration, Speicherschätzung, Modell-Erkennung, GGUF-Reader, Server-Steuerung, Benchmarks, Oberfläche) |
-| `engine/` | `fetch.sh`, Build-Skripte, Patches; nach dem Bauen `build-engramhalo/` und `build-hip/` |
-| `bench/` | Mess-Skripte mit Speicher-Wächter, `context_limits.py` (wie viele gleichzeitige Kontexte je Quant passen) und die Rohergebnisse dieser Maschine |
-| `bench/quality/` | Agenten-Benchmark Terminal-Bench-Mini-20: Holskript, Runner, Auswertung (siehe `bench/quality/README.md`) |
-| `docs/` | `RESEARCH.md` (Recherche mit Quellen), `QUALITAETS-BENCHMARKS.md` (welche Qualitäts-Benchmarks in 8 Stunden möglich sind), `TERMINAL-BENCH.md` (Ergebnisse des Agenten-Benchmarks), `HILFE.md` (Hilfe im Programm) und die Dokumentations-Website (HTML, wird über GitHub Pages aus diesem Ordner veröffentlicht) |
+| `qwen38tui/` | the program (configuration, memory estimation, model detection, GGUF reader, server control, benchmarks, interface) |
+| `engine/` | `fetch.sh`, build scripts, patches; after the build `build-engramhalo/` and `build-hip/` |
+| `bench/` | measurement scripts with memory guard, `context_limits.py` (how many simultaneous contexts fit per quant) and the raw results of this machine |
+| `bench/quality/` | agent benchmark Terminal-Bench-Mini-20: fetch script, runner, analysis (see `bench/quality/README.md`) |
+| `docs/` | `RESEARCH.md` (research with sources), `QUALITY-BENCHMARKS.md` (which quality benchmarks are possible in 8 hours), `TERMINAL-BENCH.md` (results of the agent benchmark), `HELP.md` (help inside the program) and the documentation website (HTML, published via GitHub Pages from this directory) |
 | `tests/` | `uv run pytest -q` |
-| `state/` | eigene Profile, Logs, Messergebnisse (wird beim ersten Start angelegt) |
+| `state/` | own profiles, logs, measurement results (created on first start) |
 
-## Dokumentations-Website
+## Documentation website
 
-Der Ordner `docs/` enthält eine statische Website mit allen Entscheidungen, Messungen und Quellen
-(`index.html`, `entscheidungen.html`, `speicher.html`, `benchmarks.html`, `terminal-bench.html`, `anleitung.html`, `recherche.html`).
-Veröffentlichen: in den Repository-Einstellungen unter „Pages“ den Branch `main` mit dem Ordner `/docs` wählen.
+The directory `docs/` contains a static website with all decisions, measurements and sources
+(`index.html`, `decisions.html`, `memory.html`, `measurements.html`, `terminal-bench.html`, `guide.html`, `research.html`).
+Publishing: in the repository settings under "Pages" choose the branch `main` with the directory `/docs`.
 Repository: <https://github.com/kksoftwareag/strix-halo-qwen-3.8-flash-next>.
-Es ist kein Build-Schritt nötig; `.nojekyll` sorgt dafür, dass GitHub die Dateien unverändert ausliefert.
+No build step is needed; `.nojekyll` makes sure that GitHub delivers the files unchanged.
 
-## Bekannte Grenzen
+## Known limits
 
-- Nur mit ROCm/HIP auf gfx1151 getestet. Ein Vulkan-Build ist vorbereitet, aber nicht gemessen.
-- MTP mit mehreren Slots ist auf dieser Architektur nicht gut; das Programm schaltet es im
-  Mehrnutzer-Test ab.
-- Der Speicherbedarf wird geschätzt. Die Schätzung ist auf die Messungen kalibriert, kann aber bei
-  ungewöhnlichen Einstellungen abweichen. Der Wächter fängt das ab.
-- Die MTP-Unterstützung für dieses Modell ist in llama.cpp noch nicht enthalten. Die Patches hier
-  folgen den offenen Pull Requests und müssen bei neuen llama.cpp-Versionen angepasst werden.
+- Only tested with ROCm/HIP on gfx1151. A Vulkan build is prepared, but not measured.
+- MTP with several slots is not good on this architecture; the program switches it off in the
+  multi-user test.
+- The memory requirement is estimated. The estimate is calibrated to the measurements, but can deviate with
+  unusual settings. The guard catches that.
+- MTP support for this model is not yet included in llama.cpp. The patches here
+  follow the open pull requests and have to be adapted for new llama.cpp versions.
 
-## Dank
+## Thanks
 
-- [llama.cpp](https://github.com/ggml-org/llama.cpp) und die Autoren der qwen4exp-Unterstützung
-- [EngramHalo.cpp](https://github.com/Aristo94/EngramHalo.cpp) für den Strix-Halo-Fork
-- [dzannotti](https://huggingface.co/dzannotti/Qwen3.8-Flash-Next-MTP-GGUF) für den MTP-Draft-Head und den Patch
-- [unsloth](https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF) für die Quantisierungen
-- [Qwen](https://huggingface.co/Qwen/Qwen3.8-Flash-Next) für das Modell
-- [Textual](https://textual.textualize.io/) für die Terminal-Oberfläche
+- [llama.cpp](https://github.com/ggml-org/llama.cpp) and the authors of the qwen4exp support
+- [EngramHalo.cpp](https://github.com/Aristo94/EngramHalo.cpp) for the Strix Halo fork
+- [dzannotti](https://huggingface.co/dzannotti/Qwen3.8-Flash-Next-MTP-GGUF) for the MTP draft head and the patch
+- [unsloth](https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF) for the quantizations
+- [Qwen](https://huggingface.co/Qwen/Qwen3.8-Flash-Next) for the model
+- [Textual](https://textual.textualize.io/) for the terminal interface
 
-## Lizenz
+## License
 
-Dieses Projekt steht unter der **European Union Public Licence v. 1.2 (EUPL-1.2)**, siehe `LICENSE`.
-Die Modelle, llama.cpp, EngramHalo.cpp und die Patches Dritter stehen unter ihren eigenen Lizenzen.
+This project is under the **European Union Public Licence v. 1.2 (EUPL-1.2)**, see `LICENSE`.
+The models, llama.cpp, EngramHalo.cpp and the third-party patches are under their own licenses.

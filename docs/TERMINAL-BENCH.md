@@ -1,15 +1,17 @@
 # Terminal-Bench-Mini-20: Ergebnisse
 
-Stand: 2026-09-05. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1 auf dieser Maschine, ein Quant nach dem anderen. Aufbau und Bedienung: [`bench/quality/README.md`](../bench/quality/README.md), Einordnung in [`QUALITAETS-BENCHMARKS.md`](QUALITAETS-BENCHMARKS.md).
+Stand: 2026-09-06. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1 auf dieser Maschine, ein Quant nach dem anderen. Aufbau und Bedienung: [`bench/quality/README.md`](../bench/quality/README.md), Einordnung in [`QUALITAETS-BENCHMARKS.md`](QUALITAETS-BENCHMARKS.md).
 
 ## Ergebnis
 
-| Quant | pass@1 | Dauer | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |
-| --- | --- | --- | --- | --- | --- | --- |
-| UD-IQ1_M · medium | 15/20 | 8 h 16 min | 459.008 | 15.4 | 0.3147 | 79.7 % |
-| UD-Q2_K_XL · medium | 16/20 | 7 h 36 min | 385.970 | 14.1 | 0.2246 | 82.7 % |
-| UD-IQ3_XXS · medium | 15/20 | 6 h 27 min | 273.296 | 11.8 | 0.1651 | 85.4 % |
-| UD-IQ4_XS · medium | 15/20 | 6 h 57 min | 343.555 | 13.7 | 0.0836 | 89.6 % |
+| Quant | pass@1 | pass@2 | Dauer | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| UD-IQ1_M · medium | 15/20 | **17/20** | 8 h 16 min | 459.008 | 15.4 | 0.3147 | 79.7 % |
+| UD-Q2_K_XL · medium | 16/20 | 16/20 | 7 h 36 min | 385.970 | 14.1 | 0.2246 | 82.7 % |
+| UD-IQ3_XXS · medium | 15/20 | **17/20** | 6 h 27 min | 273.296 | 11.8 | 0.1651 | 85.4 % |
+| UD-IQ4_XS · medium | 15/20 | **16/20** | 6 h 57 min | 343.555 | 13.7 | 0.0836 | 89.6 % |
+
+pass@2 zählt einen zweiten Versuch, der nur für die Aufgaben gelaufen ist, die im ersten Durchgang ins Zeitlimit liefen — mit 5400 s statt 3600 s. Aufgaben, die der Verifier abgelehnt hat, bekamen keinen zweiten Versuch; für sie ist pass@2 = pass@1.
 
 ## Aufgaben im Einzelnen
 
@@ -20,18 +22,18 @@ Stand: 2026-09-05. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1 auf 
 | `git-leak-recovery` | software-engineering | medium | **ja** (2:25) | **ja** (2:55) | **ja** (2:29) | **ja** (8:52) |
 | `fix-git` | software-engineering | easy | **ja** (4:31) | **ja** (3:30) | **ja** (3:21) | **ja** (2:57) |
 | `cobol-modernization` | software-engineering | easy | **ja** (16:30) | **ja** (9:36) | **ja** (16:32) | **ja** (13:31) |
-| `regex-log` | data-processing | medium | Zeitlimit (1:00:47) | **ja** (23:15) | **ja** (24:26) | **ja** (11:40) |
+| `regex-log` | data-processing | medium | Zeitlimit (1:00:47) → **ja** (1:12:50) | **ja** (23:15) | **ja** (24:26) | **ja** (11:40) |
 | `headless-terminal` | software-engineering | medium | **ja** (9:48) | **ja** (17:42) | **ja** (6:50) | **ja** (8:39) |
 | `mailman` | system-administration | medium | **ja** (46:45) | **ja** (44:47) | **ja** (24:55) | **ja** (21:38) |
 | `fix-ocaml-gc` | software-engineering | hard | **ja** (38:27) | **ja** (41:13) | **ja** (32:03) | **ja** (1:22:10) |
 | `break-filter-js-from-html` | security | medium | **ja** (20:50) | **ja** (57:40) | **ja** (35:20) | **ja** (20:35) |
 | `sqlite-with-gcov` | system-administration | medium | **ja** (5:34) | nicht bestanden (8:22) | **ja** (6:45) | **ja** (8:14) |
 | `sparql-university` | data-querying | hard | **ja** (34:10) | nicht bestanden (15:21) | **ja** (17:45) | **ja** (12:37) |
-| `llm-inference-batching-scheduler` | machine-learning | hard | Zeitlimit (1:00:30) | **ja** (1:00:30) | Zeitlimit (1:00:38) | Zeitlimit (1:03:22) |
+| `llm-inference-batching-scheduler` | machine-learning | hard | Zeitlimit (1:00:30) → Zeitlimit (1:30:35) | **ja** (1:00:30) | Zeitlimit (1:00:38) → **ja** (34:04) | Zeitlimit (1:03:22) → **ja** (1:30:13) |
 | `configure-git-webserver` | system-administration | hard | **ja** (10:50) | nicht bestanden (6:45) | nicht bestanden (6:20) | **ja** (5:48) |
 | `build-cython-ext` | debugging | medium | **ja** (35:11) | **ja** (30:07) | **ja** (33:24) | **ja** (28:09) |
-| `extract-elf` | file-operations | medium | Zeitlimit (1:00:29) | **ja** (26:53) | nicht bestanden (9:28) | nicht bestanden (17:32) |
-| `build-pov-ray` | software-engineering | medium | nicht bestanden (42:18) | **ja** (1:00:44) | Zeitlimit (1:00:46) | Zeitlimit (1:00:48) |
+| `extract-elf` | file-operations | medium | Zeitlimit (1:00:29) → **ja** (32:36) | **ja** (26:53) | nicht bestanden (9:28) | nicht bestanden (17:32) |
+| `build-pov-ray` | software-engineering | medium | nicht bestanden (42:18) | **ja** (1:00:44) | Zeitlimit (1:00:46) → **ja** (37:32) | Zeitlimit (1:00:48) → nicht bestanden (58:11) |
 | `openssl-selfsigned-cert` | security | medium | **ja** (3:09) | **ja** (3:48) | **ja** (2:28) | **ja** (6:24) |
 | `overfull-hbox` | debugging | easy | **ja** (21:26) | **ja** (21:15) | **ja** (15:58) | nicht bestanden (19:53) |
 | `mteb-retrieve` | data-science | medium | nicht bestanden (16:59) | nicht bestanden (13:36) | nicht bestanden (21:15) | nicht bestanden (11:26) |

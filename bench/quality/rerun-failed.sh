@@ -10,7 +10,7 @@ set -uo pipefail
 main() {
   cd "$(dirname "$0")/../.."
   local TIMEOUT="${TB_AGENT_TIMEOUT:-5400}"
-  local RES="${TB_RESULTS:-state/quality/tbench-versuch2}"
+  local RES="${TB_RESULTS:-$PWD/state/quality/tbench-versuch2}"
   local FREI_GIB="${TB_FREE_GIB:-95}"
 
   warte_auf_speicher() {

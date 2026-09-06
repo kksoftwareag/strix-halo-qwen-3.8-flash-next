@@ -366,7 +366,7 @@ def main() -> int:
               "--backend-version", hw.rocm_version or "?",
               "--quant", (r.model.quant if r.model else "?"),
               "--inference-profile", profile_label(cfg),
-              "--results-dir", a.results_dir]
+              "--results-dir", str(Path(a.results_dir).expanduser().resolve())]
     tasks: list[str] = []
     if a.tasks:
         if a.tasks.startswith("@"):

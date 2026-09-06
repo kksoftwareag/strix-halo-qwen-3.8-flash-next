@@ -17,7 +17,7 @@ nur, was der Verifier der Aufgabe akzeptiert.</p>
 
 <div class="note" id="conditions">
 <strong>Messbedingungen:</strong> <span id="cond-effort">Denkmodus <code>medium</code></span> ·
-ein Versuch je Aufgabe (pass@1) · ein Stream, keine parallelen Anfragen · spekulatives Decoding (MTP) aktiv ·
+<span id="cond-attempts">ein Versuch je Aufgabe (pass@1)</span> · ein Stream, keine parallelen Anfragen · spekulatives Decoding (MTP) aktiv ·
 60 Minuten Zeitlimit je Aufgabe · <span id="cond-ctx">163 840</span> Token Kontext ·
 Agent Terminus-2 über Harbor. Der Denkmodus wirkt stark auf Token-Zahl und Laufzeit und ist deshalb Teil
 der Kennung jedes Laufs.
@@ -105,10 +105,17 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
       (f.footprint_gib ? " · " + f.footprint_gib + " GiB Speicher" : "") + "</div></div>";
   }).join("");
 
-  $("bars").innerHTML = runs.map(r =>
-    '<div class="bar"><span class="label">' + esc(r.label || r.quant) + '</span><span class="track"><span class="fill" style="width:' +
-    (r.pass_rate * 100).toFixed(1) + '%"></span></span><span class="val">' + r.passed_tasks + "/" + r.total_tasks +
-    "</span></div>").join("");
+  $("bars").innerHTML = runs.map(r => {
+    const p1 = r.passed_tasks / r.total_tasks * 100;
+    const p2 = (r.passed_2 != null ? r.passed_2 : r.passed_tasks) / r.total_tasks * 100;
+    return '<div class="bar"><span class="label">' + esc(r.label || r.quant) + '</span><span class="track">' +
+      '<span class="fill" style="width:' + p1.toFixed(1) + '%"></span>' +
+      (p2 > p1 ? '<span class="fill2" style="width:' + (p2 - p1).toFixed(1) + '%"></span>' : "") +
+      '</span><span class="val">' + (p2 > p1 ? r.passed_tasks + " → " + r.passed_2 : r.passed_tasks) +
+      "/" + r.total_tasks + "</span></div>";
+  }).join("");
+  if (runs.some(r => r.has_attempt2)) $("cond-attempts").textContent =
+    "zwei Versuche je Aufgabe (pass@2), der zweite nur für die Zeitlimit-Fälle mit 90 statt 60 Minuten";
 
   /* Filter befüllen */
   const uniq = key => [...new Set(tasks.map(t => t[key]).filter(Boolean))].sort();

@@ -276,6 +276,7 @@ def main() -> int:
     b.add_argument("--agent-timeout", type=int, default=0, help="Sekunden je Versuch (Default 10800)")
     b.add_argument("--results-dir", default=str(PROJECT / "state" / "quality" / "tbench"))
     b.add_argument("--job-name", default="")
+    b.add_argument("--tag", default="", help="zusätzliche Kennung des Laufs (z.B. Engine-Patch), landet in der Ergebnis-Identität")
     b.add_argument("--dry-run", action="store_true", help="nur Kommandos zeigen, nichts starten")
     b.add_argument("--raw-output", action="store_true", help="Ausgabe von Harbor nicht ausdünnen (Spinner-Frames behalten)")
     b.add_argument("--apt-mirror", default="auto",
@@ -365,7 +366,7 @@ def main() -> int:
               "--backend", "rocm",
               "--backend-version", hw.rocm_version or "?",
               "--quant", (r.model.quant if r.model else "?"),
-              "--inference-profile", profile_label(cfg),
+              "--inference-profile", profile_label(cfg)] + (["--tag", a.tag] if a.tag else []) + [
               "--results-dir", str(Path(a.results_dir).expanduser().resolve())]
     tasks: list[str] = []
     if a.tasks:

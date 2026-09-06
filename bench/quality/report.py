@@ -205,7 +205,7 @@ def load_runs(results: Path) -> list[dict]:
             "quant": s.get("quant"),
             "inference_profile": profile,
             "effort": effort,
-            "label": f"{s.get('quant')} · {effort}",
+            "label": f"{s.get('quant')} · {effort}" + (f" · {s.get('tag')}" if s.get("tag") else ""),
             "log_key": f"{s.get('quant')}-{effort}" if effort != "medium" else str(s.get("quant")),
             "engine": s.get("engine"),
             "engine_version": s.get("engine_version"),

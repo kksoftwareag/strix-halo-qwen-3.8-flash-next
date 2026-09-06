@@ -1,5 +1,5 @@
 window.TBMINI = {
- "generated_at": "2026-09-06T11:37:10+00:00",
+ "generated_at": "2026-09-06T14:12:57+00:00",
  "tasks": [
   {
    "id": "pypi-server",
@@ -3057,6 +3057,75 @@ window.TBMINI = {
     "draft_accept": 0.717,
     "draft_mean_len": 3.67,
     "load_s": 45
+   },
+   "memory": [
+    [
+     "Gewichte (resident)",
+     "52.1 GiB"
+    ],
+    [
+     "PLE-Tabelle lazy (nicht resident)",
+     "26.8 GiB"
+    ],
+    [
+     "KV-Cache (12 Attn-Layer)",
+     "2.0 GiB"
+    ],
+    [
+     "Indexer-Cache",
+     "0.7 GiB"
+    ],
+    [
+     "DeltaNet-Zustand",
+     "0.1 GiB"
+    ],
+    [
+     "Compute-Buffer (Schätzung)",
+     "1.6 GiB"
+    ],
+    [
+     "MTP-Head + Draft-KV",
+     "3.4 GiB"
+    ],
+    [
+     "Prompt-Cache (max)",
+     "2.0 GiB"
+    ],
+    [
+     "Summe",
+     "62.0 GiB"
+    ],
+    [
+     "Verfügbar (MemAvailable)",
+     "106.5 GiB"
+    ],
+    [
+     "Reserve OS/Page-Cache",
+     "6.0 GiB"
+    ],
+    [
+     "Spielraum",
+     "38.4 GiB"
+    ]
+   ],
+   "ctx_total": 163840,
+   "ctx_per_slot": 163840,
+   "slots": 1,
+   "apt_mirror": "ftp.fau.de (131.188.12.211)"
+  },
+  "UD-IQ3_XXS-xhigh": {
+   "log": "state/quality/tbmini-UD-IQ3_XXS-xhigh.log",
+   "server_log": "state/logs/tbench-server-20260906-134235.log",
+   "command": "ROCBLAS_USE_HIPBLASLT=1 /home/lyra/models/qwen38-flash/engine/build-engramhalo/bin/llama serve -m /home/lyra/.cache/huggingface/hub/models--unsloth--Qwen3.8-Flash-Next-GGUF/snapshots/824f539b2710e5a9e47af4952cf6578cf5ee8932/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf -ngl 99 -c 163840 -fa on -ctk q8_0 -ctv q8_0 -b 8192 -ub 2048 -t 4 --load-mode none -np 1 --cache-ram 2048 -md /home/lyra/.cache/huggingface/hub/models--dzannotti--Qwen3.8-Flash-Next-MTP-GGUF/snapshots/0b2551d191548168d3254ddea4ab943a5ef4f809/Qwen3.8-Flash-Next-MTP-Q4_K_M.gguf -ngld 99 --spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75 --jinja --chat-template-kwargs '{\"reasoning_effort\": \"xhigh\"}' --temp 1 --top-p 0.95 --top-k 20 --min-p 0 --host 10.50.4.9 --port 8080 -a qwen3.8-flash --metrics -lv 4",
+   "server": {
+    "requests": 92,
+    "prompt_tokens": 93639,
+    "generated_tokens": 90099,
+    "pp_tps": 227.5,
+    "tg_tps": 22.4,
+    "draft_accept": 0.679,
+    "draft_mean_len": 3.27,
+    "load_s": 44
    },
    "memory": [
     [

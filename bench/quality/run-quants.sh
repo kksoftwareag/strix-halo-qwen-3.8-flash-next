@@ -6,6 +6,7 @@
 #   bench/quality/run-quants.sh UD-IQ4_XS                # nur einer
 #   TB_AGENT_TIMEOUT=1800 bench/quality/run-quants.sh    # anderes Zeitlimit je Aufgabe (Default 3600)
 #   TB_EFFORT=xhigh bench/quality/run-quants.sh          # Denkstufe (Default medium)
+#   TB_TAG=qwen4exp-28123 bench/quality/run-quants.sh    # Kennung des Engine-Stands
 set -uo pipefail
 
 main() {
@@ -14,7 +15,8 @@ main() {
   QUANTS=("$@")
   [ ${#QUANTS[@]} -eq 0 ] && QUANTS=(UD-Q2_K_XL UD-IQ1_M UD-IQ3_XXS UD-IQ4_XS)
   TIMEOUT="${TB_AGENT_TIMEOUT:-3600}"
-  EFFORT="${TB_EFFORT:-medium}"           # Denkstufe: low | medium | xhigh
+  EFFORT="${TB_EFFORT:-medium}"   # Denkstufe: low | medium | xhigh
+  TAG="${TB_TAG:-}"               # zusätzliche Kennung, z.B. der Engine-Stand
   SUFFIX=""; [ "$EFFORT" != "medium" ] && SUFFIX="-$EFFORT"
   FREI_GIB="${TB_FREE_GIB:-95}"
   # Der Spiegel wird fest gesetzt: archive.ubuntu.com ist aus diesem Netz zeitweise
@@ -39,6 +41,7 @@ main() {
       --tier full --attempts 1 --agent-timeout "$TIMEOUT" \
       --apt-mirror "${TB_APT_MIRROR:-ftp.fau.de}" \
       --reasoning-effort "$EFFORT" \
+      ${TAG:+--tag "$TAG"} \
       --quant "$q" --job-name "tbmini-${q}${SUFFIX}" > "$log" 2>&1
     rc=$?
     echo "=== $q  Ende  $(date '+%F %T')  exit $rc  Log: $log"

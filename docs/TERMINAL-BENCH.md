@@ -4,14 +4,15 @@ Stand: 2026-09-06. Agenten-Benchmark mit 20 Aufgaben aus Terminal-Bench 2.1 auf 
 
 ## Ergebnis
 
-| Quant | pass@1 | pass@2 | Dauer | Ø je Aufgabe | Median | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| UD-IQ1_M · medium | 15/20 | **19/20** | 8 h 16 min | 24:49 | 20:50 | 459.008 | 15.4 | 0.3147 | 79.7 % |
-| UD-Q2_K_XL · medium | 16/20 | **18/20** | 7 h 36 min | 22:48 | 17:42 | 385.970 | 14.1 | 0.2246 | 82.7 % |
-| UD-IQ3_XXS · medium | 15/20 | **18/20** | 6 h 27 min | 19:22 | 16:32 | 273.296 | 11.8 | 0.1651 | 85.4 % |
-| UD-IQ4_XS · medium | 15/20 | **18/20** | 6 h 57 min | 20:53 | 12:37 | 343.555 | 13.7 | 0.0836 | 89.6 % |
+| Quant | pass@1 | pass@2 | pass@3 | Dauer | Ø je Aufgabe | Median | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| UD-IQ1_M · medium | 15/20 | **19/20** | **20/20** | 8 h 16 min | 24:49 | 20:50 | 459.008 | 15.4 | 0.3147 | 79.7 % |
+| UD-Q2_K_XL · medium | 16/20 | **18/20** | 18/20 | 7 h 36 min | 22:48 | 17:42 | 385.970 | 14.1 | 0.2246 | 82.7 % |
+| UD-IQ3_XXS · medium | 15/20 | **18/20** | 18/20 | 6 h 27 min | 19:22 | 16:32 | 273.296 | 11.8 | 0.1651 | 85.4 % |
+| UD-IQ4_XS · medium | 15/20 | **18/20** | 18/20 | 6 h 57 min | 20:53 | 12:37 | 343.555 | 13.7 | 0.0836 | 89.6 % |
 
 pass@2: Jede im ersten Durchgang gescheiterte Aufgabe bekam genau einen zweiten Versuch, mit 5400 s Zeitlimit statt 3600 s.
+pass@3 zählt einen dritten Versuch mit 10800 s, der nur für die Aufgaben lief, die auch im zweiten Anlauf am Zeitlimit scheiterten.
 
 „Ø je Aufgabe“ und „Median“ beziehen sich auf den ersten Durchgang und zählen die volle Zeit je Aufgabe: Container-Aufbau, Arbeit des Agenten und Verifier.
 
@@ -31,7 +32,7 @@ pass@2: Jede im ersten Durchgang gescheiterte Aufgabe bekam genau einen zweiten 
 | `break-filter-js-from-html` | security | medium | **ja** (20:50) | **ja** (57:40) | **ja** (35:20) | **ja** (20:35) |
 | `sqlite-with-gcov` | system-administration | medium | **ja** (5:34) | nicht bestanden (8:22) → **ja** (6:49) | **ja** (6:45) | **ja** (8:14) |
 | `sparql-university` | data-querying | hard | **ja** (34:10) | nicht bestanden (15:21) → **ja** (11:45) | **ja** (17:45) | **ja** (12:37) |
-| `llm-inference-batching-scheduler` | machine-learning | hard | Zeitlimit (1:00:30) → Zeitlimit (1:30:35) | **ja** (1:00:30) | Zeitlimit (1:00:38) → **ja** (34:04) | Zeitlimit (1:03:22) → **ja** (1:30:13) |
+| `llm-inference-batching-scheduler` | machine-learning | hard | Zeitlimit (1:00:30) → Zeitlimit (1:30:35) → **ja** (2:46:33) | **ja** (1:00:30) | Zeitlimit (1:00:38) → **ja** (34:04) | Zeitlimit (1:03:22) → **ja** (1:30:13) |
 | `configure-git-webserver` | system-administration | hard | **ja** (10:50) | nicht bestanden (6:45) → nicht bestanden (3:59) | nicht bestanden (6:20) → **ja** (5:12) | **ja** (5:48) |
 | `build-cython-ext` | debugging | medium | **ja** (35:11) | **ja** (30:07) | **ja** (33:24) | **ja** (28:09) |
 | `extract-elf` | file-operations | medium | Zeitlimit (1:00:29) → **ja** (32:36) | **ja** (26:53) | nicht bestanden (9:28) → nicht bestanden (22:52) | nicht bestanden (17:32) → **ja** (51:04) |

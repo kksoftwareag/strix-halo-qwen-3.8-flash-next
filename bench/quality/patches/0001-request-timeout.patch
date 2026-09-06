@@ -1,0 +1,20 @@
+diff --git a/terminal_bench.py b/terminal_bench.py
+index ad382f8..7939717 100755
+--- a/terminal_bench.py
++++ b/terminal_bench.py
+@@ -372,7 +372,14 @@ def build_config(
+                     "enable_summarize": True,
+                     "proactive_summarization_threshold": SUMMARIZATION_FREE_TOKENS,
+                     "model_info": {"max_input_tokens": context_length},
+-                    "llm_kwargs": {"api_key": api_key},
++                    "llm_kwargs": {
++                        "api_key": api_key,
++                        # Ohne eigenes Timeout bricht LiteLLM eine Anfrage nach 600 s ab und wiederholt sie
++                        # mit demselben Prompt. Bei langen Antworten (hoher reasoning_effort auf langsamer
++                        # Hardware) entsteht daraus eine Endlosschleife, die das Zeitbudget der Aufgabe
++                        # verbraucht, ohne dass ein Token beim Agenten ankommt.
++                        "timeout": float(os.environ.get("TBENCH_REQUEST_TIMEOUT", "600")),
++                    },
+                 },
+             }
+         ],

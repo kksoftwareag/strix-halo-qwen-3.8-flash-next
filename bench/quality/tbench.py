@@ -265,6 +265,10 @@ def main() -> int:
                    help="Spielraum, den die Docker-Container brauchen; darunter wird gewarnt (Default 8)")
     g.add_argument("--use-running", action="store_true", help="keinen Server starten, laufenden benutzen")
     g.add_argument("--endpoint", default="", help="Endpunkt überschreiben (Default: aus der Konfiguration)")
+    g.add_argument("--request-timeout", type=int, default=3600,
+                   help="Zeitlimit einer einzelnen Modellanfrage in Sekunden (Default 3600). Der Benchmark bricht "
+                        "sonst nach 600 s ab und wiederholt mit demselben Prompt – bei langen Antworten eine "
+                        "Endlosschleife.")
 
     b = ap.add_argument_group("Benchmark")
     b.add_argument("--tier", default="full", choices=["smoke", "full"])
@@ -408,6 +412,7 @@ def main() -> int:
         log(f"   Wächter       SIGKILL bei MemAvailable < {guard:.1f} GiB")
     shim = HERE / "dockershim"
     renv = dict(os.environ)
+    renv["TBENCH_REQUEST_TIMEOUT"] = str(a.request_timeout)
     hosts = apt_mirror_hosts(a.apt_mirror)
     if hosts:
         renv["QWEN38_EXTRA_HOSTS"] = ",".join(hosts)

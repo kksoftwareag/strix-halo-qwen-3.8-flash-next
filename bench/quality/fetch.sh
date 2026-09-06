@@ -18,6 +18,18 @@ git -C "$DEST" fetch --quiet origin
 git -C "$DEST" checkout --quiet "$COMMIT"
 git -C "$DEST" log -1 --format='   %h %ci %s'
 
+echo "== Patches"
+for patch in "$HERE"/patches/*.patch; do
+  [ -e "$patch" ] || continue
+  if git -C "$DEST" apply --reverse --check "$patch" 2>/dev/null; then
+    echo "   $(basename "$patch") bereits enthalten"
+  elif git -C "$DEST" apply "$patch" 2>/dev/null; then
+    echo "   $(basename "$patch") angewendet"
+  else
+    echo "   FEHLER: $(basename "$patch") passt nicht" >&2; exit 1
+  fi
+done
+
 echo
 echo "== Voraussetzungen"
 ok=0

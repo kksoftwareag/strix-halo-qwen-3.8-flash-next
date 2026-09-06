@@ -101,6 +101,26 @@ Modelle im Container. Mit Q4_K_XL ist das knapp; für `--concurrency > 1` ist IQ
 vernünftige Wahl. Fällt `MemAvailable` unter die Schwelle, killt der Wächter den Server –
 der Lauf bricht dann ab, aber die Maschine bleibt bedienbar.
 
+## Fehlerquelle: abgebrochene Modellanfragen
+
+Bei der Untersuchung eines Zeitlimit-Fehlschlags (`cobol-modernization`, UD-IQ3_XXS, `xhigh`) kam ein Defekt im
+Zusammenspiel von Harness und Server heraus, der alle Läufe betrifft: **LiteLLM bricht eine Anfrage nach 600 Sekunden
+ab und wiederholt sie mit demselben Prompt.** Braucht eine Antwort auf dieser Hardware länger, entsteht daraus eine
+Schleife — jeder Versuch läuft erneut in die Grenze, es kommt kein Token beim Agenten an, und das Zeitbudget der
+Aufgabe wird aufgebraucht.
+
+In besagtem Fall erzeugte der Server für einen einzigen Agentenschritt fünf Generierungen mit identischem Prompt
+(je etwa 11 700 Token, vier davon nach 600 s abgebrochen); im ganzen Lauf waren es 9 verworfene Generierungen mit
+zusammen rund 87 der 181 Minuten, also 48 % der Laufzeit ohne jedes Ergebnis. Im Server-Log erkennbar an
+`W srv stop: cancel task`.
+
+Über alle bisherigen Läufe zusammen: **58 abgebrochene Generierungen**, davon 33 in der medium-Runde. Das heißt für
+die Interpretation der Ergebnisse: Ein Teil der Zeitlimit-Fehlschläge ist kein Modellversagen, sondern verlorene Zeit
+in dieser Schleife, und die dokumentierten Aufgabendauern sind entsprechend zu hoch.
+
+Behoben mit `bench/quality/patches/0001-request-timeout.patch`, den `fetch.sh` auf den Benchmark anwendet:
+Das Zeitlimit einer einzelnen Anfrage ist jetzt einstellbar (`tbench.py --request-timeout`, Default 3600 s statt 600).
+
 ## Netzwerk: apt-Spiegel
 
 `archive.ubuntu.com` ist aus manchen Netzen unbrauchbar langsam (hier zeitweise 20 s je Anfrage). Terminus-2

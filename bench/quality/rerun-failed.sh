@@ -10,6 +10,8 @@ set -uo pipefail
 main() {
   cd "$(dirname "$0")/../.."
   local TIMEOUT="${TB_AGENT_TIMEOUT:-5400}"
+  local EFFORT="${TB_EFFORT:-medium}"
+  local SUFFIX=""; [ "$EFFORT" != "medium" ] && SUFFIX="-$EFFORT"
   local RES="${TB_RESULTS:-$PWD/state/quality/tbench-versuch2}"
   local FREI_GIB="${TB_FREE_GIB:-95}"
 
@@ -23,20 +25,21 @@ main() {
     echo "WARNUNG: nur ${frei} GiB frei" >&2
   }
 
-  mapfile -t paare < <(python3 bench/quality/offene_wiederholungen.py)
+  mapfile -t paare < <(python3 bench/quality/offene_wiederholungen.py --effort "$EFFORT")
   if [ ${#paare[@]} -eq 0 ]; then
     echo "=== nichts zu wiederholen"; return 0
   fi
   for paar in "${paare[@]}"; do
     local q="${paar%%:*}" tasks="${paar#*:}"
-    local log="state/quality/tbmini-${q}-versuch2b.log"
-    echo "=== $q  Start $(date '+%F %T')  Zeitlimit ${TIMEOUT}s  Aufgaben: $tasks"
+    local log="state/quality/tbmini-${q}${SUFFIX}-versuch2b.log"
+    echo "=== $q  Start $(date '+%F %T')  Zeitlimit ${TIMEOUT}s  Denkstufe $EFFORT  Aufgaben: $tasks"
     warte_auf_speicher
     uv run --quiet python bench/quality/tbench.py \
       --tasks "$tasks" --attempts 1 --agent-timeout "$TIMEOUT" \
       --apt-mirror "${TB_APT_MIRROR:-ftp.fau.de}" \
       --results-dir "$RES" \
-      --quant "$q" --job-name "tbmini-${q}-v2b" > "$log" 2>&1
+      --reasoning-effort "$EFFORT" \
+      --quant "$q" --job-name "tbmini-${q}${SUFFIX}-v2b" > "$log" 2>&1
     echo "=== $q  Ende  $(date '+%F %T')  exit $?  Log: $log"
   done
   echo "=== alle Wiederholungen fertig $(date '+%F %T')"

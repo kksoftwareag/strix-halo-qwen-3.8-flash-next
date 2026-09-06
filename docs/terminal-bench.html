@@ -96,22 +96,25 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
   /* Karten und Balken */
   $("summary").innerHTML = runs.map(r => {
     const f = (D.quant_facts || {})[r.quant] || {};
+    const best = r.passed_3 != null ? r.passed_3 : (r.passed_2 != null ? r.passed_2 : r.passed_tasks);
     return '<div class="card"><h3>' + esc(r.quant) + ' <span class="pill">' + esc(r.effort || "?") + '</span></h3>' +
-      '<div class="big">' + (r.passed_2 != null && r.passed_2 > r.passed_tasks
-        ? r.passed_tasks + " → " + r.passed_2 + "/" + r.total_tasks
+      '<div class="big">' + (best > r.passed_tasks
+        ? r.passed_tasks + " → " + best + "/" + r.total_tasks
         : r.passed_tasks + "/" + r.total_tasks) +
-      '</div><div class="sub">' + (r.passed_2 != null && r.passed_2 > r.passed_tasks ? "pass@1 → pass@2 · " : "") +
-      Math.round(r.pass_rate * 100) + " % bestanden · " + hm(r.duration_s) + " Laufzeit" +
+      '</div><div class="sub">' + (best > r.passed_tasks ? "pass@1 → pass@" + (r.has_attempt3 ? "3" : "2") + " · " : "") +
+      hm(r.duration_s) + " Laufzeit · " +
+      (r.task_mean_s ? "Ø " + hms(r.task_mean_s) + " je Aufgabe" : "") +
       (f.footprint_gib ? " · " + f.footprint_gib + " GiB Speicher" : "") + "</div></div>";
   }).join("");
 
   $("bars").innerHTML = runs.map(r => {
     const p1 = r.passed_tasks / r.total_tasks * 100;
-    const p2 = (r.passed_2 != null ? r.passed_2 : r.passed_tasks) / r.total_tasks * 100;
+    const best = r.passed_3 != null ? r.passed_3 : (r.passed_2 != null ? r.passed_2 : r.passed_tasks);
+    const p2 = best / r.total_tasks * 100;
     return '<div class="bar"><span class="label">' + esc(r.label || r.quant) + '</span><span class="track">' +
       '<span class="fill" style="width:' + p1.toFixed(1) + '%"></span>' +
       (p2 > p1 ? '<span class="fill2" style="width:' + (p2 - p1).toFixed(1) + '%"></span>' : "") +
-      '</span><span class="val">' + (p2 > p1 ? r.passed_tasks + " → " + r.passed_2 : r.passed_tasks) +
+      '</span><span class="val">' + (p2 > p1 ? r.passed_tasks + " → " + best : r.passed_tasks) +
       "/" + r.total_tasks + "</span></div>";
   }).join("");
   if (runs.some(r => r.has_attempt2)) $("cond-attempts").textContent =
@@ -162,11 +165,11 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
         const x = cellOf(r, t.id);
         if (!x) { html += "<td class='cell none'>–</td>"; continue; }
         const out = x.outcome || (x.passed ? "bestanden" : "nicht bestanden");
-        const a2 = x.attempt2;
-        const ok2 = a2 && a2.passed;
-        const cls = x.passed ? "pass" : (ok2 ? "pass2" : (out === "nicht bestanden" ? "fail" : "err"));
+        const a2 = x.attempt2, a3 = x.attempt3;
+        const okSpaeter = (a2 && a2.passed) || (a3 && a3.passed);
+        const cls = x.passed ? "pass" : (okSpaeter ? "pass2" : (out === "nicht bestanden" ? "fail" : "err"));
         let mark = x.passed ? "ja" : (out === "Zeitlimit" ? "Zeit" : (out === "Abbruch" ? "Abbruch" : "nein"));
-        if (a2) mark += ok2 ? " → ja" : " → nein";
+        for (const a of [a2, a3]) if (a) mark += a.passed ? " → ja" : " → nein";
         html += "<td class='cell " + cls + "' data-task='" + esc(t.id) + "' data-run='" + esc(r.dir || r.quant) + "'>" +
           mark + " <span class='meta'>" + hms(x.duration_s) +
           (x.tok_per_s != null ? " · " + x.tok_per_s.toLocaleString("de-DE") + " t/s" : "") + "</span></td>";
@@ -196,8 +199,9 @@ Gedankengang, Kommandos und Terminal-Ausgabe.</p>
       "<dt>Zeit im Modell</dt><dd>" + (x.model_s != null ? hms(x.model_s) +
         (x.duration_s ? " von " + hms(x.duration_s) + " (" + Math.round(x.model_s / x.duration_s * 100) + " %)" : "") : "–") + "</dd>" +
       "<dt>Tempo</dt><dd>" + (x.tok_per_s != null ? x.tok_per_s.toLocaleString("de-DE") + " Token/s" : "–") + "</dd>" +
-      (x.attempt2 ? "<dt>zweiter Versuch</dt><dd>" + esc(x.attempt2.outcome || "") + " nach " + hms(x.attempt2.duration_s) +
-        (x.attempt2.timeout_s ? " (Limit " + x.attempt2.timeout_s + " s)" : "") + "</dd>" : "") +
+      [["zweiter", x.attempt2], ["dritter", x.attempt3]].map(([n, a]) => a
+        ? "<dt>" + n + " Versuch</dt><dd>" + esc(a.outcome || "") + " nach " + hms(a.duration_s) +
+          (a.timeout_s ? " (Limit " + a.timeout_s + " s)" : "") + "</dd>" : "").join("") +
       "<dt>Token ein / davon Cache</dt><dd>" + num(tok.input) + " / " + num(tok.cached) + "</dd>" +
       "<dt>Token aus</dt><dd>" + num(tok.output) + "</dd>" +
       "<dt>größter Kontext</dt><dd>" + num(x.peak_context) + "</dd>" +

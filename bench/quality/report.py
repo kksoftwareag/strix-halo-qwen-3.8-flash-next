@@ -23,7 +23,8 @@ PROJECT = HERE.parents[1]
 TASKS_DIR = HERE / "terminal-bench-mini" / "tasks"
 SUBSET = HERE / "terminal-bench-mini" / "subsets" / "full.txt"
 RESULTS = PROJECT / "state" / "quality" / "tbench"
-RESULTS2 = PROJECT / "state" / "quality" / "tbench-versuch2"   # zweiter Versuch der Zeitlimit-Fälle
+RESULTS2 = PROJECT / "state" / "quality" / "tbench-versuch2"   # zweiter Versuch
+RESULTS3 = PROJECT / "state" / "quality" / "tbench-versuch3"   # dritter Versuch, nur Zeitlimit-Fälle
 LOGS = PROJECT / "state" / "quality"
 
 # Reihenfolge der Quants von klein nach groß
@@ -227,16 +228,29 @@ def load_runs(results: Path) -> list[dict]:
             "dir": str(summary.parent.relative_to(PROJECT)),
             "per_task": per,
         })
-    zweite = second_attempts(RESULTS2)
+    zweite, dritte = second_attempts(RESULTS2), second_attempts(RESULTS3)
     for r in runs:
         per2 = zweite.get((r["quant"], r["effort"])) or {}
+        per3 = dritte.get((r["quant"], r["effort"])) or {}
         for task, d2 in per2.items():
             if task in r["per_task"]:
                 r["per_task"][task]["attempt2"] = d2
+        for task, d3 in per3.items():
+            if task in r["per_task"]:
+                r["per_task"][task]["attempt3"] = d3
         r["passed_2"] = sum(1 for t, d in r["per_task"].items()
                             if d["passed"] or (d.get("attempt2") or {}).get("passed"))
+        r["passed_3"] = sum(1 for t, d in r["per_task"].items()
+                            if d["passed"] or (d.get("attempt2") or {}).get("passed")
+                            or (d.get("attempt3") or {}).get("passed"))
+        durs = sorted(d["duration_s"] for d in r["per_task"].values() if d.get("duration_s"))
+        r["task_mean_s"] = round(sum(durs) / len(durs)) if durs else None
+        r["task_median_s"] = durs[len(durs) // 2] if durs else None
+        r["task_max_s"] = durs[-1] if durs else None
         r["has_attempt2"] = bool(per2)
+        r["has_attempt3"] = bool(per3)
         r["attempt2_timeout_s"] = next((d.get("timeout_s") for d in per2.values() if d.get("timeout_s")), None)
+        r["attempt3_timeout_s"] = next((d.get("timeout_s") for d in per3.values() if d.get("timeout_s")), None)
 
     effort_order = {"aus": 0, "low": 1, "medium": 2, "xhigh": 3}
     runs.sort(key=lambda r: (effort_order.get(r["effort"], 9),
@@ -340,9 +354,11 @@ def markdown(data: dict) -> str:
     add("## Ergebnis\n")
     if full:
         zwei = any(r.get("has_attempt2") for r in full)
-        add("| Quant | pass@1 | " + ("pass@2 | " if zwei else "") +
-            "Dauer | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |")
-        add("| --- | --- | " + ("--- | " if zwei else "") + "--- | --- | --- | --- | --- |")
+        drei = any(r.get("has_attempt3") for r in full)
+        add("| Quant | pass@1 | " + ("pass@2 | " if zwei else "") + ("pass@3 | " if drei else "") +
+            "Dauer | Ø je Aufgabe | Median | Ausgabe-Token | Token/s über die Laufzeit | KLD | Top-1 |")
+        add("| --- | --- | " + ("--- | " if zwei else "") + ("--- | " if drei else "") +
+            "--- | --- | --- | --- | --- | --- | --- |")
         for r in full:
             f = QUANT_FACTS.get(r["quant"], {})
             out_tok = (r["tokens"] or {}).get("output") or 0
@@ -351,15 +367,32 @@ def markdown(data: dict) -> str:
             if zwei:
                 n2 = r.get("passed_2", r["passed_tasks"])
                 p2 = (f"**{n2}/{r['total_tasks']}** | " if n2 > r["passed_tasks"] else f"{n2}/{r['total_tasks']} | ")
+            if drei:
+                n3 = r.get("passed_3", r.get("passed_2", r["passed_tasks"]))
+                p2 += (f"**{n3}/{r['total_tasks']}** | " if n3 > r.get("passed_2", 0) else f"{n3}/{r['total_tasks']} | ")
             add(f"| {r['label']} | {r['passed_tasks']}/{r['total_tasks']} | {p2}"
-                f"{hm(r['duration_s'])} | {out_tok:,} | {tps:.1f} | {f.get('kld', '–')} | "
+                f"{hm(r['duration_s'])} | {hms(r['task_mean_s'] or 0)} | {hms(r['task_median_s'] or 0)} | "
+                f"{out_tok:,} | {tps:.1f} | {f.get('kld', '–')} | "
                 f"{str(f.get('top1', '–')) + (' %' if f.get('top1') else '')} |".replace(",", "."))
         if zwei:
             tmo = next((r.get("attempt2_timeout_s") for r in full if r.get("attempt2_timeout_s")), None)
             add("")
-            add(f"pass@2 zählt einen zweiten Versuch, der nur für die Aufgaben gelaufen ist, die im ersten Durchgang "
-                f"ins Zeitlimit liefen — mit {tmo or 5400} s statt {full[0].get('agent_timeout_s') or 3600} s. "
-                "Aufgaben, die der Verifier abgelehnt hat, bekamen keinen zweiten Versuch; für sie ist pass@2 = pass@1.")
+            gescheitert = sum(1 for r in full for d in r["per_task"].values() if not d["passed"])
+            wiederholt = sum(1 for r in full for d in r["per_task"].values() if d.get("attempt2"))
+            t1 = full[0].get("agent_timeout_s") or 3600
+            if wiederholt >= gescheitert:
+                add(f"pass@2: Jede im ersten Durchgang gescheiterte Aufgabe bekam genau einen zweiten Versuch, "
+                    f"mit {tmo or 5400} s Zeitlimit statt {t1} s.")
+            else:
+                add(f"pass@2: Ein zweiter Versuch mit {tmo or 5400} s statt {t1} s lief bisher für {wiederholt} der "
+                    f"{gescheitert} gescheiterten Aufgaben; für die übrigen ist pass@2 = pass@1.")
+            if drei:
+                t3 = next((r.get("attempt3_timeout_s") for r in full if r.get("attempt3_timeout_s")), 10800)
+                add(f"pass@3 zählt einen dritten Versuch mit {t3} s, der nur für die Aufgaben lief, die auch im "
+                    "zweiten Anlauf am Zeitlimit scheiterten.")
+            add("")
+            add("„Ø je Aufgabe“ und „Median“ beziehen sich auf den ersten Durchgang und zählen die volle Zeit je "
+                "Aufgabe: Container-Aufbau, Arbeit des Agenten und Verifier.")
     else:
         add("_Noch keine vollständigen Läufe._")
     add("")
@@ -379,10 +412,10 @@ def markdown(data: dict) -> str:
                     cells.append(f"**ja** ({hms(d['duration_s'])})")
                 else:
                     txt = f"{d.get('outcome', 'nein')} ({hms(d['duration_s'])})"
-                    a2 = d.get("attempt2")
-                    if a2:
-                        txt += (f" → **ja** ({hms(a2['duration_s'])})" if a2["passed"]
-                                else f" → {a2.get('outcome', 'nein')} ({hms(a2['duration_s'])})")
+                    for a in (d.get("attempt2"), d.get("attempt3")):
+                        if a:
+                            txt += (f" → **ja** ({hms(a['duration_s'])})" if a["passed"]
+                                    else f" → {a.get('outcome', 'nein')} ({hms(a['duration_s'])})")
                     cells.append(txt)
             add(f"| `{t['id']}` | {t['category']} | {t['difficulty']} | " + " | ".join(cells) + " |")
         add("")

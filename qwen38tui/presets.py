@@ -71,24 +71,30 @@ EH_PRESETS: list[Preset] = [
     Preset(
         "eh-qualitaet", "EngramHalo – Max. Qualität (UD-Q4_K_XL + MTP) ★ Standard",
         "Strix-Halo-Fork: Engram-Tabelle bleibt lazy (~2.7 GiB), daher passt der beste Quant (KLD 0.047) MIT MTP: gemessen 35 t/s, "
-        "Footprint ~85 GiB, Load 28 s. 128k Kontext, MTP+ngram n4/p0.75, hipBLASLt.",
-        dict(quant="UD-Q4_K_XL", ctx_size=131072, load_mode="none", thinking=True, reasoning_effort="medium", **_EH, **_QWEN_SAMPLING),
+        "Footprint ~85 GiB, Load 28 s. 128k Kontext, MTP+ngram n4/p0.75, hipBLASLt. Q8_0-Draft-Head, falls vorhanden: "
+        "bei tiefem Kontext 29.0 statt 26.8 t/s (Akzeptanz 0.83 statt 0.62), bei leerem Kontext etwas langsamer.",
+        dict(quant="UD-Q4_K_XL", ctx_size=131072, load_mode="none", thinking=True, reasoning_effort="medium",
+             mtp_head="mtp:Qwen3.8-Flash-Next-MTP-Q8_0", **_EH, **_QWEN_SAMPLING),
     ),
     Preset(
         "eh-no-thinking", "EngramHalo – Ohne Thinking (UD-Q4_K_XL, Chat/Tools)",
         "Wie eh-qualitaet, aber enable_thinking=false und Qwen-Non-Thinking-Sampling (temp 0.7, top_p 0.8, presence 1.5).",
         dict(quant="UD-Q4_K_XL", ctx_size=131072, load_mode="none", thinking=False,
-             temp=0.7, top_p=0.8, top_k=20, min_p=0.0, presence_penalty=1.5, repeat_penalty=1.0, **_EH),
+             temp=0.7, top_p=0.8, top_k=20, min_p=0.0, presence_penalty=1.5, repeat_penalty=1.0,
+             mtp_head="mtp:Qwen3.8-Flash-Next-MTP-Q8_0", **_EH),
     ),
     Preset(
         "eh-schnell", "EngramHalo – schnell (UD-IQ3_XXS + MTP)",
-        "Kleinster sinnvoller Quant, ~57 GiB Footprint, 32k Kontext; gemessen 34 t/s (MTP) vs 23 t/s ohne. IQ4_XS: 36.5 t/s bei 69 GiB.",
-        dict(quant="UD-IQ3_XXS", ctx_size=32768, load_mode="none", thinking=True, reasoning_effort="low", **_EH, **_QWEN_SAMPLING),
+        "Kleinster sinnvoller Quant, ~57 GiB Footprint, 32k Kontext; gemessen 34 t/s (MTP) vs 23 t/s ohne. IQ4_XS: 36.5 t/s bei 69 GiB. "
+        "Bewusst der kleine Q4_K_M-Draft-Head: bei kurzem Kontext 40.9 statt 36.5 t/s.",
+        dict(quant="UD-IQ3_XXS", ctx_size=32768, load_mode="none", thinking=True, reasoning_effort="low",
+             mtp_head="dzannotti:Qwen3.8-Flash-Next-MTP-Q4_K_M", **_EH, **_QWEN_SAMPLING),
     ),
     Preset(
         "eh-longctx", "EngramHalo – 160k Kontext (UD-IQ4_XS + MTP)",
-        "UD-IQ4_XS mit 163840 Kontext (MTP laut Fork bis 164k validiert), KV q8_0 ≈ 2 GiB, MTP+ngram.",
-        dict(quant="UD-IQ4_XS", ctx_size=163840, load_mode="none", thinking=True, reasoning_effort="medium", **_EH, **_QWEN_SAMPLING),
+        "UD-IQ4_XS mit 163840 Kontext (MTP laut Fork bis 164k validiert), KV q8_0 ≈ 2 GiB, MTP+ngram, Q8_0-Draft-Head.",
+        dict(quant="UD-IQ4_XS", ctx_size=163840, load_mode="none", thinking=True, reasoning_effort="medium",
+             mtp_head="mtp:Qwen3.8-Flash-Next-MTP-Q8_0", **_EH, **_QWEN_SAMPLING),
     ),
     Preset(
         "eh-agent", "EngramHalo – Coding-Agent / Terminal-Bench (UD-Q4_K_XL, 160k)",

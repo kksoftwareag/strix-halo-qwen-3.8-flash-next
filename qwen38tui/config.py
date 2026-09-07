@@ -213,8 +213,11 @@ def resolve(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fits: "c
     if cfg.mtp_enabled and inv.mtp_heads:
         mtp = inv.mtp(cfg.mtp_head) if cfg.mtp_head != "auto" else None
         if mtp is None:
-            # auto: erster Head, dessen Tensor-Namen zum Loader der Engine passen (dzannotti-Design für die lokalen Forks)
-            mtp = next((h for h in inv.mtp_heads if h.compatible_with(engine)), None)
+            # auto: kompatible Heads (Tensor-Namen passen zum Loader der Engine), davon der kleinste.
+            # Größere Heads sind je Draft-Schritt teurer; der Q8_0-Kopf lohnt erst bei tiefem Kontext
+            # und wird deshalb in den Presets ausdrücklich gewählt, nicht automatisch.
+            passend = [h for h in inv.mtp_heads if h.compatible_with(engine)]
+            mtp = min(passend, key=lambda h: h.n_bytes) if passend else None
     host = cfg.host
     if host == "auto":
         host = hw.primary_ip if hw and hw.primary_ip else "127.0.0.1"

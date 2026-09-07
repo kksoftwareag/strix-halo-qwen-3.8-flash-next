@@ -201,8 +201,7 @@ hf download dzannotti/Qwen3.8-Flash-Next-MTP-GGUF Qwen3.8-Flash-Next-MTP-BF16.gg
 engine/build-engramhalo/bin/llama quantize <BF16 file> state/mtp/Qwen3.8-Flash-Next-MTP-Q8_0.gguf Q8_0 8
 ```
 
-Anything in `state/mtp/` is picked up automatically. The `eh-agent` preset uses it when present and falls back to the
-Q4_K_M head otherwise. For short chats Q4_K_M stays ahead (40.9 against 36.5 t/s).
+Anything in `state/mtp/` is picked up automatically. The presets for deep context — `eh-qualitaet`, `eh-no-thinking`, `eh-longctx`, `eh-agent` — use it when present and fall back to the Q4_K_M head otherwise. `eh-schnell` deliberately keeps the small head: at a short context it is ahead, 40.9 against 36.5 t/s. Automatic selection picks the smallest compatible head, so a BF16 head lying around is never chosen by accident.
 
 **The two qwen4exp commits from master (#28123, #28023) are already in EngramHalo** — the fork carries the same
 recurrent-state rollback (`[TAG_RECURRENT_ROLLBACK_SPLITS]`) and the same sliced indexer sum, with the same reasoning

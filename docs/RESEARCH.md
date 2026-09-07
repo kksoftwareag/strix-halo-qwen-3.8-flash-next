@@ -180,16 +180,21 @@ answers, not the missing throughput gain. Analysis: `bench/analyze_multiuser.py`
 **Draft head and context depth (2026-09-07, UD-IQ4_XS, `-np 1`, temp 1.0, 600 output tokens).** The 40 t/s from the
 short benchmarks are real, but they only hold at an empty context:
 
-| Draft head | Size | ~0 context | 30,000 tokens of context |
-| --- | --- | --- | --- |
-| dzannotti Q4_K_M | 2.44 GiB | **40.9 t/s** (acceptance 0.90) | 26.8 t/s (acceptance **0.62**) |
-| Q8_0, quantised here | 3.85 GiB | 36.5 t/s (0.84) | **29.0 t/s** (acceptance **0.83**) |
-| dzannotti BF16 | 7.24 GiB | 29.4 t/s (0.77) | 25.5 t/s (0.82) |
+| Draft head | Size | ~0 context | 4k | 8k | 30k |
+| --- | --- | --- | --- | --- | --- |
+| dzannotti Q4_K_M | 2.44 GiB | **40.9** (0.90) | **36.6** (0.84) | **32.2** (0.81) | 26.8 (**0.62**) |
+| Q8_0, quantised here | 3.85 GiB | 36.5 (0.84) | 32.6 (0.83) | 30.4 (0.78) | **29.0** (**0.83**) |
+| dzannotti BF16 | 7.24 GiB | 29.4 (0.77) | – | – | 25.5 (0.82) |
 
-Two effects overlap. Decode gets slower with depth because attention and the indexer run over the whole context, and
-draft acceptance drops. The smaller head loses acceptance sharply (0.90 → 0.62), the Q8_0 head barely at all
-(0.84 → 0.83) — which is why it wins at depth despite costing more per draft step. BF16 is bigger and slower at every
-depth, as the unsloth documentation says.
+Decode in t/s, draft acceptance in brackets. The crossover sits between 8k and 30k tokens: the small head leads by
+4.4 t/s at an empty context, by 4.0 at 4k, by 1.8 at 8k, and trails by 2.2 at 30k. Its acceptance holds up to 8k
+(0.81) and then collapses to 0.62, while the Q8_0 head stays near 0.83. Each point is a single measurement at
+`temp 1.0` on one kind of task, so treat differences below about 1 t/s as noise.
+
+Two effects overlap. Up to about 8k the loss is mostly the more expensive attention and indexer, which run over the
+whole context; beyond that the small head's draft acceptance collapses on top of it, which is why the Q8_0 head wins
+at depth despite costing more per draft step. BF16 is bigger and slower at every depth, as the unsloth documentation
+says.
 
 That explains the agent runs: their contexts grow to tens of thousands of tokens, and 21.9 to 24.4 t/s is what this
 machine delivers there. Nothing is broken.

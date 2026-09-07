@@ -57,6 +57,25 @@ The raw data are in the project under <code>bench/results/</code>.</p>
 </table></div>
 <p>All values in tokens per second, temperature 1.0 unless stated otherwise. Reasoning outputs benefit the most.</p>
 
+<h2 id="drafthead">Draft head and context depth (UD-IQ4_XS, one slot, temp 1.0, 600 output tokens)</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Draft head</th><th class="num">Size</th><th class="num">~0 context</th><th class="num">4k</th><th class="num">8k</th><th class="num">30k</th></tr></thead>
+<tbody>
+<tr><td>dzannotti Q4_K_M</td><td class="num">2.44 GiB</td><td class="num"><strong>40.9</strong> (0.90)</td><td class="num"><strong>36.6</strong> (0.84)</td><td class="num"><strong>32.2</strong> (0.81)</td><td class="num">26.8 (0.62)</td></tr>
+<tr><td>Q8_0, quantized here</td><td class="num">3.85 GiB</td><td class="num">36.5 (0.84)</td><td class="num">32.6 (0.83)</td><td class="num">30.4 (0.78)</td><td class="num"><strong>29.0</strong> (0.83)</td></tr>
+<tr><td>dzannotti BF16</td><td class="num">7.24 GiB</td><td class="num">29.4 (0.77)</td><td class="num">–</td><td class="num">–</td><td class="num">25.5 (0.82)</td></tr>
+</tbody></table></div>
+<p>Decode in tokens per second, draft acceptance in brackets. This is where the 40 t/s from the short benchmarks
+come from — and where they go. The crossover sits between 8k and 30k tokens: the small head leads by 4.4 t/s at an
+empty context and trails by 2.2 t/s at 30k, because its acceptance holds up to 8k and then falls to 0.62 while the
+Q8_0 head stays near 0.83. The agent runs measure 21.9 to 24.4 t/s; their contexts are tens of thousands of tokens
+deep, so that is the expected figure.</p>
+<p>The Q8_0 head is not published. Quantize it from the BF16 head, then anything in <code>state/mtp/</code> is picked
+up automatically:</p>
+<pre><code>hf download dzannotti/Qwen3.8-Flash-Next-MTP-GGUF Qwen3.8-Flash-Next-MTP-BF16.gguf
+engine/build-engramhalo/bin/llama quantize &lt;BF16 file&gt; state/mtp/Qwen3.8-Flash-Next-MTP-Q8_0.gguf Q8_0 8</code></pre>
+<p>Each point is a single measurement on one kind of task, so differences below about 1 t/s are noise.</p>
+
 <h2 id="multiuser">Multi-user throughput (EngramHalo, 8 slots, 20k context per slot, 256 tokens per request)</h2>
 <div class="bars"><div class="bar"><span class="label">1 user</span><span class="track"><span class="fill" style="width:40%"></span></span><span class="val">20.4 t/s</span></div><div class="bar"><span class="label">2 users</span><span class="track"><span class="fill" style="width:63%"></span></span><span class="val">32 t/s</span></div><div class="bar"><span class="label">4 users</span><span class="track"><span class="fill" style="width:84%"></span></span><span class="val">42.4 t/s</span></div><div class="bar"><span class="label">8 users</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">50.4 t/s</span></div></div>
 <div class="tablewrap"><table>

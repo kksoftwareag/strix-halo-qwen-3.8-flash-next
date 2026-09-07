@@ -27,11 +27,12 @@
 <dt>Rationale</dt><dd>The quants differ only in the precision of the routed experts; attention, DeltaNet and the embedding table are the same everywhere. At 35 tokens/s Q4_K_XL is practically as fast as IQ4_XS (36.5) and Q2_K_XL (35), so there is no reason to sacrifice quality once it fits.</dd>
 <dt>Evidence</dt><dd>unsloth KLD table; own measurements with all four quants.</dd>
 <dt>Rejected</dt><dd>Q2_K_XL as the default: 17 % faster without MTP, but equally fast with MTP and clearly worse (KLD 0.225).</dd>
-</dl></div><div class="decision" id="mtp-head"><h3>MTP head: dzannotti</h3><dl>
-<dt>Decision</dt><dd><strong>Only the dzannotti head (Q4_K_M, 2.4 GB) is used; the program recognizes compatibility by the tensor names.</strong></dd>
+</dl></div><div class="decision" id="mtp-head"><h3>MTP head: dzannotti, Q8_0 for deep context</h3><dl>
+<dt>Decision</dt><dd><strong>Only heads with dzannotti's tensor layout are used; the program recognizes compatibility by the tensor names. Presets for deep context ask for a Q8_0 head quantized from the published BF16 head, the short-context preset keeps the 2.4 GB Q4_K_M head.</strong></dd>
 <dt>Rationale</dt><dd>The local builds follow the graph from llama.cpp PR #27739 and expect the tensors <code>output_hc_*</code>. The unsloth head names them <code>blk.48.nextn.hc_head_*</code> (PR #28243) and loads only with the unsloth fork.</dd>
 <dt>Evidence</dt><dd>GGUF headers of both heads read; loader code in src/models/qwen4exp.cpp of both forks.</dd>
-<dt>Rejected</dt><dd>unsloth head with the unsloth fork b10715-mix: not tested.</dd>
+<dt>Draft head size</dt><dd>Measured with UD-IQ4_XS, one slot, 600 output tokens: Q4_K_M reaches 40.9 t/s at an empty context but only 26.8 t/s at 30k, where its draft acceptance falls from 0.90 to 0.62. The Q8_0 head (3.85 GiB, quantized here) holds acceptance at 0.83 and reaches 29.0 t/s at 30k, while giving up 4.4 t/s at an empty context. BF16 (7.24 GiB) is slowest at every depth.</dd>
+<dt>Rejected</dt><dd>unsloth head with the unsloth fork b10715-mix: not tested. BF16 head as the default: bigger and slower, the draft step is dominated by the output projection.</dd>
 </dl></div><div class="decision" id="mtp"><h3>MTP: enabled for a single user, disabled for multi-user</h3><dl>
 <dt>Decision</dt><dd><strong>Single-user presets use <code>--spec-type draft-mtp,ngram-mod --spec-draft-n-max 4 --spec-draft-p-min 0.75</code>; the multi-user test switches MTP off.</strong></dd>
 <dt>Rationale</dt><dd>One user: 20.8 → 33–41 tokens/s. Eight users: 35 tokens/s in total with MTP, 50 without. Between n_max 3 to 6 and p_min 0 to 0.75 there is only about 5 % difference (measurement noise 3 %). Temperature 1.0 costs only ~5 % acceptance compared to greedy.</dd>

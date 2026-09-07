@@ -4,7 +4,8 @@
 #   bench/mtp_head_compare.sh <label> [head-key ...]
 #
 # Ohne Kopf-Argumente werden alle kompatiblen Köpfe gemessen. Je Kopf zwei Stufen:
-# kurzer Prompt (~0 Kontext) und ~30k Kontext – dort liegt der Alltag eines Agenten.
+# Kontexttiefen über TB_DEPTHS, Voreinstellung "0 30000" – 0 ist der Datenblattwert,
+# 30k der Alltag eines Agenten.
 set -uo pipefail
 
 main() {
@@ -20,6 +21,7 @@ for h in d['mtp_heads']:
         print(h['key'])")
   fi
   local QUANT="${TB_QUANT:-UD-IQ4_XS}" GEN="${TB_GEN:-600}"
+  local DEPTHS; read -r -a DEPTHS <<< "${TB_DEPTHS:-0 30000}"
   local STAMP; STAMP="$(date '+%Y%m%d-%H%M%S')"
   local OUT="state/bench/mtp-heads-${LABEL}-${STAMP}.log"
   mkdir -p state/bench
@@ -28,7 +30,7 @@ for h in d['mtp_heads']:
     echo "== Engine: $(engine/build-engramhalo/bin/llama version 2>&1 | head -1)"; } | tee "$OUT"
 
   for head in "${HEADS[@]}"; do
-    for ctx in 0 30000; do
+    for ctx in "${DEPTHS[@]}"; do
       echo "-- Kopf $head, Kontext ${ctx} Token" | tee -a "$OUT"
       ./run.sh bench-parallel --preset eh-agent --quant "$QUANT" --mtp-head "$head" \
         --users 1 --levels 1 --ctx-tokens "$ctx" --max-tokens "$GEN" --keep-mtp 2>&1 \

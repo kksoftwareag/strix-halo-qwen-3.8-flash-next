@@ -93,9 +93,12 @@ EH_PRESETS: list[Preset] = [
     Preset(
         "eh-agent", "EngramHalo – Coding-Agent / Terminal-Bench (UD-Q4_K_XL, 160k)",
         "Für Agenten-Läufe (Terminal-Bench, SWE-Agenten): ein Slot, MTP+ngram, 163840 Kontext, kleiner Prompt-Cache "
-        "(2 GiB) – so bleiben rund 8 GiB für die Docker-Container der Aufgaben frei. Thinking medium.",
+        "(2 GiB) – so bleiben rund 8 GiB für die Docker-Container der Aufgaben frei. Thinking medium. "
+        "Nutzt den Q8_0-Draft-Head, falls vorhanden (bei 30k Kontext 29.0 statt 26.8 t/s, Akzeptanz 0.83 statt 0.62); "
+        "sonst fällt es auf den vorhandenen Kopf zurück. Erzeugen: siehe docs/RESEARCH.md.",
         dict(quant="UD-Q4_K_XL", ctx_size=163840, load_mode="none", thinking=True, reasoning_effort="medium",
-             n_parallel=1, cache_ram_mib=2048, mem_guard_gib=5.0, **_EH, **_QWEN_SAMPLING),
+             n_parallel=1, cache_ram_mib=2048, mem_guard_gib=5.0,
+             mtp_head="mtp:Qwen3.8-Flash-Next-MTP-Q8_0", **_EH, **_QWEN_SAMPLING),
     ),
 ]
 

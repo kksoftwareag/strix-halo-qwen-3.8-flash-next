@@ -9,9 +9,9 @@
 #   0003 Scheduler-Ring-Puffer (PR #27311) – repariert kaputte Ausgaben bei mehreren Slots mit langen Prompts
 #   0004 Draft-Kontext je Sequenz statt gesamt (Issue #28433)          [beide: ENGINE_RING_PATCH=1]
 #   0005 qwen4exp aus master: Rollback des rekurrenten Zustands (#28123) und schnellere Indexer-Summe (#28023)
-#        [ENGINE_QWEN4EXP_PATCH=1] – #28123 spart laut Commit-Text das Auslagern des gesamten rekurrenten
-#        Zustands bei jeder MTP-Runde; ungemessen, deshalb aus. Achtung: Issue #28019 meldet mit aktiviertem
-#        Rollback Schäden am rekurrenten Zustand bei mehreren Sequenzen.
+#        [ENGINE_QWEN4EXP_PATCH=1] – nur für den Stock-Fork: EngramHalo enthält beide Arbeiten bereits
+#        (Rollback des rekurrenten Zustands und Indexer-Summe über Slices), fetch.sh meldet den Patch dort als
+#        „bereits enthalten". Achtung: Issue #28019 meldet mit aktiviertem Rollback Schäden bei mehreren Sequenzen.
 # Aus, weil alle dokumentierten Messwerte ohne die beiden entstanden sind und mehrere Slots bei langen
 # Prompts ohnehin keinen Durchsatz bringen (siehe docs/RESEARCH.md). Wer mit vielen Slots arbeitet,
 # schaltet sie ein und baut neu.

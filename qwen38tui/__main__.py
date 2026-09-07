@@ -25,6 +25,7 @@ def main(argv: list[str] | None = None) -> int:
     p_par.add_argument("--profile", default="")
     p_par.add_argument("--preset", default="")
     p_par.add_argument("--quant", default="", help="Quant überschreiben, z.B. UD-IQ4_XS")
+    p_par.add_argument("--mtp-head", default="", help="Draft-Head überschreiben (Schlüssel aus `inventory`)")
     sub.add_parser("presets", help="Eingebaute Presets auflisten")
     sub.add_parser("inventory", help="Gefundene Engines/Modelle/MTP-Heads als JSON")
     sub.add_parser("hw", help="Hardware-/Systemzustand als JSON")
@@ -73,6 +74,8 @@ def main(argv: list[str] | None = None) -> int:
         cfg = get_preset("eh-qualitaet" if inv0.engine("hip-engramhalo") else "stock-ausgewogen").apply()  # type: ignore[union-attr]
     if getattr(a, "quant", ""):
         cfg = cfg.copy(quant=a.quant)
+    if getattr(a, "mtp_head", ""):
+        cfg = cfg.copy(mtp_head=a.mtp_head)
     inv, hw = discover_all(), probe()
     cmd = build_command(cfg, inv, hw, fits=lambda m: fits(cfg, m, None, hw))
     if a.cmd == "bench-parallel":

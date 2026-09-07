@@ -177,6 +177,38 @@ Operating recommendation: long context → one slot; multiple slots only for cha
 (`engine/patches/0003-27311-uma-ring-buffer.patch`) is ready, but not built — it would fix the broken
 answers, not the missing throughput gain. Analysis: `bench/analyze_multiuser.py`.
 
+**Draft head and context depth (2026-09-07, UD-IQ4_XS, `-np 1`, temp 1.0, 600 output tokens).** The 40 t/s from the
+short benchmarks are real, but they only hold at an empty context:
+
+| Draft head | Size | ~0 context | 30,000 tokens of context |
+| --- | --- | --- | --- |
+| dzannotti Q4_K_M | 2.44 GiB | **40.9 t/s** (acceptance 0.90) | 26.8 t/s (acceptance **0.62**) |
+| Q8_0, quantised here | 3.85 GiB | 36.5 t/s (0.84) | **29.0 t/s** (acceptance **0.83**) |
+| dzannotti BF16 | 7.24 GiB | 29.4 t/s (0.77) | 25.5 t/s (0.82) |
+
+Two effects overlap. Decode gets slower with depth because attention and the indexer run over the whole context, and
+draft acceptance drops. The smaller head loses acceptance sharply (0.90 → 0.62), the Q8_0 head barely at all
+(0.84 → 0.83) — which is why it wins at depth despite costing more per draft step. BF16 is bigger and slower at every
+depth, as the unsloth documentation says.
+
+That explains the agent runs: their contexts grow to tens of thousands of tokens, and 21.9 to 24.4 t/s is what this
+machine delivers there. Nothing is broken.
+
+The Q8_0 head is not published; build it from the BF16 head:
+
+```bash
+hf download dzannotti/Qwen3.8-Flash-Next-MTP-GGUF Qwen3.8-Flash-Next-MTP-BF16.gguf
+engine/build-engramhalo/bin/llama quantize <BF16 file> state/mtp/Qwen3.8-Flash-Next-MTP-Q8_0.gguf Q8_0 8
+```
+
+Anything in `state/mtp/` is picked up automatically. The `eh-agent` preset uses it when present and falls back to the
+Q4_K_M head otherwise. For short chats Q4_K_M stays ahead (40.9 against 36.5 t/s).
+
+**The two qwen4exp commits from master (#28123, #28023) are already in EngramHalo** — the fork carries the same
+recurrent-state rollback (`[TAG_RECURRENT_ROLLBACK_SPLITS]`) and the same sliced indexer sum, with the same reasoning
+in the comments. `engine/fetch.sh` reports patch 0005 as "already contained" and changes nothing; it is only relevant
+for a stock llama.cpp build.
+
 **Parallelism limits per quant.** `-c` is the total context across all slots; with `-np 4 -c 262144` each
 slot gets 65536 tokens. Two figures matter: KV and indexer cache at **17,952 bytes per token** (0.55 GiB per 32k, the
 same for all quants, because only 12 of the 48 layers have attention and the KV type is q8_0) and the DeltaNet state at

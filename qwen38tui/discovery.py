@@ -342,6 +342,8 @@ def discover_mtp_heads() -> list[MtpHead]:
     for repo in MTP_REPO_DIRS:
         if (repo / "snapshots").is_dir():
             scan.append((repo / "snapshots", repo.name.replace("models--", "").replace("--", "/")))
+    if (STATE_DIR / "mtp").is_dir():           # selbst erzeugte Köpfe, z.B. aus `llama quantize`
+        scan.append((STATE_DIR / "mtp", "mtp"))
     for d in _env_dirs("QWEN38_MTP_DIRS"):
         if d.is_dir():
             scan.append((d, d.name))

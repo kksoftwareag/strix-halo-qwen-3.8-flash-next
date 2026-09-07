@@ -1,0 +1,131 @@
+{
+  "schema_version": 3,
+  "task": "regex-log",
+  "completed": true,
+  "passed": true,
+  "reward": 1.0,
+  "rewards": {
+    "reward": 1.0
+  },
+  "duration_ms": 1614713,
+  "tokens": {
+    "input": 138685,
+    "cached": 118223,
+    "output": 36358
+  },
+  "agent_steps": 12,
+  "attempts": [
+    {
+      "attempt": 1,
+      "trial_name": "regex-log__fLbfsYG",
+      "passed": true,
+      "reward": 1.0,
+      "rewards": {
+        "reward": 1.0
+      },
+      "duration_ms": 1614713,
+      "tokens": {
+        "input": 138685,
+        "cached": 118223,
+        "output": 36358,
+        "peak_context": 20460
+      },
+      "agent_steps": 12,
+      "exception": null,
+      "transcript": "transcript-regex-log.json",
+      "harbor_paths": {
+        "trial": "jobs/tbmini-UD-IQ3_XXS-xhigh-rest-regex-log/regex-log__fLbfsYG",
+        "native_trajectory": "jobs/tbmini-UD-IQ3_XXS-xhigh-rest-regex-log/regex-log__fLbfsYG/agent/trajectory.json",
+        "model_patch": null,
+        "verifier_ctrf": "jobs/tbmini-UD-IQ3_XXS-xhigh-rest-regex-log/regex-log__fLbfsYG/verifier/ctrf.json",
+        "verifier_output": "jobs/tbmini-UD-IQ3_XXS-xhigh-rest-regex-log/regex-log__fLbfsYG/verifier/test-stdout.txt"
+      }
+    }
+  ],
+  "succeeded_at_attempt": 1,
+  "transcript": "transcript-regex-log.json",
+  "model": {
+    "name": "Qwen3.8-Flash-Next",
+    "id": "qwen3.8-flash",
+    "endpoint_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "created": 1788787231,
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 81950799360,
+        "ftype": "IQ3_XXS - 3.0625 bpw"
+      }
+    }
+  },
+  "platform": {
+    "id": "strix-halo",
+    "name": "AMD Ryzen AI MAX+ 395 (Strix Halo)"
+  },
+  "engine": "llama.cpp",
+  "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+  "backend": "rocm",
+  "backend_version": "7.1.52802",
+  "quant": "UD-IQ3_XXS",
+  "inference_profile": "mtp4-ngram-thinking-xhigh",
+  "tag": null,
+  "result_tag": "llama.cpp-rocm-UD-IQ3_XXS-mtp4-ngram-thinking-xhigh-terminus-2",
+  "evaluation_profile": {
+    "benchmark": "Terminal-Bench-Local",
+    "terminal_bench_version": "2.1",
+    "terminal_bench_revision": "5c8eadf1f393183288fa08b8f73ca9a469cc5e00",
+    "harbor_version": "0.20.0",
+    "model_id": "qwen3.8-flash",
+    "model_metadata": {
+      "id": "qwen3.8-flash",
+      "aliases": [
+        "qwen3.8-flash"
+      ],
+      "tags": [],
+      "object": "model",
+      "owned_by": "llamacpp",
+      "meta": {
+        "vocab_type": true,
+        "n_vocab": 248320,
+        "n_ctx": 163840,
+        "n_ctx_train": 262144,
+        "n_embd": 2560,
+        "n_params": 176943899520,
+        "size": 81950799360,
+        "ftype": "IQ3_XXS - 3.0625 bpw"
+      }
+    },
+    "endpoint": "http://10.50.4.9:8080/v1",
+    "engine": "llama.cpp",
+    "engine_version": "0.3.0-dev (build 1, commit 60bce1a)",
+    "backend": "rocm",
+    "backend_version": "7.1.52802",
+    "quant": "UD-IQ3_XXS",
+    "inference_profile": "mtp4-ngram-thinking-xhigh",
+    "tag": null,
+    "agent": {
+      "name": "terminus-2",
+      "version": "2.0.0",
+      "context_length": 163840,
+      "context_summarization": true,
+      "summarization_free_tokens": 8000
+    },
+    "agent_timeout_seconds": 10800
+  },
+  "profile_hash": "dde713aab0dafc5586f4e01c695b278e97692fde0f4630af1ceaf8f2540e0781",
+  "harbor_job": "jobs/tbmini-UD-IQ3_XXS-xhigh-rest-regex-log",
+  "harbor_jobs": [
+    "jobs/tbmini-UD-IQ3_XXS-xhigh-rest-regex-log"
+  ],
+  "exported_at": "2026-09-07T13:47:29.494093+00:00"
+}

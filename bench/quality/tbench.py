@@ -280,6 +280,7 @@ def main() -> int:
     b.add_argument("--agent-timeout", type=int, default=0, help="Sekunden je Versuch (Default 10800)")
     b.add_argument("--results-dir", default=str(PROJECT / "state" / "quality" / "tbench"))
     b.add_argument("--job-name", default="")
+    b.add_argument("--resume", default="", help="abgebrochenen Job fortsetzen (Name unter jobs/) statt neu zu starten")
     b.add_argument("--tag", default="", help="zusätzliche Kennung des Laufs (z.B. Engine-Patch), landet in der Ergebnis-Identität")
     b.add_argument("--dry-run", action="store_true", help="nur Kommandos zeigen, nichts starten")
     b.add_argument("--raw-output", action="store_true", help="Ausgabe von Harbor nicht ausdünnen (Spinner-Frames behalten)")
@@ -393,6 +394,22 @@ def main() -> int:
         runner += ["--job-name", a.job_name]
     extra = [x for x in a.rest if x != "--"]
     runner += extra
+    if a.resume:
+        # Fortsetzen: der Runner überspringt Aufgaben, die im Job schon ein Ergebnis haben.
+        # Der Job behält seine beim Start geschriebene config.json – das Anfrage-Zeitlimit muss
+        # deshalb dort nachgetragen werden, sonst gilt weiter LiteLLMs Voreinstellung von 600 s.
+        cfg_path = TBM / "jobs" / a.resume / "config.json"
+        if cfg_path.is_file():
+            job = json.loads(cfg_path.read_text())
+            for agent in job.get("agents", []):
+                kw = agent.setdefault("kwargs", {}).setdefault("llm_kwargs", {})
+                if kw.get("timeout") != float(a.request_timeout):
+                    kw["timeout"] = float(a.request_timeout)
+                    cfg_path.write_text(json.dumps(job, indent=2) + "\n")
+                    log(f"   Anfrage-Zeitlimit im Job auf {a.request_timeout} s gesetzt")
+        runner = [sys.executable, "terminal_bench.py", "resume", f"jobs/{a.resume}",
+                  "--results-dir", str(Path(a.results_dir).expanduser().resolve())]
+        tasks = []
     if cfg.api_key:
         runner += ["--api-key", cfg.api_key]
 

@@ -180,11 +180,11 @@ answers, not the missing throughput gain. Analysis: `bench/analyze_multiuser.py`
 **Draft head and context depth (2026-09-07, UD-IQ4_XS, `-np 1`, temp 1.0, 600 output tokens).** The 40 t/s from the
 short benchmarks are real, but they only hold at an empty context:
 
-| Draft head | Size | ~0 context | 4k | 8k | 30k |
-| --- | --- | --- | --- | --- | --- |
-| dzannotti Q4_K_M | 2.44 GiB | **40.9** (0.90) | **36.6** (0.84) | **32.2** (0.81) | 26.8 (**0.62**) |
-| Q8_0, quantised here | 3.85 GiB | 36.5 (0.84) | 32.6 (0.83) | 30.4 (0.78) | **29.0** (**0.83**) |
-| dzannotti BF16 | 7.24 GiB | 29.4 (0.77) | – | – | 25.5 (0.82) |
+| Draft head | Size | ~0 context | 4k | 8k | 30k | 64k |
+| --- | --- | --- | --- | --- | --- | --- |
+| dzannotti Q4_K_M | 2.44 GiB | **40.9** (0.90) | **36.6** (0.84) | **32.2** (0.81) | 26.8 (**0.62**) | **20.5** (0.61) |
+| Q8_0, quantised here | 3.85 GiB | 36.5 (0.84) | 32.6 (0.83) | 30.4 (0.78) | **29.0** (**0.83**) | 20.0 (**0.76**) |
+| dzannotti BF16 | 7.24 GiB | 29.4 (0.77) | – | – | 25.5 (0.82) | – |
 
 Decode in t/s, draft acceptance in brackets. The crossover sits between 8k and 30k tokens: the small head leads by
 4.4 t/s at an empty context, by 4.0 at 4k, by 1.8 at 8k, and trails by 2.2 at 30k. Its acceptance holds up to 8k
@@ -196,6 +196,19 @@ whole context; beyond that the small head's draft acceptance collapses on top of
 at depth despite costing more per draft step. BF16 is bigger and slower at every depth, as the unsloth documentation
 says.
 
+**At 64k the head no longer matters (2026-09-08).** Both heads land at 20.0 to 20.5 t/s — a difference of 0.5 t/s,
+which is inside the noise. The Q8_0 head keeps its better acceptance there (0.76 against 0.61), but that no longer
+buys speed: at this depth every accepted draft token still has to be verified against 64k of context, and attention
+plus indexer dominate the step so completely that the cheaper draft step and the higher hit rate cancel out. So the
+Q8_0 head's advantage is a band around 30k, not a trend that keeps growing. Prompt processing also slows down with
+depth: 318 t/s at 30k against 261 t/s at 64k, which is why time to first token grows from 94 to 246 seconds —
+four minutes of waiting before the first token of the answer.
+
+One caveat from the same runs: the benchmark plants a code word in the filler text and checks whether the answer
+repeats it. Up to 30k every run reproduced it; at 64k neither head did. That is a single prompt shape and no
+substitute for a recall benchmark, but it fits the model card, which states 262144 tokens of training context while
+the useful working depth is far shorter.
+
 That explains the agent runs: their contexts grow to tens of thousands of tokens, and 21.9 to 24.4 t/s is what this
 machine delivers there. Nothing is broken.
 
@@ -206,7 +219,7 @@ hf download dzannotti/Qwen3.8-Flash-Next-MTP-GGUF Qwen3.8-Flash-Next-MTP-BF16.gg
 engine/build-engramhalo/bin/llama quantize <BF16 file> state/mtp/Qwen3.8-Flash-Next-MTP-Q8_0.gguf Q8_0 8
 ```
 
-Anything in `state/mtp/` is picked up automatically. The presets for deep context — `eh-qualitaet`, `eh-no-thinking`, `eh-longctx`, `eh-agent` — use it when present and fall back to the Q4_K_M head otherwise. `eh-schnell` deliberately keeps the small head: at a short context it is ahead, 40.9 against 36.5 t/s. Automatic selection picks the smallest compatible head, so a BF16 head lying around is never chosen by accident.
+Anything in `state/mtp/` is picked up automatically. All EngramHalo presets ask for the Q8_0 head and fall back to the Q4_K_M head when it is absent. That is a deliberate simplification: below roughly 8k tokens of context the small head is about 4 t/s faster, so `eh-schnell` gives up a little. Automatic selection picks the smallest compatible head, so a BF16 head lying around is never chosen by accident.
 
 **The two qwen4exp commits from master (#28123, #28023) are already in EngramHalo** — the fork carries the same
 recurrent-state rollback (`[TAG_RECURRENT_ROLLBACK_SPLITS]`) and the same sliced indexer sum, with the same reasoning

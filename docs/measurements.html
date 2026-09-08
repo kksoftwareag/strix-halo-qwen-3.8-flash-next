@@ -59,17 +59,23 @@ The raw data are in the project under <code>bench/results/</code>.</p>
 
 <h2 id="drafthead">Draft head and context depth (UD-IQ4_XS, one slot, temp 1.0, 600 output tokens)</h2>
 <div class="tablewrap"><table>
-<thead><tr><th>Draft head</th><th class="num">Size</th><th class="num">~0 context</th><th class="num">4k</th><th class="num">8k</th><th class="num">30k</th></tr></thead>
+<thead><tr><th>Draft head</th><th class="num">Size</th><th class="num">~0 context</th><th class="num">4k</th><th class="num">8k</th><th class="num">30k</th><th class="num">64k</th></tr></thead>
 <tbody>
-<tr><td>dzannotti Q4_K_M</td><td class="num">2.44 GiB</td><td class="num"><strong>40.9</strong> (0.90)</td><td class="num"><strong>36.6</strong> (0.84)</td><td class="num"><strong>32.2</strong> (0.81)</td><td class="num">26.8 (0.62)</td></tr>
-<tr><td>Q8_0, quantized here</td><td class="num">3.85 GiB</td><td class="num">36.5 (0.84)</td><td class="num">32.6 (0.83)</td><td class="num">30.4 (0.78)</td><td class="num"><strong>29.0</strong> (0.83)</td></tr>
-<tr><td>dzannotti BF16</td><td class="num">7.24 GiB</td><td class="num">29.4 (0.77)</td><td class="num">–</td><td class="num">–</td><td class="num">25.5 (0.82)</td></tr>
+<tr><td>dzannotti Q4_K_M</td><td class="num">2.44 GiB</td><td class="num"><strong>40.9</strong> (0.90)</td><td class="num"><strong>36.6</strong> (0.84)</td><td class="num"><strong>32.2</strong> (0.81)</td><td class="num">26.8 (0.62)</td><td class="num"><strong>20.5</strong> (0.61)</td></tr>
+<tr><td>Q8_0, quantized here</td><td class="num">3.85 GiB</td><td class="num">36.5 (0.84)</td><td class="num">32.6 (0.83)</td><td class="num">30.4 (0.78)</td><td class="num"><strong>29.0</strong> (0.83)</td><td class="num">20.0 (<strong>0.76</strong>)</td></tr>
+<tr><td>dzannotti BF16</td><td class="num">7.24 GiB</td><td class="num">29.4 (0.77)</td><td class="num">–</td><td class="num">–</td><td class="num">25.5 (0.82)</td><td class="num">–</td></tr>
 </tbody></table></div>
 <p>Decode in tokens per second, draft acceptance in brackets. This is where the 40 t/s from the short benchmarks
 come from — and where they go. The crossover sits between 8k and 30k tokens: the small head leads by 4.4 t/s at an
 empty context and trails by 2.2 t/s at 30k, because its acceptance holds up to 8k and then falls to 0.62 while the
 Q8_0 head stays near 0.83. The agent runs measure 21.9 to 24.4 t/s; their contexts are tens of thousands of tokens
 deep, so that is the expected figure.</p>
+<p>At 64k the choice of head stops mattering: 20.5 against 20.0 t/s is noise. The Q8_0 head still drafts better
+there (0.76 against 0.61), but attention and indexer over 64k of context dominate every step, so the better hit rate
+buys no speed. Its advantage is a band around 30k, not a trend that keeps growing. Prompt processing drops from
+318 to 261 tokens per second between 30k and 64k, so time to first token grows from 94 to 246 seconds. One caveat
+from the same runs: up to 30k every answer repeated the code word planted in the filler text, at 64k neither head
+did — one prompt shape, not a recall benchmark, but worth knowing before filling the window.</p>
 <p>The Q8_0 head is not published. Quantize it from the BF16 head, then anything in <code>state/mtp/</code> is picked
 up automatically:</p>
 <pre><code>hf download dzannotti/Qwen3.8-Flash-Next-MTP-GGUF Qwen3.8-Flash-Next-MTP-BF16.gguf

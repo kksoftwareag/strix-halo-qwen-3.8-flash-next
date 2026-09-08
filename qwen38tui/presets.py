@@ -86,9 +86,9 @@ EH_PRESETS: list[Preset] = [
     Preset(
         "eh-schnell", "EngramHalo – schnell (UD-IQ3_XXS + MTP)",
         "Kleinster sinnvoller Quant, ~57 GiB Footprint, 32k Kontext; gemessen 34 t/s (MTP) vs 23 t/s ohne. IQ4_XS: 36.5 t/s bei 69 GiB. "
-        "Bewusst der kleine Q4_K_M-Draft-Head: bei kurzem Kontext 40.9 statt 36.5 t/s.",
+        "Q8_0-Draft-Head wie überall; bei sehr kurzem Kontext wäre der kleine Q4_K_M-Kopf 4 t/s schneller.",
         dict(quant="UD-IQ3_XXS", ctx_size=32768, load_mode="none", thinking=True, reasoning_effort="low",
-             mtp_head="dzannotti:Qwen3.8-Flash-Next-MTP-Q4_K_M", **_EH, **_QWEN_SAMPLING),
+             mtp_head="mtp:Qwen3.8-Flash-Next-MTP-Q8_0", **_EH, **_QWEN_SAMPLING),
     ),
     Preset(
         "eh-longctx", "EngramHalo – 160k Kontext (UD-IQ4_XS + MTP)",

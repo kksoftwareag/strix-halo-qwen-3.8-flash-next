@@ -336,6 +336,23 @@ class MtpHead:
         return d
 
 
+def discover_mmprojs() -> list[Path]:
+    """Vision-Projektoren (mmproj-*.gguf) neben den Modellen finden.
+
+    unsloth legt sie in dasselbe Repo wie die Gewichte (mmproj-F16.gguf / mmproj-BF16.gguf).
+    Ohne so eine Datei ist das Modell reiner Text – die Gewichte allein enthalten keinen Bildencoder.
+    """
+    treffer: list[Path] = []
+    orte = [repo / "snapshots" for repo in MTP_REPO_DIRS if (repo / "snapshots").is_dir()]
+    orte += [STATE_DIR / "mmproj"]
+    orte += list(_env_dirs("QWEN38_MMPROJ_DIRS"))
+    for d in orte:
+        if d.is_dir():
+            treffer += [p for p in sorted(d.rglob("mmproj*.gguf")) if p.exists()]
+    # F16 vor BF16: gleich groß, F16 ist der von llama.cpp üblicherweise getestete Pfad
+    return sorted(treffer, key=lambda p: (0 if "F16" in p.name and "BF16" not in p.name else 1, p.name))
+
+
 def discover_mtp_heads() -> list[MtpHead]:
     heads: list[MtpHead] = []
     scan: list[tuple[Path, str]] = []
@@ -381,6 +398,7 @@ class Inventory:
     engines: list[Engine]
     models: list[ModelFile]
     mtp_heads: list[MtpHead]
+    mmprojs: list[Path] = field(default_factory=list)
 
     def engine(self, key: str) -> Engine | None:
         for e in self.engines:
@@ -408,4 +426,4 @@ class Inventory:
 
 
 def discover_all() -> Inventory:
-    return Inventory(discover_engines(), discover_models(), discover_mtp_heads())
+    return Inventory(discover_engines(), discover_models(), discover_mtp_heads(), discover_mmprojs())

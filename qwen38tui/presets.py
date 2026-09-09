@@ -120,7 +120,7 @@ EH_PRESETS: list[Preset] = [
         "Achtung: acht Slots passen in den Speicher, aber bei mehr als vier GLEICHZEITIGEN Generierungen war die "
         "Ausgabe in einer früheren Messung fehlerhaft (Issue #27572) – für stoßweise Agenten ist das kein Problem.",
         dict(quant="UD-IQ3_XXS", ctx_size=8 * 131072, load_mode="none", thinking=True, reasoning_effort="medium",
-             n_parallel=8, kv_unified="off", n_ctx_checkpoints=1, checkpoint_min_step=65536,
+             n_parallel=8, kv_unified="off", n_ctx_checkpoints=1, checkpoint_min_step=65536, mmproj="auto",
              cache_ram_mib=2048, mem_guard_gib=4.0,
              mtp_head="mtp:Qwen3.8-Flash-Next-MTP-Q8_0", **_EH, **_QWEN_SAMPLING),
     ),

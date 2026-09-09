@@ -49,6 +49,9 @@ class ServerConfig:
     # --- Spekulatives Decoding (MTP) ---
     mtp_enabled: bool = True
     mtp_head: str = "auto"
+    # --- Multimodal ---
+    mmproj: str = ""                     # Pfad zum Vision-Projektor (mmproj-*.gguf);
+                                         # "" = nur Text, "auto" = gefundenen Projektor nehmen
     spec_draft_n_max: int = 3
     spec_draft_n_min: int = 0
     spec_draft_p_min: float = 0.75
@@ -242,6 +245,14 @@ def build_command(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fi
         return Command([], env, r, errors, warnings)
     assert r.engine and r.model
 
+    # Vision-Projektor auflösen: "auto" nimmt den gefundenen, ein Pfad wird direkt benutzt.
+    mmproj_pfad = None
+    if cfg.mmproj == "auto":
+        mmproj_pfad = inv.mmprojs[0] if getattr(inv, "mmprojs", None) else None
+    elif cfg.mmproj:
+        kandidat = Path(cfg.mmproj).expanduser()
+        mmproj_pfad = kandidat.resolve() if kandidat.is_file() else None
+
     argv = r.engine.serve_argv()
     argv += ["-m", str(r.model.path)]
     argv += ["-ngl", str(cfg.n_gpu_layers)]
@@ -261,6 +272,8 @@ def build_command(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fi
         argv += ["-ot", "per_layer_token_embd.weight=CPU"]
     if cfg.load_mode != "auto":
         argv += ["--load-mode", cfg.load_mode]
+    if mmproj_pfad:
+        argv += ["--mmproj", str(mmproj_pfad)]
     argv += ["-np", str(cfg.n_parallel)]
     if cfg.kv_unified == "on":
         argv += ["--kv-unified"]
@@ -378,6 +391,11 @@ def build_command(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fi
         warnings.append(f"threads={cfg.threads} > physische Kerne ({hw.cores_physical}); SMT bringt bei llama.cpp meist nichts.")
     if r.host not in ("127.0.0.1", "localhost") and not (cfg.api_key or cfg.api_key_file):
         warnings.append(f"Server lauscht auf {r.host} ohne API-Key (nur in vertrauenswürdigem LAN).")
+    if cfg.mmproj == "auto" and not mmproj_pfad:
+        warnings.append("mmproj auto: kein Vision-Projektor gefunden – der Server läuft ohne Bildverstehen. "
+                        "Holen mit: hf download unsloth/Qwen3.8-Flash-Next-GGUF mmproj-F16.gguf")
+    elif cfg.mmproj and cfg.mmproj != "auto" and not mmproj_pfad:
+        errors.append(f"mmproj-Datei fehlt: {cfg.mmproj}")
     if cfg.api_key_file:
         schluesseldatei = Path(cfg.api_key_file).expanduser().resolve()
         if not schluesseldatei.is_file():

@@ -109,6 +109,33 @@ files are never overwritten. The server takes them with `--api-key-file`, so the
 list. Clients send `Authorization: Bearer <key>`; without one, or with a wrong one, the server answers 401. Add or
 revoke a key by editing the file and restarting the service.
 
+### Vision
+
+The model is text-only on its own — the weights contain no image encoder. Vision comes from a separate projector file
+that unsloth ships in the same repo:
+
+```bash
+hf download unsloth/Qwen3.8-Flash-Next-GGUF mmproj-F16.gguf
+```
+
+Anything named `mmproj*.gguf` next to the weights (or in `state/mmproj/`, or in `QWEN38_MMPROJ_DIRS`) is picked up
+automatically; `mmproj: "auto"` in a preset then adds `--mmproj` to the command line, and `/props` reports
+`vision: true`. The projector is `qwen3vl_merger` and costs about 1.1 GB. Verified: a test image with shapes and the
+text "STRIX HALO 47" was described correctly, colours and text included.
+
+In **LiteLLM** the server side is only half of it — for an OpenAI-compatible endpoint LiteLLM does not assume image
+support and rejects image content before it ever reaches the server. Declare it:
+
+```yaml
+  - model_name: qwen38-flash
+    litellm_params:
+      model: openai/qwen3.8-flash
+      api_base: http://10.50.4.9:8080/v1
+      api_key: os.environ/QWEN38_KEY
+    model_info:
+      supports_vision: true
+```
+
 **`--host 0.0.0.0` opens the server to the whole network.** The keys are the only protection, and plain HTTP sends
 them unencrypted — so use it on a trusted network, or put TLS in front (`--ssl-key-file` / `--ssl-cert-file`).
 

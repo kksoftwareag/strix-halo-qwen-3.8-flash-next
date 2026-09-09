@@ -36,6 +36,7 @@ class MemoryEstimate:
     compute: int = 0
     mtp_weights: int = 0
     mtp_kv: int = 0
+    checkpoints: int = 0
     prompt_cache: int = 0
     reserve_os: int = 6 * GIB
     budget: int = 0              # verfügbarer Speicher (MemAvailable)
@@ -46,7 +47,7 @@ class MemoryEstimate:
     @property
     def total(self) -> int:
         return (self.weights_resident + self.kv_cache + self.indexer_cache + self.recurrent_state + self.compute
-                + self.mtp_weights + self.mtp_kv + self.prompt_cache)
+                + self.mtp_weights + self.mtp_kv + self.checkpoints + self.prompt_cache)
 
     @property
     def headroom(self) -> int:
@@ -78,6 +79,8 @@ class MemoryEstimate:
         ]
         if self.mtp_weights:
             rows.append(("MTP-Head + Draft-KV", f(self.mtp_weights + self.mtp_kv)))
+        if self.checkpoints:
+            rows.append(("Context-Checkpoints", f(self.checkpoints)))
         if self.prompt_cache:
             rows.append(("Prompt-Cache (max)", f(self.prompt_cache)))
         rows += [
@@ -155,7 +158,9 @@ def estimate(cfg: ServerConfig, model: ModelFile | None, mtp: MtpHead | None, hw
         est.notes.append("mlock: Gewichte werden gepinnt (kein Swap); benötigt ausreichend RLIMIT_MEMLOCK.")
     # KV
     kv_tok, idx_tok = kv_bytes_per_token(model, cfg)
-    n_ctx_total = cfg.ctx_size * (1 if cfg.kv_unified != "off" else cfg.n_parallel)
+    # -c ist in beiden Modi die Gesamtzahl der KV-Zellen: bei geteiltem Cache bekommt jede Sequenz
+    # n_ctx/n_parallel davon (llama-context.cpp: n_ctx = n_ctx_seq * n_seq_max), belegt wird n_ctx.
+    n_ctx_total = cfg.ctx_size
     est.kv_cache = int(kv_tok * n_ctx_total)
     est.indexer_cache = int(idx_tok * n_ctx_total)
     est.per_token_kv = kv_tok + idx_tok
@@ -181,6 +186,33 @@ def estimate(cfg: ServerConfig, model: ModelFile | None, mtp: MtpHead | None, hw
         # gemessen: Draft-Modell 2146 MiB + Compute 740 MiB (ub 2048) / 135 MiB (ub 512) + 64 MiB KV @32k
         est.mtp_weights = mtp.n_bytes
         est.mtp_kv = int((kv_tok / max(1, (n_layer // 4))) * cfg.ctx_size) + int(0.36 * MIB * ub) + int(0.1 * GIB)
+    # Context-Checkpoints: Rollback-Punkte im Host-RAM. Der Server legt etwa alle --checkpoint-min-step
+    # Token einen an, höchstens --ctx-checkpoints Stück je Slot. Gemessen an den Server-Logs
+    # (bench/results/cache): ein Checkpoint enthält den DeltaNet-Zustand – ohne MTP konstant 112.6 MiB,
+    # egal an welcher Stelle – und mit MTP zusätzlich den Draft-KV des ganzen Präfixes, gemessen
+    # 2072 Byte je Token (122.5 MiB bei 5038 Token, 165.3 MiB bei 26688 Token, gleiche Steigung in
+    # beiden Läufen). Bei tiefem Kontext ist deshalb nicht der Zustand teuer, sondern der Draft-KV:
+    # bei 200k Token sind es rund 500 MiB je Checkpoint.
+    # Die lebenden Checkpoints verteilen sich über den Kontext (der älteste fällt weg, wenn der
+    # Vorrat voll ist), im Mittel sitzt einer bei ctx*(k+1)/(2k) – danach richtet sich der Draft-Anteil.
+    CKPT_MTP_BYTES_PER_TOKEN = 2072
+    if cfg.n_ctx_checkpoints > 0:
+        ctx_je_slot = cfg.ctx_size if cfg.kv_unified == "on" else cfg.ctx_size // max(1, cfg.n_parallel)
+        je_slot = min(cfg.n_ctx_checkpoints, max(1, ctx_je_slot // max(1, cfg.checkpoint_min_step)))
+        pro_stueck = per_seq
+        if cfg.mtp_enabled and mtp is not None:
+            mittlere_position = ctx_je_slot * (je_slot + 1) / (2 * je_slot)
+            pro_stueck += CKPT_MTP_BYTES_PER_TOKEN * mittlere_position
+        est.checkpoints = int(pro_stueck * je_slot * cfg.n_parallel)
+        if est.checkpoints > 1 * GIB:
+            est.notes.append(
+                "Context-Checkpoints sind der ungünstigste Fall: so viel wird es erst, wenn jeder Slot "
+                "seinen Kontext wirklich füllt. Ein Terminal-Bench-Lauf kam auf 9 Stück (bis 248 MiB).")
+        if est.checkpoints > 4 * GIB:
+            est.notes.append(
+                f"Context-Checkpoints belegen bis zu {est.checkpoints / GIB:.1f} GiB Host-RAM "
+                f"({je_slot} je Slot à ~{pro_stueck / MIB:.0f} MiB). Kleiner wird es mit "
+                f"--ctx-checkpoints, deutlich kleiner ohne MTP (dann {per_seq / MIB:.0f} MiB je Stück).")
     # Prompt-Cache
     if cfg.cache_ram_mib > 0:
         est.prompt_cache = min(cfg.cache_ram_mib * MIB, est.kv_cache * 2)

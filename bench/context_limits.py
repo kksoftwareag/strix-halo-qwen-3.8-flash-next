@@ -22,6 +22,8 @@ def main() -> int:
     ap.add_argument("--budget-gib", type=float, default=106.5)
     ap.add_argument("--preset", default="eh-agent")
     ap.add_argument("--max-slots", type=int, default=64)
+    ap.add_argument("--checkpoints", type=int, default=0,
+                    help="--ctx-checkpoints je Slot (0 = aus; die Voreinstellung des Servers ist 32)")
     a = ap.parse_args()
 
     from qwen38tui.config import build_command
@@ -35,7 +37,9 @@ def main() -> int:
     base = get_preset(a.preset).apply()
 
     def est_of(quant: str, slots: int, ctx_total: int, mtp: bool):
-        cfg = base.copy(quant=quant, n_parallel=slots, mtp_enabled=mtp, ctx_size=ctx_total)
+        cfg = base.copy(quant=quant, n_parallel=slots, mtp_enabled=mtp, ctx_size=ctx_total,
+                        n_ctx_checkpoints=a.checkpoints,
+                        checkpoint_min_step=max(1024, (ctx_total // max(1, slots)) // max(1, a.checkpoints)) if a.checkpoints else 8192)
         cmd = build_command(cfg, inv, hw)
         r = cmd.resolved
         return estimate(cfg, r.model, r.mtp, hw, "hip", True) if r.model else None
@@ -52,7 +56,8 @@ def main() -> int:
     cfg0 = base.copy()
     kv, idx = kv_bytes_per_token(build_command(cfg0, inv, hw).resolved.model, cfg0)
     print(f"KV+Indexer je Token: {kv + idx:.0f} Byte = {(kv + idx) * 32768 / GIB:.2f} GiB je 32k Kontext")
-    print(f"Budget: {a.budget_gib:.1f} GiB MemAvailable minus 6 GiB Reserve, Preset {a.preset}\n")
+    print(f"Budget: {a.budget_gib:.1f} GiB MemAvailable minus 6 GiB Reserve, Preset {a.preset}, "
+          f"--ctx-checkpoints {a.checkpoints}\n")
     print(f"{'Quant':12} {'Gewichte':>9} {'256k/1 Slot':>13} | " +
           " ".join(f"{s // 1024:>4}k" for s in SIZES) + "   (mit MTP / ohne MTP)")
     for q in QUANTS:

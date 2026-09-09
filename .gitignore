@@ -14,3 +14,4 @@ bench/results/mtp/*.log
 bench/research_raw.json
 engine/engramhalo-src/
 bench/quality/terminal-bench-mini/
+bench/results/cache/*.log

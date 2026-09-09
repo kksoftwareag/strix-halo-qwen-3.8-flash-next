@@ -231,18 +231,87 @@ slot gets 65536 tokens. Two figures matter: KV and indexer cache at **17,952 byt
 same for all quants, because only 12 of the 48 layers have attention and the KV type is q8_0) and the DeltaNet state at
 **113 MiB per slot**, independent of the context length. The context of a single slot is limited by the training length
 to 262144 tokens, not by the memory — these 256k fit with every quant, even with UD-Q4_K_XL
-(94.1 GiB used, 6.4 GiB headroom).
+(95.5 GiB used, 5.0 GiB headroom).
 
 Maximum number of concurrent contexts of the given size (with MTP / without MTP), computed with `bench/context_limits.py`
-on the program's memory model for 106.5 GiB free memory, prompt cache 2 GiB, ubatch 2048, 6 GiB reserve; truncated at 64:
+on the program's memory model for 106.5 GiB free memory, prompt cache 2 GiB, ubatch 2048, 6 GiB reserve; truncated at 64.
+The MTP column is for the **Q8_0 draft head (3.85 GiB)**, which all presets now use. The table assumes
+`--ctx-checkpoints 0`; with the server's default of 32 it looks very different, see the section on context
+checkpoints below:
 
 | Quant | weights resident | 16k per slot | 32k | 64k | 128k | 256k |
 | --- | --- | --- | --- | --- | --- | --- |
-| UD-IQ1_M | 45.2 GiB | 64 / 64 | 64 / 64 | 37 / 42 | 19 / 22 | 10 / 11 |
-| UD-Q2_K_XL | 49.2 GiB | 64 / 64 | 63 / 64 | 34 / 39 | 18 / 20 | 9 / 10 |
-| UD-IQ3_XXS | 52.1 GiB | 64 / 64 | 59 / 64 | 32 / 37 | 17 / 19 | 8 / 9 |
-| UD-IQ4_XS | 63.0 GiB | 64 / 64 | 44 / 51 | 23 / 27 | 12 / 14 | 6 / 7 |
-| UD-Q4_K_XL | 79.5 GiB | 27 / 37 | 16 / 21 | 8 / 11 | 4 / 6 | 2 / 3 |
+| UD-IQ1_M | 45.2 GiB | 64 / 64 | 64 / 64 | 36 / 42 | 19 / 22 | 9 / 11 |
+| UD-Q2_K_XL | 49.2 GiB | 64 / 64 | 61 / 64 | 33 / 39 | 17 / 20 | 9 / 10 |
+| UD-IQ3_XXS | 52.1 GiB | 64 / 64 | 57 / 64 | 31 / 37 | 16 / 19 | 8 / 9 |
+| UD-IQ4_XS | 63.0 GiB | 64 / 64 | 42 / 51 | 22 / 27 | 11 / 14 | 6 / 7 |
+| UD-Q4_K_XL | 79.5 GiB | 24 / 37 | 14 / 21 | 7 / 11 | 4 / 6 | 2 / 3 |
+
+Compared with the 2.44 GiB Q4_K_M head the bigger head costs 1.41 GiB, which changes the numbers in the deep columns
+by at most one slot — at 256k it changes nothing at all (IQ3_XXS 8, IQ4_XS 6 with either head). The switch to Q8_0 is
+free in terms of parallelism.
+
+**Slots and context per slot trade one for one.** Once the weights and the draft head are resident, what is left is a
+fixed token budget, and only the DeltaNet state (113 MiB per slot, independent of length) depends on the split. For
+UD-IQ3_XXS with 4 GiB headroom the total is about 1.9 M tokens no matter how it is cut: 8 × 242k, 12 × 159k,
+16 × 117k, 24 × 76k, 32 × 55k. Doubling the number of users therefore halves the context each of them gets; the
+per-slot state costs the difference between 1936k tokens at 8 slots and 1760k at 32. For UD-IQ4_XS the same budget is
+about 1.33 M tokens (6 × 224k, 8 × 166k, 16 × 80k, 32 × 37k). "As many users as possible with as much context as
+possible" is therefore one decision, not two.
+
+**Context checkpoints are the prompt cache of this model — and the largest hidden cost (2026-09-08).** llama.cpp
+keeps rollback points per slot (`--ctx-checkpoints`, default 32, `--checkpoint-min-step`, default 8192 tokens). For a
+plain transformer they are a convenience. For a hybrid recurrent model they are the only way a cached prompt can be
+continued at all: with `--ctx-checkpoints 0` the server answers every follow-up turn with
+`forcing full prompt re-processing due to lack of cache data (likely due to SWA or hybrid/recurrent memory)`. The
+prompt cache still stores the state (250 MiB for 7200 tokens, visible in the log), it just cannot be put back.
+Measured with `bench/cache_probe.py`, hit rate from the second turn on:
+
+| Sessions / slots | `--ctx-checkpoints` | cache hit | time per follow-up turn |
+| --- | --- | --- | --- |
+| 4 on 2 (eviction) | 32 | **99.5 %** | 3.5 s |
+| 4 on 2 (eviction) | 1 | **99.5 %** | 4.2 s |
+| 4 on 2 (eviction) | 0 | 0.0 % | 20.5 s |
+| 4 on 4 (one slot each) | 0 | 0.0 % | 21.4 s |
+
+Two things follow. First, **one checkpoint is enough** — 1 and 32 give the same 99.5 %, so the rest is paid for
+nothing. Second, giving every session its own slot does *not* remove the need: even with nothing evicted the hit rate
+is 0.0 % without checkpoints, because a new turn has to drop the trailing token of the previous answer, and rolling
+the recurrent state back by even one token needs a checkpoint.
+
+Checkpoints do not help when the history itself changes. Rewriting the middle of the conversation (`--diverge-at`)
+costs a full re-processing either way: 0.0 % hit with 4 checkpoints and with 0, then back to 99.5 % in the following
+turn. So they buy the continuation of a conversation, not the repair of an edited one.
+
+What one checkpoint costs, read off the server logs:
+
+| | size of one checkpoint |
+| --- | --- |
+| without MTP | 112.6 MiB, the same at any depth |
+| with MTP | 112.6 MiB + 2072 bytes per token of prefix |
+
+The slope is exact: 122.5 MiB at 5038 tokens, 126.6 at 7086, 161.3 at 24640, 165.3 at 26688 — the same
+2072 bytes/token in independent runs, and a Terminal-Bench run confirms it at 248.0 MiB for 68539 tokens. So the
+DeltaNet state is the floor and the **draft KV of the whole prefix** is what grows: with MTP a checkpoint at 224k
+tokens is 555 MiB. The server keeps up to `--ctx-checkpoints` of them per slot, spread over the context, so the worst
+case per slot is roughly `k × (112.6 MiB + 2072 B × ctx/2)`.
+
+That is why the table above assumes `--ctx-checkpoints 0`. With the default of 32 the same budget yields far less:
+UD-IQ3_XXS at 256k drops from 8 concurrent contexts to 2, and UD-Q4_K_XL no longer fits even once. The estimator in
+`qwen38tui/memory.py` now accounts for this and shows a "Context checkpoints" row.
+
+**Two ways to serve several agents, and they behave differently.** With `--no-kv-unified` (the default as soon as
+`-np` is given) each slot owns a fixed `n_ctx / n_parallel` slice; with `--kv-unified` all slots draw from one pool
+and a single session may use `min(pool, 262144)` tokens. The fork spells the consequence out in
+`[TAG_IDLE_SLOT_CLEAR]`: with a shared pool an idle slot is saved to the prompt cache **and cleared**, because that
+frees reusable room; with a split cache it is only copied and its KV stays where it is. Measured directly: a
+26692-token prompt against four slots of 16384 is rejected with `request (26692 tokens) exceeds the available context
+size`, while the same request against the same pool with `--kv-unified` runs through at 34.1 t/s with
+`n_ctx_slot = 65536`.
+
+For agents that means: one slot per agent and a split cache is the configuration where nothing is ever evicted and
+the cache hit costs nothing. A shared pool buys elasticity — one agent alone can reach the full 256k — and pays for
+it with eviction and restore whenever the agents are active at the same time.
 
 In practice, with the small quants the limit is not the memory but the throughput: with 8 slots there remain
 6.8 t/s per request (see table above). That is enough for chat, not for agents — an agent with 30000 output tokens

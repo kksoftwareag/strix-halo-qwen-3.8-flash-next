@@ -72,22 +72,69 @@ because only 12 of the 48 layers have attention and the KV type is q8_0.</li>
 <li><strong>DeltaNet state: 113 MB per slot</strong>, independent of the context length. With 16 slots that is 1.8 GB.</li>
 </ul>
 <p>The context of a single slot is limited to 262,144 tokens by the training length of the model, not by
-memory: these 256k fit with <em>every</em> quant, including UD-Q4_K_XL (94.1 GB used, 6.4 GB headroom).
+memory: these 256k fit with <em>every</em> quant, including UD-Q4_K_XL (95.5 GB used, 5.0 GB headroom).
 Only with several slots does memory become an issue.</p>
 
 <div class="tablewrap"><table>
 <thead><tr><th>Quant</th><th class="num">Weights</th><th class="num">16k per slot</th><th class="num">32k</th><th class="num">64k</th><th class="num">128k</th><th class="num">256k</th></tr></thead>
 <tbody>
-<tr><td>UD-IQ1_M</td><td class="num">45.2 GB</td><td class="num">64</td><td class="num">64</td><td class="num">37</td><td class="num">19</td><td class="num">10</td></tr>
-<tr><td>UD-Q2_K_XL</td><td class="num">49.2 GB</td><td class="num">64</td><td class="num">63</td><td class="num">34</td><td class="num">18</td><td class="num">9</td></tr>
-<tr><td>UD-IQ3_XXS</td><td class="num">52.1 GB</td><td class="num">64</td><td class="num">59</td><td class="num">32</td><td class="num">17</td><td class="num">8</td></tr>
-<tr><td>UD-IQ4_XS</td><td class="num">63.0 GB</td><td class="num">64</td><td class="num">44</td><td class="num">23</td><td class="num">12</td><td class="num">6</td></tr>
-<tr><td>UD-Q4_K_XL</td><td class="num">79.5 GB</td><td class="num">27</td><td class="num">16</td><td class="num">8</td><td class="num">4</td><td class="num">2</td></tr>
+<tr><td>UD-IQ1_M</td><td class="num">45.2 GB</td><td class="num">64</td><td class="num">64</td><td class="num">36</td><td class="num">19</td><td class="num">9</td></tr>
+<tr><td>UD-Q2_K_XL</td><td class="num">49.2 GB</td><td class="num">64</td><td class="num">61</td><td class="num">33</td><td class="num">17</td><td class="num">9</td></tr>
+<tr><td>UD-IQ3_XXS</td><td class="num">52.1 GB</td><td class="num">64</td><td class="num">57</td><td class="num">31</td><td class="num">16</td><td class="num">8</td></tr>
+<tr><td>UD-IQ4_XS</td><td class="num">63.0 GB</td><td class="num">64</td><td class="num">42</td><td class="num">22</td><td class="num">11</td><td class="num">6</td></tr>
+<tr><td>UD-Q4_K_XL</td><td class="num">79.5 GB</td><td class="num">24</td><td class="num">14</td><td class="num">7</td><td class="num">4</td><td class="num">2</td></tr>
 </tbody></table></div>
-<p class="sub">Maximum number of concurrent contexts of the given size, with MTP draft head, prompt cache 2 GB,
-ubatch 2048, 6 GB reserve for the operating system, based on 106.5 GB of free memory. Without MTP it is about
-10 to 30 percent more (UD-Q4_K_XL at 32k: 21 instead of 16), because the draft model and draft KV cost around 3.3 GB.
-The values are cut off at 64 slots; above that the number is theoretical anyway. Recalculate with <code>bench/context_limits.py</code>.</p>
+<p class="sub">Maximum number of concurrent contexts of the given size, with the Q8_0 MTP draft head (3.85 GB, the head
+all presets use), prompt cache 2 GB, ubatch 2048, 6 GB reserve for the operating system, based on 106.5 GB of free
+memory. Without MTP it is about 10 to 30 percent more, because the draft model and its KV cost around 4.7 GB. Against
+the smaller Q4_K_M head the difference is at most one slot, and at 256k none at all. The values are cut off at 64
+slots; above that the number is theoretical anyway. Recalculate with <code>bench/context_limits.py</code>.</p>
+
+<p><strong>Slots and context per slot trade one for one.</strong> Once weights and draft head are resident, what is
+left is a fixed token budget; only the DeltaNet state depends on how it is split. For UD-IQ3_XXS with 4 GB headroom
+the total is around 1.9 M tokens however it is cut — 8 × 242k, 12 × 159k, 16 × 117k, 24 × 76k, 32 × 55k — so twice
+the users means half the context each. UD-IQ4_XS has about 1.33 M tokens to give away (6 × 224k, 8 × 166k, 16 × 80k).
+Choosing the number of users therefore already chooses the context length.</p>
+
+<h3>Context checkpoints: the cache of this model, and the largest hidden cost</h3>
+<p>llama.cpp keeps rollback points per slot (<code>--ctx-checkpoints</code>, default 32). For a hybrid recurrent
+model they are not a convenience but the only way a conversation can be continued from the cache at all. Switch them
+off and the server says so plainly: <em>forcing full prompt re-processing due to lack of cache data (likely due to
+SWA or hybrid/recurrent memory)</em>.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Sessions / slots</th><th class="num">--ctx-checkpoints</th><th class="num">Cache hit</th><th class="num">Time per follow-up turn</th></tr></thead>
+<tbody>
+<tr><td>4 on 2 (eviction)</td><td class="num">32</td><td class="num"><strong>99.5 %</strong></td><td class="num">3.5 s</td></tr>
+<tr><td>4 on 2 (eviction)</td><td class="num">1</td><td class="num"><strong>99.5 %</strong></td><td class="num">4.2 s</td></tr>
+<tr><td>4 on 2 (eviction)</td><td class="num">0</td><td class="num">0.0 %</td><td class="num">20.5 s</td></tr>
+<tr><td>4 on 4 (one slot each)</td><td class="num">0</td><td class="num">0.0 %</td><td class="num">21.4 s</td></tr>
+</tbody></table></div>
+<p>One checkpoint is enough — 1 and 32 deliver the same 99.5 %, the rest is paid for nothing. And giving every
+session its own slot does not remove the need: even with nothing evicted the hit rate is 0.0 % without checkpoints,
+because a new turn has to drop the trailing token of the previous answer, and rolling the recurrent state back by a
+single token already needs one. What checkpoints do <em>not</em> buy is the repair of an edited history: rewriting
+the middle of a conversation costs a full re-processing with 4 checkpoints just as it does with none.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Configuration</th><th class="num">Size of one checkpoint</th></tr></thead>
+<tbody>
+<tr><td>without MTP</td><td class="num">112.6 MB, the same at any depth</td></tr>
+<tr><td>with MTP</td><td class="num">112.6 MB + 2072 bytes per token of prefix</td></tr>
+</tbody></table></div>
+<p>The slope is exact across independent runs (122.5 MB at 5038 tokens, 165.3 MB at 26688, 248.0 MB at 68539 in a
+Terminal-Bench run): the DeltaNet state is the floor, and what grows is the draft KV of the whole prefix. With MTP a
+checkpoint at 224k tokens is 555 MB, and the server keeps up to 32 of them per slot. That is why the table above
+assumes <code>--ctx-checkpoints 0</code>; with the default of 32, UD-IQ3_XXS at 256k drops from 8 concurrent contexts
+to 2 and UD-Q4_K_XL no longer fits even once. Keep the number small rather than switching it off.</p>
+
+<h3>Split or shared KV cache</h3>
+<p>With <code>--no-kv-unified</code> — the default as soon as <code>-np</code> is given — every slot owns a fixed
+<code>n_ctx / n_parallel</code> slice. With <code>--kv-unified</code> all slots draw from one pool and a single
+session may use up to the training length. Measured: a 26,692-token prompt against four slots of 16,384 is rejected
+with <em>request exceeds the available context size</em>; the same request against the same pool with a shared cache
+runs through at 34.1 tokens per second. The fork also treats idle slots differently — with a shared pool an idle
+slot is saved to the prompt cache <em>and cleared</em>, because that frees reusable room; with a split cache it is
+only copied and its KV stays in place. One slot per agent with a split cache is therefore the configuration in which
+nothing is ever evicted; a shared pool buys elasticity and pays with eviction and restore.</p>
 
 <h3>What works in practice</h3>
 <p>With the small quants memory is not the limit – throughput is. Measured with UD-IQ4_XS without MTP,

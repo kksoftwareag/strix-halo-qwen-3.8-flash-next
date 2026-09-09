@@ -44,4 +44,21 @@ quant and round. This can be changed via `TB_LEVELS`, `TB_CTX` and `TB_GEN`, for
 `ubatch 2048` that is already eight. With eight slots, UD-Q4_K_XL fits into memory again as well; it is just not
 the default.
 
-`context_limits.py` predicts how many slots of which size fit into memory.
+`context_limits.py` predicts how many slots of which size fit into memory. `--checkpoints N` sets how many context
+checkpoints per slot are budgeted for; the default 0 gives the pure KV ceiling, and the server's own default is 32.
+
+`serving_plan.py` answers the other direction: for a given number of users, how much context each of them can get
+while a chosen amount of memory stays free. It prints KV and checkpoint cost separately, and with
+`--slots N --command` it also prints the finished command line.
+
+## Prompt cache with agentic loads
+
+`cache_probe.py` starts a server and plays several agent sessions in turn: each begins with a long document and then
+appends short follow-ups, which is what makes prompt caching pay off. The server reports `cache_n` and `prompt_n` per
+answer, so the hit rate per turn is exact. More sessions than slots forces eviction, `--diverge-at N` rewrites the
+middle of the history in round N so the cached prefix no longer matches, and `--ctx-checkpoints` / `--kv-unified`
+switch the two mechanisms that decide whether any of it works.
+
+`cache_suite.sh`, `cache_suite2.sh` and `cache_suite3.sh` are the three series that were run with it: split versus
+shared KV pool, the cost of the checkpoints, and whether one slot per session removes the need for them. Results are
+in `bench/results/cache/`, the findings in `docs/RESEARCH.md`.

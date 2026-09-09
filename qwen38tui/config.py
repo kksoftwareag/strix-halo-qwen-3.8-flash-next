@@ -41,8 +41,11 @@ class ServerConfig:
     threads_batch: int = 0               # 0 = wie threads
     n_parallel: int = 1
     kv_unified: str = "auto"             # auto|on|off
+    kv_unified_per_slot: int = 0         # Obergrenze je Slot im gemeinsamen KV-Pool (Token); 0 = Flag weglassen
     cache_ram_mib: int = 8192            # Prompt-Cache im RAM (MiB); -1 unbegrenzt, 0 aus
     cache_reuse: int = 0
+    n_ctx_checkpoints: int = 32          # Rollback-Punkte je Slot; bei diesem Modell je 113 MiB RAM
+    checkpoint_min_step: int = 8192      # Mindestabstand zweier Checkpoints in Token
     # --- Spekulatives Decoding (MTP) ---
     mtp_enabled: bool = True
     mtp_head: str = "auto"
@@ -261,9 +264,15 @@ def build_command(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fi
         argv += ["--kv-unified"]
     elif cfg.kv_unified == "off":
         argv += ["--no-kv-unified"]
+    if cfg.kv_unified_per_slot:
+        argv += ["--kv-unified-per-slot", str(cfg.kv_unified_per_slot)]
     argv += ["--cache-ram", str(cfg.cache_ram_mib)]
     if cfg.cache_reuse:
         argv += ["--cache-reuse", str(cfg.cache_reuse)]
+    if cfg.n_ctx_checkpoints != 32:
+        argv += ["--ctx-checkpoints", str(cfg.n_ctx_checkpoints)]
+    if cfg.checkpoint_min_step != 8192:
+        argv += ["--checkpoint-min-step", str(cfg.checkpoint_min_step)]
 
     # Spekulatives Decoding
     if cfg.mtp_enabled:

@@ -21,7 +21,7 @@ HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 LLAMA_COMMIT="$(cat "$HERE/patches/BASE_COMMIT")"
 EH_REPO="https://github.com/Aristo94/EngramHalo.cpp"
 EH_BRANCH="strix-halo-qwen4exp"
-EH_COMMIT="${EH_COMMIT:-60bce1a304394203e4e4285cf795138026d9f793}"
+EH_COMMIT="${EH_COMMIT:-b90764b9d438ae3ba5dc6173124f8ea98f353c30}"
 
 apply_patch() {  # apply_patch <dir> <patch>
   # Erst direkt, dann als Drei-Wege-Merge (nötig für den EngramHalo-Fork, dessen ggml-Dateien abweichen).

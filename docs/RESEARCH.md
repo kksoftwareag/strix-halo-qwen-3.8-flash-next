@@ -221,6 +221,23 @@ engine/build-engramhalo/bin/llama quantize <BF16 file> state/mtp/Qwen3.8-Flash-N
 
 Anything in `state/mtp/` is picked up automatically. All EngramHalo presets ask for the Q8_0 head and fall back to the Q4_K_M head when it is absent. That is a deliberate simplification: below roughly 8k tokens of context the small head is about 4 t/s faster, so `eh-schnell` gives up a little. Automatic selection picks the smallest compatible head, so a BF16 head lying around is never chosen by accident.
 
+**Engine updated to EngramHalo b90764b9d (2026-09-08).** The fork was rebased onto a five-days-newer llama.cpp
+master; the version string goes from `0.3.0-dev (build 1, commit 60bce1a)` to `0.4.0-dev (build 10883, commit
+b90764b9d)`. The fork's own commits are unchanged and `docs/strix-halo/` is byte-identical, so there is no new
+guidance to adopt — what arrives is upstream work, including HIP kernel changes in `fattn-mma-f16`, `fattn-vec`,
+`mmvq`, `mmf` and `vecdotq`, plus 69 lines in `llama-model.cpp` and 8 in `qwen4exp.cpp`. Our #25992 patch still
+applies cleanly. Measured against the running service (UD-IQ3_XXS, 8 × 128k, MTP with the Q8_0 head, 800 output
+tokens, `bench/live_bench.py`):
+
+| Concurrent users | before (build 1) | after (build 10883) |
+| --- | --- | --- |
+| 1 | 26.1 t/s | **28.4 t/s** |
+| 2 | 30.5 t/s total | **32.1 t/s total** |
+| 4 | 33.2 t/s total | 31.9 t/s total |
+
+So a single user gains about 9 %, and under concurrency the difference is within the noise. Vision still works after
+the rebuild. `engine/fetch.sh` pins the new commit.
+
 **The two qwen4exp commits from master (#28123, #28023) are already in EngramHalo** — the fork carries the same
 recurrent-state rollback (`[TAG_RECURRENT_ROLLBACK_SPLITS]`) and the same sliced indexer sum, with the same reasoning
 in the comments. `engine/fetch.sh` reports patch 0005 as "already contained" and changes nothing; it is only relevant

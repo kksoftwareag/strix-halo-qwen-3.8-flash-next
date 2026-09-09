@@ -130,7 +130,7 @@ support and rejects image content before it ever reaches the server. Declare it:
   - model_name: qwen38-flash
     litellm_params:
       model: openai/qwen3.8-flash
-      api_base: http://10.50.4.9:8080/v1
+      api_base: http://<lan-ip>:8080/v1
       api_key: os.environ/QWEN38_KEY
     model_info:
       supports_vision: true

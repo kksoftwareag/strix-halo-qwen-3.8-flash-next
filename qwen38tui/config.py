@@ -347,8 +347,12 @@ def build_command(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fi
 
     # Plausibilitäten
     ctx_train = int(r.model.meta.get("qwen4exp.context_length", 262144) or 262144)
-    if cfg.ctx_size > ctx_train:
-        warnings.append(f"Kontext {cfg.ctx_size} > Trainingskontext {ctx_train} (RoPE-Skalierung nötig, Qualität sinkt).")
+    # -c ist die Gesamtzahl über alle Slots. Gegen die Trainingslänge zählt, was ein einzelner Slot
+    # bekommt: bei geteiltem Cache n_ctx/n_parallel, bei gemeinsamem Pool der ganze Pool.
+    ctx_je_slot = cfg.ctx_size if cfg.kv_unified == "on" else cfg.ctx_size // max(1, cfg.n_parallel)
+    if ctx_je_slot > ctx_train:
+        warnings.append(f"Kontext je Slot {ctx_je_slot} > Trainingskontext {ctx_train} "
+                        f"(der Server kappt darauf; mehr bringt nichts).")
     if r.engine.backend == "hip" and cfg.load_mode in ("mmap", "mmap+mlock") and not r.engine.fast_lazy_ple:
         warnings.append("--load-mode mmap auf ROCm (Stock-Fork): Gewichte-Upload läuft seitenweise (~18 MB/s gemessen, Page-Cache-Thrash) – Ladezeit >2 h bei Q4_K_XL. Nur EngramHalo macht SSD-lazy praktikabel.")
     elif cfg.load_mode not in ("mmap", "mmap+mlock") and cfg.tensor_read_lazy != "off" and r.model.ple_bytes and not r.engine.fast_lazy_ple:
@@ -362,7 +366,9 @@ def build_command(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fi
     if cfg.ubatch_size > cfg.batch_size:
         errors.append("ubatch darf nicht größer als batch sein.")
     if cfg.n_parallel > 1 and cfg.mtp_enabled:
-        warnings.append("MTP bei mehreren Slots kostet Durchsatz (gemessen: 8 Nutzer 35 t/s mit MTP vs 50 t/s ohne) – für Mehrnutzer MTP aus, für Einzelnutzer an.")
+        warnings.append("MTP kostet Durchsatz, sobald mehrere Anfragen GLEICHZEITIG laufen (gemessen: 8 Nutzer "
+                        "35 t/s mit MTP vs 50 t/s ohne). Bei stoßweisen Agenten, die meist einzeln rechnen, "
+                        "bleibt MTP der Gewinn; bei Dauerlast auf allen Slots MTP abschalten.")
     if hw and cfg.threads > hw.cores_physical > 0:
         warnings.append(f"threads={cfg.threads} > physische Kerne ({hw.cores_physical}); SMT bringt bei llama.cpp meist nichts.")
     if r.host not in ("127.0.0.1", "localhost") and not cfg.api_key:

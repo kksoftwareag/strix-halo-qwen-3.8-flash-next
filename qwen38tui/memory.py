@@ -181,6 +181,12 @@ def estimate(cfg: ServerConfig, model: ModelFile | None, mtp: MtpHead | None, hw
     if m and m.get("compute"):
         est.compute = int(m["compute"]) + int(0.25 * GIB)
         est.measured = True
+    # Der Compute-Buffer wächst mit der Slot-Zahl, nicht nur mit ubatch. Gemessen an der
+    # Speicheraufteilung des Servers (common_memory_breakdown_print, ub 2048): 1188 MiB bei einem Slot,
+    # 6442 MiB bei acht -> rund 750 MiB je zusätzlichem Slot. Ohne diesen Term war die Schätzung bei
+    # acht Slots 3.8 GiB zu niedrig und der Speicherwächter hat den Server abgeräumt.
+    COMPUTE_PER_EXTRA_SLOT = 750 * MIB
+    est.compute += int(COMPUTE_PER_EXTRA_SLOT * max(0, cfg.n_parallel - 1))
     # MTP
     if cfg.mtp_enabled and mtp is not None:
         # gemessen: Draft-Modell 2146 MiB + Compute 740 MiB (ub 2048) / 135 MiB (ub 512) + 64 MiB KV @32k

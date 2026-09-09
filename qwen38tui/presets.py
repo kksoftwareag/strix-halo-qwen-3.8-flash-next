@@ -106,6 +106,24 @@ EH_PRESETS: list[Preset] = [
              n_parallel=1, cache_ram_mib=2048, mem_guard_gib=5.0,
              mtp_head="mtp:Qwen3.8-Flash-Next-MTP-Q8_0", **_EH, **_QWEN_SAMPLING),
     ),
+    Preset(
+        "eh-team", "EngramHalo – Mehrere Agenten (UD-IQ3_XXS, 8 × 128k)",
+        "Server für mehrere Agenten gleichzeitig: 8 Slots à 131072 Token, geteilter KV-Cache (jeder Slot behält "
+        "seinen Platz, nichts wird verdrängt). Entscheidend ist --ctx-checkpoints 1: bei diesem hybriden Modell "
+        "sind die Checkpoints der Cache – ohne sie wird jede Folgerunde komplett neu gerechnet (gemessen 0 % statt "
+        "99.5 % Treffer), einer genügt aber, und die Voreinstellung 32 kostet nur Speicher (je 112.6 MiB plus "
+        "2072 Byte pro Token Präfix). Nutzerzahl und Kontext tauschen sich fast eins zu eins, aber jeder Slot "
+        "kostet zusätzlich rund 750 MiB Compute-Buffer, und die Checkpoints wachsen mit der Tiefe. "
+        "Gemessen: acht aktive Sitzungen lassen rund 11 GiB MemAvailable übrig. 6 × 176k und 4 × 256k "
+        "passen genauso, 16 Slots nicht mehr. "
+        "nicht mehr. Auslegen mit bench/serving_plan.py. "
+        "Achtung: acht Slots passen in den Speicher, aber bei mehr als vier GLEICHZEITIGEN Generierungen war die "
+        "Ausgabe in einer früheren Messung fehlerhaft (Issue #27572) – für stoßweise Agenten ist das kein Problem.",
+        dict(quant="UD-IQ3_XXS", ctx_size=8 * 131072, load_mode="none", thinking=True, reasoning_effort="medium",
+             n_parallel=8, kv_unified="off", n_ctx_checkpoints=1, checkpoint_min_step=65536,
+             cache_ram_mib=2048, mem_guard_gib=4.0,
+             mtp_head="mtp:Qwen3.8-Flash-Next-MTP-Q8_0", **_EH, **_QWEN_SAMPLING),
+    ),
 ]
 
 PRESETS: list[Preset] = EH_PRESETS + STOCK_PRESETS

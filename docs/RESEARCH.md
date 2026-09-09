@@ -313,6 +313,35 @@ For agents that means: one slot per agent and a split cache is the configuration
 the cache hit costs nothing. A shared pool buys elasticity — one agent alone can reach the full 256k — and pays for
 it with eviction and restore whenever the agents are active at the same time.
 
+**A slot costs about 750 MiB of compute buffer, on top of everything else.** The first attempt at a team preset
+(8 × 196608 tokens) was estimated at 95.2 GiB and killed by the memory guard at 99.0 GiB. The server's own
+`common_memory_breakdown_print` shows where: the compute buffer was 6442 MiB, not the 1188 MiB measured with a single
+slot at the same ubatch — roughly 750 MiB per additional slot. The estimator now carries that term; with it the same
+configuration is projected at 100.3 GiB against 99.0 GiB measured, so it errs on the safe side. This is the reason a
+plain "tokens divided by users" calculation is too optimistic beyond a handful of slots.
+
+**More sessions than slots needs `--cache-ram` to match.** An entry in the RAM prompt cache is the sequence state
+plus its checkpoint: measured at 378 MiB for a session of 7100 tokens. With `--cache-ram 4096` the server therefore
+keeps ten of them — the log says `cache state: 10 prompts, 3777 MiB (limits: 4096 MiB, …)` — and twelve sessions on
+eight slots fall out of the cache again, back to a 0.0 % hit rate. Deep sessions are far more expensive, because the
+checkpoint grows with the prefix. So either give every agent its own slot, where nothing has to be cached at all, or
+budget roughly 400 MiB of `--cache-ram` per extra shallow session and much more for deep ones.
+
+**The resulting setup — preset `eh-team`.** UD-IQ3_XXS, `-np 8 -c 1048576` (8 × 128k), split KV cache,
+`--ctx-checkpoints 1 --checkpoint-min-step 65536`, `--cache-ram 2048`, MTP with the Q8_0 head. Verified with
+`bench/cache_suite4.sh`:
+
+| Case | Result |
+| --- | --- |
+| 8 sessions on 8 slots, 3 turns each | **99.5 %** cache hit from the second turn, 4–5 s instead of 20 s |
+| 1 session with a 53,511-token prompt | **99.9 %** hit, 5.7 s instead of ~200 s re-processing |
+| memory with 8 active sessions | 14 GiB MemAvailable left (estimator: 18.8 GiB) |
+
+Two earlier attempts were killed by the memory guard, at 8 × 196k and 8 × 160k, which is where the compute-buffer and
+checkpoint terms above come from. The estimator is still optimistic by several GiB at eight slots — it does not track
+the host-side growth of the page cache — so treat its "headroom" as an upper bound and let the guard have the last
+word. A checkpoint at depth matches the formula exactly: 217.9 MiB measured at 53,592 tokens against 218.5 predicted.
+
 In practice, with the small quants the limit is not the memory but the throughput: with 8 slots there remain
 6.8 t/s per request (see table above). That is enough for chat, not for agents — an agent with 30000 output tokens
 then waits 74 instead of 25 minutes. That is why the agent benchmarks run with one slot. On top of that: MTP only pays

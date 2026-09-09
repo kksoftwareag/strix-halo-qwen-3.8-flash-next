@@ -70,6 +70,8 @@ class ServerConfig:
     host: str = "auto"                   # auto = primäre IP (LAN), sonst z.B. 127.0.0.1 / 0.0.0.0
     port: int = 8080
     api_key: str = ""
+    api_key_file: str = ""               # Datei mit einem Schlüssel je Zeile (# = Kommentar); besser als
+                                         # --api-key, weil die Schlüssel sonst in der Prozessliste stehen
     alias: str = "qwen3.8-flash"
     metrics: bool = True
     webui: bool = True
@@ -315,7 +317,10 @@ def build_command(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fi
     argv += ["--host", r.host, "--port", str(cfg.port)]
     if cfg.alias:
         argv += ["-a", cfg.alias]
-    if cfg.api_key:
+    if cfg.api_key_file:
+        # absolut auflösen: unter systemd gibt es kein verlässliches Arbeitsverzeichnis
+        argv += ["--api-key-file", str(Path(cfg.api_key_file).expanduser().resolve())]
+    elif cfg.api_key:
         argv += ["--api-key", cfg.api_key]
     if cfg.metrics:
         argv += ["--metrics"]
@@ -371,8 +376,16 @@ def build_command(cfg: ServerConfig, inv: Inventory, hw: HardwareInfo | None, fi
                         "bleibt MTP der Gewinn; bei Dauerlast auf allen Slots MTP abschalten.")
     if hw and cfg.threads > hw.cores_physical > 0:
         warnings.append(f"threads={cfg.threads} > physische Kerne ({hw.cores_physical}); SMT bringt bei llama.cpp meist nichts.")
-    if r.host not in ("127.0.0.1", "localhost") and not cfg.api_key:
+    if r.host not in ("127.0.0.1", "localhost") and not (cfg.api_key or cfg.api_key_file):
         warnings.append(f"Server lauscht auf {r.host} ohne API-Key (nur in vertrauenswürdigem LAN).")
+    if cfg.api_key_file:
+        schluesseldatei = Path(cfg.api_key_file).expanduser().resolve()
+        if not schluesseldatei.is_file():
+            errors.append(f"API-Key-Datei fehlt: {schluesseldatei}")
+        elif schluesseldatei.stat().st_mode & 0o077:
+            warnings.append(f"API-Key-Datei {schluesseldatei} ist für andere lesbar – chmod 600 setzen.")
+    if cfg.api_key and cfg.api_key_file:
+        warnings.append("api_key und api_key_file gesetzt: die Datei gewinnt, der einzelne Schlüssel wird ignoriert.")
     return Command(argv, env, r, errors, warnings)
 
 

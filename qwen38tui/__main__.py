@@ -16,6 +16,15 @@ def main(argv: list[str] | None = None) -> int:
     p_run = sub.add_parser("run", help="Server mit aktueller Konfiguration im Vordergrund starten (ohne TUI)")
     p_run.add_argument("--profile", default="")
     p_run.add_argument("--preset", default="")
+    p_exp = sub.add_parser("export", help="Startskript + systemd-User-Unit nach scripts/ schreiben (ohne TUI)")
+    p_exp.add_argument("--profile", default="")
+    p_exp.add_argument("--preset", default="")
+    p_exp.add_argument("--host", default="", help="z. B. 0.0.0.0 für alle Schnittstellen (Vorgabe: aus der Konfiguration)")
+    p_exp.add_argument("--port", type=int, default=0)
+    p_exp.add_argument("--api-key-file", default="", help="Datei mit einem Schlüssel je Zeile")
+    p_exp.add_argument("--new-keys", type=int, default=0, metavar="N",
+                       help="N neue Schlüssel erzeugen und in die Datei aus --api-key-file schreiben")
+    p_exp.add_argument("--install", action="store_true", help="Unit zusätzlich nach ~/.config/systemd/user/ kopieren")
     p_par = sub.add_parser("bench-parallel", help="Mehrnutzer-Benchmark: N gleichzeitige Anfragen gegen einen Server mit -np N (ohne TUI)")
     p_par.add_argument("--users", type=int, default=8, help="max. gleichzeitige Nutzer (1–16)")
     p_par.add_argument("--levels", default="", help="Stufen, z.B. 1,2,4,8,16 (Default: 1,2,4,8,16 bis --users)")
@@ -72,12 +81,65 @@ def main(argv: list[str] | None = None) -> int:
     else:
         inv0 = discover_all()
         cfg = get_preset("eh-qualitaet" if inv0.engine("hip-engramhalo") else "stock-ausgewogen").apply()  # type: ignore[union-attr]
+    if getattr(a, "host", ""):
+        cfg = cfg.copy(host=a.host)
+    if getattr(a, "port", 0):
+        cfg = cfg.copy(port=a.port)
+    if getattr(a, "api_key_file", ""):
+        cfg = cfg.copy(api_key_file=a.api_key_file)
+        if getattr(a, "new_keys", 0):
+            import secrets
+            from pathlib import Path as _P
+
+            ziel = _P(a.api_key_file).expanduser()
+            ziel.parent.mkdir(parents=True, exist_ok=True)
+            if ziel.exists():
+                print(f"{ziel} existiert bereits – vorhandene Schlüssel bleiben unverändert.", file=sys.stderr)
+            else:
+                zeilen = ["# API-Schlüssel für den Qwen3.8-Flash-Next-Server, einer je Zeile.",
+                          "# Zeilen mit # sind Kommentare. Nach Änderungen den Dienst neu starten.",
+                          ""]
+                zeilen += [f"qwen38-{secrets.token_urlsafe(32)}" for _ in range(a.new_keys)]
+                ziel.write_text("\n".join(zeilen) + "\n")
+                ziel.chmod(0o600)
+                print(f"{a.new_keys} Schlüssel geschrieben: {ziel} (chmod 600)", file=sys.stderr)
     if getattr(a, "quant", ""):
         cfg = cfg.copy(quant=a.quant)
     if getattr(a, "mtp_head", ""):
         cfg = cfg.copy(mtp_head=a.mtp_head)
     inv, hw = discover_all(), probe()
     cmd = build_command(cfg, inv, hw, fits=lambda m: fits(cfg, m, None, hw))
+    if a.cmd == "export":
+        from .discovery import PROJECT_DIR
+        from .scriptgen import bash_script, systemd_unit
+
+        for e in cmd.errors:
+            print(f"FEHLER: {e}", file=sys.stderr)
+        if cmd.errors:
+            return 2
+        for w in cmd.warnings:
+            print(f"Hinweis: {w}", file=sys.stderr)
+        out = PROJECT_DIR / "scripts"
+        out.mkdir(exist_ok=True)
+        name = cfg.profile_name or "server"
+        sh = out / f"start-{name}.sh"
+        sh.write_text(bash_script(cfg, cmd))
+        sh.chmod(0o755)
+        unit_name = f"qwen38-{name}.service"
+        unit = out / unit_name
+        unit.write_text(systemd_unit(cfg, cmd, str(sh), python=sys.executable,
+                                     memguard=str(PROJECT_DIR / "bench" / "memguard.py")))
+        print(f"Startskript: {sh}")
+        print(f"Unit:        {unit}")
+        if a.install:
+            from pathlib import Path as _P
+
+            ziel = _P.home() / ".config" / "systemd" / "user"
+            ziel.mkdir(parents=True, exist_ok=True)
+            (ziel / unit_name).write_text(unit.read_text())
+            print(f"Installiert: {ziel / unit_name}")
+            print(f"Aktivieren:  systemctl --user daemon-reload && systemctl --user enable --now {unit_name}")
+        return 0
     if a.cmd == "bench-parallel":
         import asyncio
 

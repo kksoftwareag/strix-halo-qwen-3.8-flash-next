@@ -84,7 +84,33 @@ Both builds end up under `engine/build-*/bin/`. You register your own llama.cpp 
 ./run.sh show --preset eh-qualitaet    # show command line and memory balance
 ./run.sh run  --preset eh-qualitaet    # start server without the program
 ./run.sh bench-parallel --users 8      # multi-user benchmark without the program
+./run.sh export --preset eh-team --host 0.0.0.0 \
+    --api-key-file state/api-keys.txt --new-keys 5 --install    # service for the LAN
 ```
+
+### Running as a service on the network
+
+`export` writes a start script and a systemd **user** unit to `scripts/`, and with `--install` also to
+`~/.config/systemd/user/`. The unit starts the server under `bench/memguard.py`, because GPU memory (GTT) shows up in
+no cgroup limit — `MemoryMax` would not protect anything here, only `MemAvailable` does. A guard kill is not retried
+endlessly: three attempts in ten minutes, then the service stays down.
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now qwen38-eh-team.service
+systemctl --user status qwen38-eh-team.service
+journalctl --user -u qwen38-eh-team.service -f
+```
+
+A user unit runs only while the user is logged in. For a start at boot: `sudo loginctl enable-linger $USER`.
+
+`--new-keys N` writes N random keys to the file given by `--api-key-file`, one per line, with mode 0600; existing
+files are never overwritten. The server takes them with `--api-key-file`, so the keys do not appear in the process
+list. Clients send `Authorization: Bearer <key>`; without one, or with a wrong one, the server answers 401. Add or
+revoke a key by editing the file and restarting the service.
+
+**`--host 0.0.0.0` opens the server to the whole network.** The keys are the only protection, and plain HTTP sends
+them unencrypted — so use it on a trusted network, or put TLS in front (`--ssl-key-file` / `--ssl-cert-file`).
 
 In the program: choose a preset and press "Apply preset". On the right are the memory balance and the command.
 **F5** starts the server, **F6** stops it, **F9** exports a start script, **Ctrl+S** saves

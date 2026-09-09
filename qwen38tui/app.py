@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import time
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -418,7 +419,9 @@ class Qwen38App(App):
         sh = out / f"start-{name}.sh"
         sh.write_text(bash_script(self.cfg, cmd))
         sh.chmod(0o755)
-        (out / f"qwen38-{name}.service").write_text(systemd_unit(self.cfg, cmd, str(sh)))
+        (out / f"qwen38-{name}.service").write_text(systemd_unit(
+            self.cfg, cmd, str(sh),
+            python=sys.executable, memguard=str(PROJECT_DIR / "bench" / "memguard.py")))
         self.notify(f"Exportiert: {sh} (+ systemd-Unit)")
 
     def action_refresh_all(self) -> None:

@@ -26,7 +26,7 @@ Everything is measured on such a machine. The results and the reasoning are in
   and a multi-user test with up to 8 simultaneous requests.
 - **Export**: start script and systemd unit for operation without the program.
 - **Presets**: ready-made configurations for maximum quality, speed, long context, chat without thinking, a coding
-  agent, and `eh-team` for several agents at once (8 slots of 160k, one each, with the prompt cache set up so a
+  agent, and `eh-team` for several agents at once (8 slots of 128k, one each, with the prompt cache set up so a
   follow-up turn hits it to 99.5 %).
 
 The program changes nothing in your model files and nothing outside its own directory.
